@@ -1,0 +1,88 @@
+formalise correspondence between GV (Wadler, 2012) and
+(Gay and Vasconcelos, 2010)
+ - possibility for extending GV to handle subtyping
+   + check the subtyping for session types by (Gay and Hole, 2005).
+   and
+   presenting a formal proof of the deadlock-free property
+   of GV (whether this is of research interest, is debatable).
+ - could also handle buffered communication in GV formalisation.
+ - what is the research contribution of this work
+    - a formally proved implementation of session types in
+    multi-threaded functional programming language (with
+    linear types) with
+    guarantees of deadlock-freedom via its translation from
+    a process calculus.
+ - it's not clear whether GV handles asynchronous communication?
+ - are the formal proofs of research interest?
+ - significance of the relationship to process calculus, CP
+ - could we marry the two systems to support recursion that
+   terminates a la Coq's FixPoint construct?
+ - support for type polymorphism/type abstraction(inference?)?
+   + neither system has support for these (formally).
+ alias control without the use of linear types
+ - affine types? look this up...
+ object-oriented session types
+   + formal semantics/ownership types for sending/receiving.
+   + why is this so difficult to formulate, or hasn't this been
+   done already?
+   + motivated by prevalent usage of OOP languages.
+   + deadlock? correctness? strong normalisation?
+ - translation to process calculus in Wadler's paper?
+Email body follows:
+--------------------
+
+Hi Simon,
+
+I have read the papers you suggested along with:
+
+Wadler, Philip. Propositions as Sessions, 2012.
+
+I'll refer to them using the numbers below:
+
+Propositions as Sessions [1]
+"Linear Type Theory for Asynchronous Session Types" [2]
+TR-2003-133.pdf [3].
+
+From the works, and the sections on future work I see a
+number of things we can work on:
+
+We could formalise the implementation of a multi-threaded
+functional language with session types in Coq. We could
+marry GV, the language discussed in [1], and the language
+in [2], to provide a formal proof of:
+(1) deadlock-freedom,
+(2) bounded-buffer assurances,
+(3) type preservation (possibly the most straightforward).
+This would also entail translation to the process
+calculus discussed in [1]. It is not yet clear to me how
+significant the development would be, and whether it is
+amenable to the timeline of an MSci project; it's just
+a seed of idea so far but I'd like to know your thoughts
+on it? e.g. whether you think formalising these proofs
+(albeit proof sketches in [1]) has research value?
+Also, [1], [2] both mention the desire for
+type polymorphism and inference, and these could be
+separate directions to go on. Alternatively, we could look to
+focus on just one language defined in the literature and extend
+it with formal semantics for type inference/polymorphism/etc.
+
+My work last year involved adding an annotation to an
+actor-based language to support a variant of ownership
+types over the channel-based communication mechanism
+between the actors. The static analysis I developed
+allowed unrestricted aliasing of "owned" types within
+a single actor while still guaranteeing that only one
+actor held all the aliases at any one time. I understand
+your work on object-oriented session types looks to
+control aliasing (currently with linear typing,
+from "Modular Session Types for Distributed Object-Oriented
+Programming"), and perhaps we could explore extending
+or enhancing this feature of the object-oriented
+setting, although at this time I am not sure how to
+incorporate the use of interactive theorem proving.
+
+If you have any other projects or ideas you think
+I should consider, let me know.
+
+Regards,
+Craig
