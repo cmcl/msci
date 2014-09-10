@@ -1,0 +1,25 @@
+Paper: An extensible approach to session polymorphism
+Authors: Matthew Goto, Radha Jagadeesan, Alan Jeffrey, Corin Pitcher,
+	 and James Riely
+session types modelled as labelled transition systems.
+
+This paper gives a brief description of bounded polymorphism from Gay and Hole
+that permits creation of session types if their interaction involves sub-types
+of a specified type. The authors claim that bounded polymorphism cannot type
+common generic process like a forwarder or proxy process. The requirement for
+such a process is to accept two channels and permit input on one and output on
+the other with dual session types, s and (dual s). Bounded polymorphism is
+inadequate here because we do not wish to restrict the type s to be a subtype
+but wish to restrict the channels to be dual of each other. This kind of
+polymorphism is referred to as session polymorphism by the authors and it is
+the focus of the current paper.
+
+The key insight into allowing the typing of a generic forwarding process is to
+allow input on all session types (including the terminal session type, denoted
+end) and use "deductive reasoning principles" to deduce that the session type
+on which we read can in fact read such a type. Deduction is used on transition
+hypotheses for input to obtain new transition hypotheses. During the typing of
+an abstract session type in which we have requested input (c?x.P for channel c
+with session type S, value x and continuation process P) then in the
+continuation process P we assume there exists a transition S -> t with label
+?a for fresh type and session type variables a and t.

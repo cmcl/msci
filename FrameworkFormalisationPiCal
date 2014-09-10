@@ -1,0 +1,17 @@
+Paper: A framework for the formalisation of Pi Calculus Type Systems in
+Isabelle/HOL
+Author: Simon Gay
+
+Synopsis
+---------
+
+Notes
+---------
+Formalisation of theory separates linear and non-linear types to support in
+the future, session types.
+The proof development struggles with custom user-defined tactics which cause
+the proof assistant to introduce new names into the context. It lacks a robust
+design, something a new development could improve upon.
+
+runtime types from Pierce and Sangiorgi's proof of type soundness? [20]
+

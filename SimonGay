@@ -1,0 +1,10 @@
+Hi,
+
+I recently completed the fourth year of a five year MSci degree and I am writing to you to enquire about potential MSci projects.
+
+A little bit about me:
+
+I have spent a couple of internships in industry working on compilers to support GPGPU programming (OpenCL, SPIR, etc.) at Codeplay in Edinburgh. My honours project entailed writing a compiler middle-end (AST->IR transformation, intra- and inter-procedural data flow analysis framework) for the Insense programming language to support a variant of ownership types. More recently, this summer I have undertaken a project at MPI-SWS in Germany supervised by Viktor Vafeiadis as part of the C4 project (compositional compiler certification). This is my first serious exposure to formal verification using the Coq proof assistant and I'm looking to get further experience with such tools. I'm looking for a project that concerns any of the following areas: type theory, programming languages, compilers, and formal verification (using interactive theorem proving i.e. Coq). Do you think you have anything suitable that aligns with both our interests?
+
+Regards,
+Craig
