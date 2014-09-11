@@ -124,7 +124,42 @@ My Response:
 
 Hi Simon,
 
-Apologies for the late reply.
+Apologies for the late reply. I require to send a project outline to Gethin
+by Friday next week and I'm looking to confirm a project with you as
+supervisor. Based on our previous discussions I have written a short outline
+below. The project premise is similar to your paper, ``A framework for the
+formalisation of Pi Calculus Type Systems in Isabelle/HOL''.
+Let me know what you think/have any suggestions for amendments.
+
+Project Title: Formalisation of Session-based Lambda Caculi Type Systems
+Project Outline:
+The aim of this project is to develop a framework for formalising
+lambda calculus type systems involving session types using interactive
+theorem proving (in particuluar, the system Coq). The motivation for the
+framework is that it will enable a whole class of related languages and type
+systems to be formalised without little extra proof effort.
+Principally, we intend to instantiate the framework with a type system that
+provides the benefits of aliasing with the guarantees of linearity, termed
+``adoption and focus''. The ``adoption and focus'' type system is non-trivial
+requiring special language features, e.g. to manage capabilities which can be
+thought as a form of object liveness mechanism, so the framework design must
+support such flexibility by allowing the typing judgements to be extended
+that the capabilities can be included in soundness results, for example.
+
+a type system based on lambda calculus (the object of study will be a small
+functional language)
+the aim would be to design a metalanguage in similar vain to your approach
+in ``Formalisation of a Pi Calculus Type System'' and build on these
+foundations to study the adopt and focus constructs in a session-based
+system
+depending on the timeline i think it would be interesting to incorporate
+session subtyping
+I have put together a short outline of a project
+regarding the things we have discussed. Let me know what you think.
+
+The aim of this project is to formalise type systems based on the lambda
+calculus (pi calculus?) or the coq formalisation similar to the 2001 paper
+you wrote.
 
 Perhaps a project aimed at formalising type systems based on the lambda
 calculus in Coq (similar to your 2001 paper on formalisation of type systems
