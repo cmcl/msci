@@ -133,7 +133,7 @@ Project Title: Formalisation of Lambda Calculus Session-based Type Systems
 Project Outline:
 The aim of this project is to develop a framework for formalising lambda
 calculus type systems involving session types using interactive theorem
-proving (in particuluar, the system Coq). The motivation for the framework is
+proving (in particular, the system Coq). The motivation for the framework is
 that it will enable a whole class of related languages and type systems to be
 formalised with little extra proof effort. Inspired by previous work on a
 mechanised framework of pi calculus type systems [1], we shift to the lambda
@@ -145,30 +145,28 @@ From the generic framework, a number of directions can be explored including
 session polymorphism, session subtyping, and permitting different forms of
 aliasing within the type system. The majority of previous session type systems
 for mainstream programming languages has focussed exclusively on linear type
-systems. The disadvantage of a linear type system is the need to re-bind
+systems. One disadvantage of a linear type system is the need to re-bind
 objects after each operation [2]. Principally, we intend to instantiate the
 framework with a type system that provides the benefits of aliasing with the
 guarantees of linearity, termed ``adoption and focus''. The ``adoption and
 focus'' type system is non-trivial requiring special language features, e.g.
 to manage capabilities which can be thought as a form of object liveness
-mechanism, so the framework design must support such flexibility by allowing
-the typing judgements to be extended such that the capabilities can be
-included in soundness results, for example. The instantiation will demonstrate
-that the framework supports a wide range of languages and type systems
-providing researchers the ability to harness the power of formal verification
-in the design, implementation and documentation of session-based type systems.
+mechanism, so the framework design must support such flexibility by, e.g
+allowing the typing judgements to be extended such that the capabilities can
+be included in soundness results. The instantiation will demonstrate that the
+framework supports a wide range of languages and type systems providing
+researchers the ability to harness the power of formal verification in the
+design, implementation and documentation of session-based type systems.
 
-[1] ``A framework for the
-formalisation of Pi Calculus Type Systems in Isabelle/HOL''.
-[2] Linear type theory for asynchronous session types.
+[1] Simon J. Gay. 2001. A Framework for the Formalisation of Pi Calculus Type
+Systems in Isabelle/HOL. In Proceedings of the 14th International Conference
+on Theorem Proving in Higher Order Logics (TPHOLs '01), Richard J. Boulton and
+Paul B. Jackson (Eds.). Springer-Verlag, London, UK, UK, 217-232. 
+[2] Simon j. Gay and Vasco t. Vasconcelos. 2010. Linear type theory for
+asynchronous session types. J. Funct. Program. 20, 1 (January 2010), 19-50.
+DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
-Perhaps a project aimed at formalising type systems based on the lambda
-calculus in Coq (similar to your 2001 paper on formalisation of type systems
-based on the pi calculus) in order to consider different approaches to
-controlling aliasing within a language providing session types
-(e.g. adopt and focus) could be appropriate? What do you think? If this sounds
-amenable to yourself I shall put together a project outline and send it to
-Gethin Norman, CC'ing you?
+----
 Or a formalisation based on the pi-calculus (which would provide deadlock
 freedom guarantees).
 A project aimed at developing a generic framework for reasoning about type
