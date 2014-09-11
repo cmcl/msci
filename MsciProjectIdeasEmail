@@ -152,8 +152,11 @@ guarantees of linearity, termed ``adoption and focus''. The ``adoption and
 focus'' type system is non-trivial requiring special language features, e.g.
 to manage capabilities which can be thought as a form of object liveness
 mechanism, so the framework design must support such flexibility by allowing
-the typing judgements to be extended that the capabilities can be included in
-soundness results, for example.
+the typing judgements to be extended such that the capabilities can be
+included in soundness results, for example. The instantiation will demonstrate
+that the framework supports a wide range of languages and type systems
+providing researchers the ability to harness the power of formal verification
+in the design, implementation and documentation of session-based type systems.
 
 [1] ``A framework for the
 formalisation of Pi Calculus Type Systems in Isabelle/HOL''.
