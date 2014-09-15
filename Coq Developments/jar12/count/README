@@ -1,0 +1,19 @@
+1. Execution
+
+1) make
+2) ./count [file name]
+
+2. Adding user defined tactics into the program
+
+1) Open the file "lexer.mll"
+
+2) Add a new tactic into the tactic list. For example, if the new tactic is "foo",
+
+let tac_list = [
+"abstract";
+"absurd";
+...
+"gather_atoms"
+"foo" <- the new tactic
+]
+

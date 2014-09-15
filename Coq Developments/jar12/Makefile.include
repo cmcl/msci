@@ -1,0 +1,6 @@
+## Paths to executables. Do not include options here.
+## Modify these to suit your Coq installation, if necessary.
+
+COQC = coqc
+COQDEP = coqdep
+COQDOC = coqdoc

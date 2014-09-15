@@ -1,0 +1,8 @@
+Fnamed.vo Fnamed.glob Fnamed.v.beautified: Fnamed.v lib/LibTactics.vo lib/LibNat.vo
+Fnamedcofinite.vo Fnamedcofinite.glob Fnamedcofinite.v.beautified: Fnamedcofinite.v lib/LibTactics.vo lib/LibNat.vo
+Fnamedcontext.vo Fnamedcontext.glob Fnamedcontext.v.beautified: Fnamedcontext.v lib/LibTactics.vo lib/LibNat.vo
+Fnamedcontextcofinite.vo Fnamedcontextcofinite.glob Fnamedcontextcofinite.v.beautified: Fnamedcontextcofinite.v lib/LibTactics.vo lib/LibNat.vo
+Fnameless.vo Fnameless.glob Fnameless.v.beautified: Fnameless.v lib/LibTactics.vo lib/LibNat.vo
+Fnamelesscofinite.vo Fnamelesscofinite.glob Fnamelesscofinite.v.beautified: Fnamelesscofinite.v lib/LibTactics.vo lib/LibNat.vo
+Fequiv.vo Fequiv.glob Fequiv.v.beautified: Fequiv.v lib/LibTactics.vo lib/LibNat.vo
+Flinear.vo Flinear.glob Flinear.v.beautified: Flinear.v metatheory/Metatheory.vo lib/Extra.vo
