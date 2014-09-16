@@ -1,0 +1,16 @@
+Paper: Lightweight linear types in System F-pop
+Authors: Karl Mazurak, Jianzhou Zhao, and Steve Zdancewic
+Review:
+
+what do I see this helping with?
+
+So, it uses two typing contexts and this subkind relation thing for the linear
+and unrestricted kinds of types. There are also some examples (which I've not
+cared to look at yet), and what is called ``Linear Semantics'' which would be
+worth a read.
+
+Linear Semantics
+------------------
+
+So, what's this about?
+					   

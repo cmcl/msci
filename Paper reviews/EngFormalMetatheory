@@ -1,0 +1,13 @@
+Paper: Engineering Formal Metatheory
+Review:
+
+Discussing issues in engineering metatheory for programming languages.
+Focus was on the locally nameless representation for binders with names
+for free variables and de Brujin indices for bound variables. There was
+also novel use of cofinite quantification to rules with bindings to increase
+the strength of the induction principles and reduce the amount of renaming
+of bound variables (due to freshness issues) significantly. The theory was
+tested with formalisations of the simply-typed lambda calculus, System F_sub,
+the calculus of constructions. The formalisations followed the POPLMARK
+challenge (type soundness, preservation, progress).
+
