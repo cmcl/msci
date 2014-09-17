@@ -17,3 +17,87 @@ was the binding expression) are enforced by the indexing typing judgment.
 Another interesting restriction of the focus rule is the prevention of
 referring to the guard within the focus body by virtue of its removal from
 the capability list.
+
+Review on 17/9/2014
+---------------------
+
+In the introductory example, we see the use of a guard to denote potential
+aliases between pointers. This allows the correct typing (acceptance) of the
+logger example program since the guards prevent potential aliases from being
+referenced during an update of a linear component of the structure. The update
+is said to occur within a ``focus'' block and so the system must provide some
+typing rules to ensure any potential aliases (denoted by the guard construct)
+are not used during the block. The main disadvantage that I envisage at this
+juncture is the error-prone nature of guarding potential aliases and the
+inconvenience on the part of the programmer of having to think about aliasing
+issues.
+
+A linear type in this system seems to be defined as alias-freedom. That is, an
+object at linear type is free of aliases. During object creation and deletion,
+an object is given a linear type since no alias to that object can possibly
+exist.
+
+For the ``adoption'' construct, an expression of the form ``adopt e_1 by e_2''
+is defined, where e_1, e_2 are expressions. Suppose, e_1 ~> o_1 and e_2 ~> o_2
+where o_1, o_2 are references to objects of linear type. Then, the result
+of evaluating the adopt expression is a nonlinear reference to o_1.
+o_1 is referred to as the adoptee, and o_2 is termed the adopter. The lifetime
+of the adopter (o_2) controls access to the adoptee through the nonlinear
+reference. That is, when the adopter is deallocated the nonlinear references
+to the adoptee are invalidated. A key point of the adopt expression is the
+temporary consumption of the linear reference to o_1. Each adoptee can have
+only one adopter but an adopter can adopt multiple objects.
+
+The lifetime of the aliases to a nonlinear object is determined by the
+lifetime of the adopter. So, the programmer must have knowledge of the
+lifetime of objects within the program. It's not yet clear how the programmer
+would make the choice of which object to use as an adopter, or if some special
+object should be created for the sole purpose of adoption.
+
+Liveness of an object is managed through ``capabilities'' which is essentially
+a mapping of unique identifiers for objects to their type. If a program point
+contains a key then the object that corresponds to that key is alive at said
+program point. A key is a static name unique to particular object which is
+used to performing tracking on each objects type since we wish to control
+aliasing at the level of individual objects. What's not clear from this
+description is the actual management of objects since the paper first states
+that a mapping appears at a program point which is the boundary between
+allocation and deallocation (essentially a free() statement) of the object in
+question but later states that an object is alive at the *set* of program
+points which contain its key within their dictionary (``capabilities'').
+A notion of a ``guarded type'' is introduced as the mechanism permitting
+aliasing. Its a form of a capability made up of a nonlinear type and the
+adopters key (references of such a type can be said to be ``guarded'' by the
+key) with the following semantics: if the key of the adopter is
+present in the capabilities then a reference of a type ``guarded'' by the key
+may be used, otherwise all such references are invalid.
+
+The focus construct is used in patterns like: ``let x = focus e_1 in e_2''
+with the semantics that a capability of form p -> t is created, if e_1 has
+type p_1 -> t, and added to the capabilities for use in e_2. The key p_1
+is temporarily removed from the capabilities in the typing of e_2 so that
+any nonlinear references to the (evaluation of) e_2 are invalidated.
+Another seemingly contradictory explanation of the focus construct:
+e_2 can remove p from the capabilities yet it's later stated that at the end
+of e_2 the capabilities must contain a mapping of p -> t so that no alias can
+witness the effects of focus operation. I suppose this must mean that any
+removal of the capability must eventually be followed by its addition though
+its not clear if is true, or can be enforced by the type system. I will come
+back to this after further reading of the paper. In any case, after the focus,
+the p key is removed and the p_1 key reinstated so nonlinear access may
+proceed.
+
+A motivating dictionary add/lookup example is provided with the following
+central concerns:
+* We wish to represent entries in the dictionary as indexable with two
+different pieces of information. Thus, we require to have aliases to the
+data.
+* Each entry is a reference containing is a resizable array
+which thus must have a linear type (deallocation performed at linear type).
+Wadler's let! construct is rejected. Firstly, it's clear that it's syntactic
+scoping of nonlinear references is unsuitable for this example since we
+require to maintain the references to the entries at nonlinear type to allow
+sharing. Secondly, we are not in the context of a functional language and are
+dealing with mutable data structures; allowing temporary nonlinear access
+without restricting the operations in that context could cause memory access
+violations (as illustrated in the paper).
