@@ -101,3 +101,44 @@ sharing. Secondly, we are not in the context of a functional language and are
 dealing with mutable data structures; allowing temporary nonlinear access
 without restricting the operations in that context could cause memory access
 violations (as illustrated in the paper).
+
+The type and expression language capture the notion of capabilities and
+guarded types as well as describing which kinds of types may be adopted and
+focussed (known as heap types). An interesting use of existential and
+universal types to encode how functions and linear types behave with respect
+to the static names used to track objects. The intuition here is that,
+for linear types, we do not require to know where the object is stored in the
+heap only that it is accessible i.e. its key is in the capabilities at the
+particular program point. On the other hand, functions must behave the same
+across all addresses (static names/keys). The existential type ``packages''
+both the capability and the static name up and hides the actual name. Packing
+(and unpacking) of the linear heap type is done to convert to (from) the
+linear type h from (to) the tracked type given by the particular key involved.
+Actually, functions can quantify over both names and capabilities.
+
+The adoptees of an adopter could be represented by a singly linked list which
+are deallocated upon a call to free().
+
+The typing rules contain a capability ``context'', and each expression
+evaluates to a type and the capabilities produced after the evaluation (based
+on the initial set in the context. The type enviornments map variables only to
+nonlinear types and in contrast to other work on linear type systems, linear
+typing is not handled via environment splitting but is managed solely by the
+capabilities (mappings).
+The interesting part of the adopt typing judgement is
+the constraint on C_2, C_2 <= {p_a}, which I take to mean C_2 is *weaker* than
+{p_a}; C_2 must be an equal or larger set containing p_a. The judgement
+ensures no access to o_1 can be performed without using the guarded type since
+the capability for the tracked object is removed. This also guarantees that
+no adoptee can be adopted by more than one adopter simultaneously. What about
+circular references? Are these possible? It's statement that an adopter can
+adopt multiple objects and view them under a common type which seems to
+suggest that it's not possible for an adopter to adopt objects of different
+types. Is this prohibited by the type system? If not, what's a use case for
+this; polymorphism? The rule for updating a tuple seems tangential in its
+updating an int to an array of int, appears like it's an implementation detail
+of the programming language; could replace it with a sort-of ``any'' type
+and enforce initialisation of it?
+The focus typing judgement splits the capabilities such that one subset
+contains enough keys to permit the use of the guard, this subset is removed
+during the typing of the body of the focus.
