@@ -142,3 +142,64 @@ and enforce initialisation of it?
 The focus typing judgement splits the capabilities such that one subset
 contains enough keys to permit the use of the guard, this subset is removed
 during the typing of the body of the focus.
+The presented type system deallocates the adoptees when the adopter is
+deallocated which requires a fixed memory layout for objects. An alternative
+involves partitioning memory into regions and allocating objects from a
+specific region which adopts the objects contained within it thereby giving
+them a nonlinear type. Then, no recursive deallocation is necessary since no
+object may reference a linear type.
+The chain is traversed and adoptees recursively free'd. Other possible
+approaches are described including, having callbacks for each adoptee object
+which can perform the deallocation, or returning them to the context in which
+deallocation was performed on the adopter. The third approach prohibits an
+adopter having different types of adoptees (so, you can have an adopter
+adopting differing types!).
+
+The capabilities appear to be implemented as a sort-of data flow analysis
+since the authors mention the requirement that control flow merge points
+must have identical capabilities on incoming edges. This is essentially
+similar to many data flow analyses which can only be activiated if the
+same occurs on all incoming edges e.g. the move analysis I developed needs
+identical semantics.
+
+A number of extensions to the type system are discussed.
+The addition of a conjunction operation on keys within a guard in order to
+strengthen the protection on the linear resource.
+Abstraction of the static names to make functions more widely applicable. In
+other words, generalise the pre/post conditions and allow bounded
+quantification within the typing context of a function definition to ensure
+the capabilties satisfy some condition e.g. that they contain some key that is
+used as a guard. Using these bounds and conjunction, we can specify
+relationships between different guards e.g. overlapping guards.
+A comparison is made between a closure in this type system and a linear
+function. I thought new allocated things at linear type? Yet, what is
+described is allocating a tracked type to a closure and allowing it to be
+called any number of times which would imply it is not linear. A linear
+function in this type system is simply a tracked function which consumes its
+own capability but it's not clear how the heap type of the function is defined
+since it references itself in its definition.
+A technique for removing the lexical scoping of the focus operation using two
+rules: focus introduction and focus elimination which manipulates the
+capabilities and a new construct known as linear implication with cancelation
+semantics on the temporary capability created by a focus expression. Using
+this rule it is not too difficult to extend the type system to automatically
+infer when to insert they focus constructs.
+It's not clear how this solves the runtime operation of adoption but an
+adopter can be viewed as adopter of itself by using either a virtual adopter
+and linear implication or a typed guard where the type of the guard is
+recorded in the guard type thereby ensuring that if the type of the object
+tracked by the guard key is changed the guard type is invalidated. This is
+necessary since the adopter will be a guard of its own type and if that type
+changes then the guard type must be invalidated since it guards the old type.
+Another extension is to provide transitivity for adoption with the expected
+rules.
+
+All extensions implemented in a prototype Vault programming language
+implementation.
+
+Region-based memory management is akin to linear types in the presented system
+where regions take the form of the linear types and are not first-class values
+but provide a storage area for nonlinear objects. Alias type systems were used
+in the context of typed assembly language. Walker extended such approachs with
+existential bounds to allow for recursive data structures. Alias types are not
+destroyed on use so are more suited to an imperative paradigm.
