@@ -1,0 +1,8 @@
+Paper: Linear type theory for asynchronous session types
+Authors: Simon J. Gay and Vasco T. Vasconcelos
+
+Review on 18/9/2014
+-------------------
+
+Present a multithreaded functional language which aims to simplify previous
+work on session-based multithreaded functional languages.

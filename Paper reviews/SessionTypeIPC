@@ -1,0 +1,27 @@
+Paper: Session Types for Inter-Process Communication
+Authors: Simon J. Gay, Vasco Vasconcelos, and António Ravara
+Review (18/9/2014):
+
+Describes a programming language based on the lambda calculus with I/O side
+effects. The system tracks changes in the types of the channels and aliasing.
+Types of functions also describe how they affect channels.
+
+A progressively more elaborate maths server is described. An interesting note
+is that the simple server which computes the sum of two integers does not
+capture this fact in the type of the session. A *dependently* typed session
+could however, instead of:
+      S = ?Int.?Int.!Int.End
+we could have
+      S = ?(n: Int).?(m: Int).!(n+m).End
+the type of the sent object is inferred from the addition operation. Or even
+better (perhaps),
+      S = ?(n: Int).?(m: Int).!(p: Int).!(p = m+n).End
+we send a *proof* that p is the sum of the two received integers. The proof is
+constructed on the server side and so the only way to satisfy the protocol
+on the server side is to send the sum of the two inputs.
+
+A function type is specific to a particular channel; I'm not sure how the
+binding works in this case. Apparently, the function type doesn't truly
+abstract over channels. I think what is meant by this is that the channel
+type is specified in the function definition.
+
