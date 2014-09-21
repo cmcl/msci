@@ -1,0 +1,76 @@
+Paper: Subtyping for Session Types in the Pi Calculus
+Authors: Simon Gay and Malcolm Hole
+Review (21/9/2014):
+
+suggested future work:
+* behavioural equivalence in presence of session types
+* bouneded polymorphism
+
+Session type channels manipulated using standard channel mechanism provided by
+the pi calculus. A channel is a linear resource and its endpoints can only be
+used by a single process at any one time. However, a single process may use
+one particular endpoint more than once (provided such action is permitted by
+its session type). At this point, the intuition behind subtypes may be
+presented. If we have int <= real (read: "int is a subtype of real") then
+in a session channel expecting real data types we can replace all occurences
+with int without resulting communication errors since the bounds of the type
+are well-defined for the channel.
+
+The generic pi calculus type system defined by Igarashi and Kobayashi allows a
+range of type systems to be defined for the pi calculus. This is precisly what
+I wish to do for the lambda calculus. Such a work might be useful to browse.
+Also, there is the generic processes paper by Simon that relates to this.
+Except, from the description provided it seems it is not for formulated
+specifically session-based type systems. So my work is more specialised in its
+aim.
+
+Polyadic pi calculus-based language. Polyadicity allows multiple names be
+transmitted between processes. It appears this allows multiple items to be
+transmitted along a session typed channel. Working up to alpha-equivalence and
+have polarised input (!) were the input may be + or -, which represent the
+different endpoints of the channel. The reduction relation on processes makes
+use of a congruence relation which contains alpha-equivalence. The reduction
+relation require annotations of a channel name and label pair indicating a
+channel or label, if any, involved in the reduction step. If no channel is
+involved the channel component is tau (meaning empty) and if there is no label
+involved in the reduction, its component is set to ``_''. A nu-binding's
+reduction relations differ from standard formulations. We require different
+semantics based on the annotation on the reduction in the hypothesis. If a
+channel x is involved in the reduction and we bind x in the conclusion, then
+we must replace the type of x in the binder with a call to specially defined
+``tail'' function. The ``tail'' function just reduces the session type of the
+channel by consuming its first element.
+
+It's not clear if a rule has been missed out or not, in particular a rule for
+channel creation where the name is not the same as that reduced in the
+hypothesis. Ask yourself: under what circumstances would I require to use this
+rule? The terminated proccess, (denoted by *0*), is typed only in an
+environment of fully-used channels.
+So, suppose I had P ~a,l~> P' for some processes P, P', channel name a and
+label l. Now suppose we try to type (vx:S)P for some session type S, x =/= a.
+We need some rule that states P' ~>* *0* i.e. P' reduces using zero or more
+reduction steps to the terminated process. This might be a progress property.
+Anyway, let's assume we have that. Since (vx:S)P contains a session channel x
+with type S and since P' terminates to the *0* process we must have S = end
+since if not, x is never used in process P and we end up with (vx:S)*0* which
+has no rule because *0* is typed only in an environment of fully-used channels
+(as stated above). So, S = end and (vx:S)*0*, which is structurally congruent
+to *0*.
+
+Initially, the contravariant subtyping rule for sending a value confused me.
+But, looking back at the preliminary example exposed the true meaning: we can
+re-define the type any session channel which sends a subtype, U, of some type,
+T, to a type which sends T instead since the *actual* type of message that
+will be sent is U which is a subtype of type T. This rule is used in typing
+the initial example where the server was re-defined and the client was typed
+using the subtyping relation.
+
+The notion of a type simulation is defined, intuitively it is a subtyping
+relation between the pairs, (T,U), in the relation where T is a subtype of U.
+The subtyping relation is then defined as T <=c U iff there exists a type
+simulation containing the pair (T,U). Based on the (intuitive) explanation of
+the type simulation we can see why this is so. The definition naturally
+extends to a sequence of types. A disadvantage of the (formal) definition of
+a type simulation is that the order of the branches in branch/choice types is
+fixed since it is defined on sequences of types and not functions from labels
+to types.
