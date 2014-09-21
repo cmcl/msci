@@ -25,3 +25,44 @@ binding works in this case. Apparently, the function type doesn't truly
 abstract over channels. I think what is meant by this is that the channel
 type is specified in the function definition.
 
+Type of variables referring to channels is recorded separately to the channel
+state (current session type). This ensures that aliases are handled correctly.
+
+Syntax of small lambda calculus with novel environments for channels and
+modified reduction semantics; channel identifiers only visible through
+reduction not term-level syntax. The channel environment monitor the changing
+session type of channels but is statically determined requiring no runtime
+checks. The pair of a channel environment and a term is known as a
+configuration, and the channel environment can be seen as the stateful
+computation maintained throughout. Would it be possible to thread it through
+the program like a monad? Rather than have a ``non-standard'' typing
+judgement? Using channel environments is stated to be only necessary because
+only one side of the communication protocol is considered.
+
+The typing of a function application highlights the previously mentioned
+limitation of the channel environments approach; its required that the
+argument and function typing contain identical channel environments including
+the names of the channels, rather than being allowed to identify environments
+up to alpha-equivalence. We would somehow like to generalise the function type
+over channel identifiers. The type of functions encodes aliasing since the
+channel identifier is used in types assigned to variables. Thus, any variable
+which aliases that channel will have the same type as all other aliases. This
+is the reason for typing functions with explicit channel identifiers.
+
+Branching constructs must have the same effect on channel environments across
+all branches.
+
+A number of term abbreviations are defined and some derivations from the
+typing rules are shown.
+
+Type system includes a proof of subject reduction i.e. that if a well-typed
+term can reduce then the result is also well-typed (preservation?). We also
+have a theorem stating that all well-typed programs do not contain faulty
+configurations i.e. a pair of a channel environment and a term such that the
+term is not a value yet there it cannot be reduced any further.
+
+Separating the creation (via new) and the naming required a separate
+environment to record the current session type of a channel. Variables within
+the type environment referenced this type indirectly using the identifier for
+the channel. Recursion was needed to support the recursive session types.
+
