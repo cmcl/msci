@@ -31,4 +31,33 @@ with polymorphism (as in ``let !'').
 We separate out the file operations and file handle itself in calls to library
 functions, supposedly because this allows us to show that the file handle
 given is the one returned. I'm not sure how this is reflected in the type
-alone.
+alone. The reason is: if we just keep the existential package then the type
+for readLine becomes, existential package -> (String, existential package),
+with no dependency on the existential bound alphas.
+
+The typing rules are fairly standard, extended with kind subsumption and
+other kind rules for dealing with abstraction (term and type), and membership
+of the unrestricted environment (gamma) which contains both term and type
+variables. The typing rules also split linear typing contexts using a
+union-esque relation which additionally encodes the possibility of an
+linear type belonging to both the unrestricted environment (through
+subsumption) and the linear environment. I'm not sure where call-by-value
+reduction allows only consideration of values comes from...need to look this
+up.
+
+I need to review the parametricity lectures by Derek Dreyer since this paper
+talks an awful lot about it; proving parametricity properties for System F-pop
+using some relation stuff which I have mostly forgotten. The translation from
+a polymorphic lambda calculus that uses the ! modality treats !t (t is a term)
+as unrestricted variables by translating them into abstractions accepting an
+unused variable of Unit type. This also t be used any number of times, each
+use corresponding to a function call. Since in the lambda calculus with ! all
+variables are linear we cannot simply define !t as some unrestricted typed
+term but have to use this abstraction trick to temporarily allow unrestricted
+access within a let. It is difficult to provide the translation in the
+opposite direction since, for example, any functions taking an unrestricted
+type must now take a ! type and bind it so we can have unrestricted access and
+calls within the function will need to rebind the variable under !. Note, the
+let ! typing rule: let !x = t_1 in t_2 requires t_1 to have type !o.
+
+
