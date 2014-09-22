@@ -74,3 +74,19 @@ extends to a sequence of types. A disadvantage of the (formal) definition of
 a type simulation is that the order of the branches in branch/choice types is
 fixed since it is defined on sequences of types and not functions from labels
 to types.
+
+The T-NIL typing rule illustrates the notion of the terminated process being
+well-typed only in an environment in which all session types are ``end''.
+Note that in adding nams to an environment, we cannot add a name which already
+exists in the environment unless its type is not a session type. Intuitively,
+this is due to the linear nature of session types. The typing rules encode the
+changes made to the type of session channels as a result of communication
+between processes. However, this does not guarantee all session channels are
+fully-used when the program is executed since certain deadlocked programs are
+typable (really? The example says all session types have a matching use but
+does the example actually reduce?). Apparently, the type safety theorem states
+that a tyable process cannot generate a run-time error. Can I show that the
+provided ``deadlock example'' is not a typable process? Well, intuitively at
+least, there exists no reduction for the program since there is no parallel
+combination which reduces two receives on both sides, and since the program
+does not evaluate to a value term, it is stuck.
