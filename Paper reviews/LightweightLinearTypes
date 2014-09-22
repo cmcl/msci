@@ -14,7 +14,7 @@ Linear Semantics
 
 So, what's this about?
 
-Starting new (read: better) review below (22/1/2014):
+Starting new (read: better) review below (22/9/2014):
 -------------------
 
 Introduction of an extension of System F to support a notion of kinds which
@@ -60,4 +60,10 @@ type must now take a ! type and bind it so we can have unrestricted access and
 calls within the function will need to rebind the variable under !. Note, the
 let ! typing rule: let !x = t_1 in t_2 requires t_1 to have type !o.
 
-
+An interesting use of interfaces with kinds is to implement a variety of
+reference cell types with a range of different properties. Close to the
+example found in the ``adopt and focus'' type system we can have a ``share
+ref'' which encodes the notion of aliases and restricts modification to those
+cells which are not aliased (or shared). Note that linearity is not combined
+with alias-freedom since then we could say unrestricted types are also free
+from aliases (via subsumption).
