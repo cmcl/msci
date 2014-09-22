@@ -13,4 +13,22 @@ Linear Semantics
 ------------------
 
 So, what's this about?
-					   
+
+Starting new (read: better) review below (22/1/2014):
+-------------------
+
+Introduction of an extension of System F to support a notion of kinds which
+represents whether or not a resource is to be treated linearly. The two kinds
+(linear or unrestricted, as termed in the paper) have a relationship between
+each other which allows all unrestricted kinds to be treated as though they
+were linear. Intuitively, this is sound.
+
+Compared to other approaches like ``let !'' introduced by Wadler and type
+qualifiers kinds offers the best of both worlds, facilitating programming with
+unrestricted kinds to be easy (as in type qualifiers) and integrating well
+with polymorphism (as in ``let !'').
+
+We separate out the file operations and file handle itself in calls to library
+functions, supposedly because this allows us to show that the file handle
+given is the one returned. I'm not sure how this is reflected in the type
+alone.
