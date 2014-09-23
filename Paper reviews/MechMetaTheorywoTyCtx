@@ -1,0 +1,27 @@
+Paper: Mechanizing Metatheory without Typing Contexts
+Authors: Jonghyun Park, Jeongbong Seo, Sungwoo Park, Gyesik Lee
+Review (23/9/2014):
+
+Unbound type variables cannot be used as annotations on parameters. When would
+a unbound type variable occur?
+Q: Why can we not propagate variable substitution in a type annotation?
+A: Beta reduction occurs *after* the translation (removal of typing contexts,
+and annotation of parameters (free variables)). In the original formulation
+beta reduction would occur by itself and it would not affect the variables
+bound by the typing context.
+Why can't we enforce the consistent type annotations on the same parameter?
+
+The technique is ultimately limited to unrestricted contexts in the sense of
+System F-pop since transforming a typing context into hypothetical proofs
+means the hypotheses can be used any number of times, and a linear typing
+context must enforce each hypothesis is used exactly once. Is there another
+way around this? If not, then do we gain much from using this technique since
+we will have to add structural lemmas for the linear typing context anyway?
+It's noted in the paper that the linear typing contexts in System F-pop do not
+permit strengthening and weakening but allow other structural lemmas (probably
+permutation, but I haven't checked the Coq code).
+
+Primarily this paper is about removing structural lemmas by translating the
+System F formulation into one where typing judgements are replaced with
+hypothetical proofs. Additionally, they report an equivalence result can be
+set up with the original formulation under certain conditions (what?).
