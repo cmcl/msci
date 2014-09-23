@@ -66,4 +66,71 @@ example found in the ``adopt and focus'' type system we can have a ``share
 ref'' which encodes the notion of aliases and restricts modification to those
 cells which are not aliased (or shared). Note that linearity is not combined
 with alias-freedom since then we could say unrestricted types are also free
-from aliases (via subsumption).
+from aliases (via subsumption). Thus, one way to guarantee we have no aliases
+of a reference is to use two linear types (``access capabilities''), one to
+encode exclusive ownership and the other to encode possible sharing/aliasing
+of the underlying reference. The idea of combining a reference permitting with
+sharability is the essence of the capabilities used within the adoption and
+focus type system i.e. strong updates are permitted only when the reference is
+not shared (aliased). How does SURef get coerced into a regular reference?
+Paper say partial application of member functions but how does setting alpha
+to alpah applied to tau get you partially applied functions?
+
+Proofs are provided which show that the language can represented regular
+protocols encodable in a DFA. In order for the proofs to go through, however,
+requires appeal to intuitions about linear typing. The call-by-value setting
+with the value restriction is allow the machinery needed to support intuitions
+about linearity i.e. that subexpressions of linear type will be used exactly
+once.
+
+To reason about the effect of linearity at run-time, an extended operational
+semantics is presented which defines how subexpressions are used formally. The
+two cases considered are values used as arguments to functions (conscripted)
+and values that are subsequently used after having been ``conscripted''
+(discharged). The reduction relation is augmented with labels describing the
+set of conscripted and discharged values at each step, represented as values
+tagged with their type. Additionally, types are tagged with their kinds upon
+substitution into a type abstraction. Therefore, to ensure linear values are
+used exactly once it is enough to check that the set of linear discharged
+values in any reduction sequence is unique i.e. that a value was not
+``discharged'' twice.
+
+The intuition for how linearity behaves at run-time is that arguments with a
+linear type are never treated non-linearly within the function to which they
+are an argument. That is, they are neither duplicated nor discarded i.e. must
+be used exactly once. An equivalent definition is for a reduction of the form:
+e ~C,D~> e', the union of the tagged values in e and C (with those values
+tagged with unrestricted types removed) is equal to the union of the tagged
+values in e' and D (with those values tagged with unrestricted types removed).
+
+Unrestricted results can be explained intuitively as: for a proper expression
+e we reduce to a value v with conscripted values C and discharged values D.
+Since e was of unrestricted type then v is also of unrestricted type.
+Therefore, the tagged values in v excluding any unrestricted values is empty.
+Also, any linearly tagged values must have been discharged to obtain a final
+value of unrestricted type. So, we require that the discharged linear values
+be equal to those within e and those conscripted during the reduction.
+
+Not entirely sure I understand the applications section. The existential types
+encoding seems okay but the DFAs subsubsection is confusing. The accepting
+DFA trace is the set of discharged values tagged as occuring on the left side
+of applications, since this represents the set of functions called and since
+we have modified the syntax of functions to record the name of record labels
+then the tagged values will contain that name also; which would occur in an
+accepting DFA trace.
+So change lambda abstractions to some abstraction accepting a name (in
+addition to all the things currently expected in a lambda abstraction). Now
+since a function abstraction is a value, it will appear in the discharged set
+when it is used. Simply further label discharged tagged values with L and R
+indicating whether they occurred on the left or right side of an application,
+then we have a DFA trace by following the L tagged values of a reduction.
+
+Some extensions of the language are described to incorporate features similar
+to those provided by practical functional programming languages. In addition,
+support for programming using linear types is suggested; making use of
+syntactic to simplify or eliminate the need for the programmer to thread the
+linear references through the program or directly handle existential
+quantification. However, the description I found to be rather confusing and
+the syntactic sugar specialised. What is mentioned is the need to ensure
+the syntactic sugar correctly infers types. It appears to be straightforward
+but is an additional overhead over the system.
