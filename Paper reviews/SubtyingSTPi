@@ -20,14 +20,14 @@ The generic pi calculus type system defined by Igarashi and Kobayashi allows a
 range of type systems to be defined for the pi calculus. This is precisly what
 I wish to do for the lambda calculus. Such a work might be useful to browse.
 Also, there is the generic processes paper by Simon that relates to this.
-Except, from the description provided it seems it is not for formulated
+Except, from the description provided it seems it is not for formulating
 specifically session-based type systems. So my work is more specialised in its
 aim.
 
 Polyadic pi calculus-based language. Polyadicity allows multiple names be
 transmitted between processes. It appears this allows multiple items to be
 transmitted along a session typed channel. Working up to alpha-equivalence and
-have polarised input (!) were the input may be + or -, which represent the
+have polarised names (!) where the polarity may be + or -, which represent the
 different endpoints of the channel. The reduction relation on processes makes
 use of a congruence relation which contains alpha-equivalence. The reduction
 relation require annotations of a channel name and label pair indicating a
@@ -90,3 +90,11 @@ provided ``deadlock example'' is not a typable process? Well, intuitively at
 least, there exists no reduction for the program since there is no parallel
 combination which reduces two receives on both sides, and since the program
 does not evaluate to a value term, it is stuck.
+
+Section 4 describes and proves properties of the system required to ensure
+typing preservation and type safety. It is mostly proof sketches and I suppose
+there is not much to say about them.
+
+Section 5 is some typechecking algorithm for infering the polarities of
+channels and also deciding the subtyping relationship between two types, if
+any.
