@@ -6,3 +6,32 @@ Review on 18/9/2014
 
 Present a multithreaded functional language which aims to simplify previous
 work on session-based multithreaded functional languages.
+
+Review (29/9/2014):
+
+SPL
+wide applicability; network protocols, but more flexible: business protocols
+within web services and operating system services (communication layer),
+file handling
+provide session types in the context of the pi calculus
+increasing body of work on more mainstream paradigms e.g. functional and
+object-oriented languages
+
+CPL
+complex semantics with unrealistic (simple) handling of communication
+previous work on asynchronous communication focussed on process calculus not
+lambda calculus (functional setting)
+previous functional settings used complex type systems
+
+GAP
+no formal proof of session type giving upper bound for channel buffer size 
+
+WTD
+standard linear type system
+subtyping between function types to allow inference and conversion between
+linear and non-linear types
+
+ROF
+in some cases, can deallocate the buffer given static type information
+
+
