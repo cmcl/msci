@@ -134,3 +134,23 @@ quantification. However, the description I found to be rather confusing and
 the syntactic sugar specialised. What is mentioned is the need to ensure
 the syntactic sugar correctly infers types. It appears to be straightforward
 but is an additional overhead over the system.
+
+-----
+SPL
+Various approaches in type systems to allow the coexistence of linear and
+non-linear types.
+Some ideas from capability calculi to allow abstract interfaces managing
+references
+CPL
+Some approaches do not adequately reflect the common case (let !)
+Others hamper inclusion of desirable features e.g. polymorphism (type
+qualifiers)
+WTD
+Extend System F by categorising types as being of two different ``kinds''
+(linear or non-linear)
+Present operational semantics, and proofs of soundness, progress +
+preservation, and respects parametricity. Includes a subsumption rule for
+kinds allowing non-linear kinds to be treated as linear.
+ROF
+RFW
+
