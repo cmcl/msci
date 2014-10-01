@@ -30,10 +30,10 @@ with polymorphism (as in ``let !'').
 
 We separate out the file operations and file handle itself in calls to library
 functions, supposedly because this allows us to show that the file handle
-given is the one returned. I'm not sure how this is reflected in the type
-alone. The reason is: if we just keep the existential package then the type
-for readLine becomes, existential package -> (String, existential package),
-with no dependency on the existential bound alphas.
+given is the one returned.
+If we just keep the existential package then the type for readLine becomes,
+existential package -> (String, existential package), with no dependency on
+the existential bound alphas.
 
 The typing rules are fairly standard, extended with kind subsumption and
 other kind rules for dealing with abstraction (term and type), and membership
@@ -151,6 +151,40 @@ Extend System F by categorising types as being of two different ``kinds''
 Present operational semantics, and proofs of soundness, progress +
 preservation, and respects parametricity. Includes a subsumption rule for
 kinds allowing non-linear kinds to be treated as linear.
+Linearity aware run-time semantics permit one substitution of a value into
+a function by separating out uses of values into two categories: conscripted
+and discharged. Upon a value's first use as a function argument it is
+conscripted then any subsequent use of that value, in context where replacing
+it with a free variable would result in a stuck configuration, it is
+discharged. The reduction steps are augmented with the set of conscripted
+and discharged values during the step.
+Some extensions of the language are described to incorporate features similar
+to those provided by practical functional programming languages. In addition,
+support for programming using linear types is suggested; making use of
+syntactic to simplify or eliminate the need for the programmer to thread the
+linear references through the program or directly handle existential
+quantification.
 ROF
+An example translation from the current method to a previously proposed method
+(let !) is presented but it is noted that translation in the opposite
+direction is difficult since, for example, any functions taking an
+unrestricted type must now take a ! type and bind it so we can have
+unrestricted access, and calls within the function will need to rebind the
+variable under !. Note, the let ! typing rule: let !x = t_1 in t_2 requires
+t_1 to have type !o.
 RFW
-
+If the recommended extensions do not appear in the mechanisation then that
+would be an appropriate future work.
+Extensions present algebraic datatypes semantics with constructors with
+value argument considered a value.
+POC
+However, the syntactic sugar description I found to be rather confusing and
+the syntactic sugar specialised. What is mentioned is the need to ensure
+the syntactic sugar correctly infers types. It appears to be straightforward
+but is an additional overhead over the system.
+It is not mentioned whether the suggested extensions appear in the
+mechanisation or not.
+Possible discrepancy in algebraic datatype extension, constructors can expect
+``additional type parameters, which act as through [sic] they are
+existentially bound'' but the semantics of case indicate they are universally
+bound.

@@ -1,0 +1,131 @@
+\documentclass[11pt]{article}
+\usepackage{gensymb}
+% Set the paper size to A4
+\setlength{\paperheight}{297mm}
+\setlength{\paperwidth}{210mm}
+% Define commands which allow the width and height of the text
+% to be specified. Centre the text on the page.
+\newcommand{\settextwidth}[1]{
+\setlength{\textwidth}{#1}
+\setlength{\oddsidemargin}{\paperwidth}
+\addtolength{\oddsidemargin}{-\textwidth}
+\setlength{\oddsidemargin}{0.5\oddsidemargin}
+\addtolength{\oddsidemargin}{-1in}
+}
+\newcommand{\settextheight}[1]{
+\setlength{\textheight}{#1}
+\setlength{\headheight}{0mm}
+\setlength{\headsep}{0mm}
+\setlength{\topmargin}{\paperheight}
+\addtolength{\topmargin}{-\textheight}
+\setlength{\topmargin}{0.5\topmargin}
+\addtolength{\topmargin}{-1in}
+}
+% Top and bottom margins should be 15mm, so text height is 267mm
+\settextheight{267mm}
+% Left and right margins should be 25mm, so text width is 160mm
+\settextwidth{160mm}
+% No page number
+\pagestyle{empty}
+\setlength{\parskip}{6pt}
+\begin{document}
+\begin{tabular*}{160mm}{|l@{\extracolsep{\fill}}c@{\extracolsep{0pt}}|l|}
+\hline
+Title:
+Lightweight Linear Types in System F\degree
+
+& &
+Name:
+Craig McLaughlin
+
+\\ \hline
+Author[s]:
+Karl Mazurak, Jianzhou Zhao, and Steve Zdancewic
+
+& &
+Student number:
+
+
+\\ \hline
+\end{tabular*}
+
+\begin{center}
+\begin{minipage}{140mm}
+\small
+Abstract: %
+There are various approaches to providing both linear and non-linear access to
+resources within a programming language. However, they either hamper the
+inclusion of desirable programming features, or do not adequately reflect the
+common case. The present paper presents an extension to System F which avoids
+these deficiencies by categorising types whilst maintaining semantics
+familiar to the base language. Mechanised proofs for type soundness and
+parametricity are presented, and a relationship between linear and non-linear
+types is defined explicating the semantics of linearity. Extensions to the
+system are suggested in order to, among other things, facilitate usage in a
+general-purpose functional language. The system can encode a wide variety of
+safe interfaces and simulate a range of reference management schemes,
+illustrating the applicability of the technique.
+
+\end{minipage}
+\end{center}
+
+Previous work on incoporating linearity into a type system has proposed two
+approaches. One approach is to consider all types to be linear by default,
+and provide a construct (let !, in the literature) for temporary non-linear
+access to the resource. The problem with this approach is that non-linear
+references and access patterns are more common than linear ones, resulting in
+a rather cumbersome programming approach involving a lot of binders. A second
+technique is to use type qualifiers (one for linear, one for non-linear) then
+all types are a combination of a base (such as Int, or String) and a type
+qualifier. However, to allow for desirable programming features such as
+polymorphism, the technique requires that all polymorphic functions be
+quantified over all type qualifiers, even for simple functions such as plus
+(where it could be called on either a linear or non-linear Int). Additionally,
+in some situations, there is a relationship between type qualifiers, burdening
+the programmer with unnecessary detail and complexity.
+
+WTD
+Extend System F by categorising types as being of two different ``kinds''
+(linear or non-linear)
+Present operational semantics, and proofs of soundness, progress +
+preservation, and respects parametricity. Includes a subsumption rule for
+kinds allowing non-linear kinds to be treated as linear.
+Linearity aware run-time semantics permit one substitution of a value into
+a function by separating out uses of values into two categories: conscripted
+and discharged. Upon a value's first use as a function argument it is
+conscripted then any subsequent use of that value, in context where replacing
+it with a free variable would result in a stuck configuration, it is
+discharged. The reduction steps are augmented with the set of conscripted
+and discharged values during the step.
+Some extensions of the language are described to incorporate features similar
+to those provided by practical functional programming languages. In addition,
+support for programming using linear types is suggested; making use of
+syntactic to simplify or eliminate the need for the programmer to thread the
+linear references through the program or directly handle existential
+quantification.
+ROF
+An example translation from the current method to a previously proposed method
+(let !) is presented but it is noted that translation in the opposite
+direction is difficult since, for example, any functions taking an
+unrestricted type must now take a ! type and bind it so we can have
+unrestricted access, and calls within the function will need to rebind the
+variable under !. Note, the let ! typing rule:$ let !x = t_1 in t_2$ requires
+$t_1$ to have type $!o$.
+RFW
+If the recommended extensions do not appear in the mechanisation then that
+would be an appropriate future work.
+Extensions present algebraic datatypes semantics with constructors with
+value argument considered a value.
+POC
+However, the syntactic sugar description I found to be rather confusing and
+the syntactic sugar specialised. What is mentioned is the need to ensure
+the syntactic sugar correctly infers types. It appears to be straightforward
+but is an additional overhead over the system.
+It is not mentioned whether the suggested extensions appear in the
+mechanisation or not.
+Possible discrepancy in algebraic datatype extension, constructors can expect
+``additional type parameters, which act as through [sic] they are
+existentially bound'' but the semantics of case indicate they are universally
+bound.
+
+\end{document}
