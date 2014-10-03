@@ -1,0 +1,86 @@
+Title: A Coq library for verification of concurrent programs
+Authors: Reynald Affeldt and Naoki Kobayashi
+
+SPL (+CPL)
+* Previous verification efforts focussed on concurrent programs assumed a pure
+concurrent calculi as the base which is unrealistic
+* Small concurrent languages have also being verified with the combined use
+of model checkers
+* The languages so verified however lack datatypes and so are difficult to use
+for verifying realistic concurrent programs
+* pi calculus cannot encode data types and control structures with the
+concurrent primitives
+* spatial logics designed for such things as reachability of states in the
+context of concurrent program specification
+WTD
+* Provide a library to verify realistic concurrent programs in Coq
+* Fairness provided by specification language which accompanies encoding
+  - based on Cardelli and Gordon's spatial logic
+  - strong fairness: that possibly infinitely executing communications will
+eventually be scheduled (accompanying example shows a hidden channel name
+being given a value, until we reduce this (I suspect, haven't read sem. yet)
+we won't be able to proceed with the right parallel branch of an infinite
+input process)
+  - strong fairness is that any process which is infinitely often reduced
+by a reduction of a subprocess (enabled) is eventually reduced
+* Non-trivial application verified using library
+* object language based on the pi calculus and similar to the Pict programming
+language (applpi)
+* Some applpi concurrency primitives are a subset of those of the pi calculus
+  - replication only possible on input processes
+  - no external choice
+  - so called deep embedding
+  - parameterising channel type with type expect by process continutation
+(in the binder) can utilise Coq dependent typechecking to simplify the
+typechecking in the object language
+* Simple server example
+  - channel communicates pair of channel and nat (linear typing?)
+* Interesting use of Type universe to prevent processes from being sent as
+data (channels have type Set -> Set)
+* Using a Higher-order abstract syntax representation, simplifying the
+reasoning of realistic concurrent applications
+* Semantics of object language:
+  - Reduction of processes is made more difficult by their occurrence inside
+Coq function abstractions, previous solutions aren't suitable since in this
+developement conditionals are constructed using Coq case analysis (whereas
+others used type constructors)
+  - Channels created maintained in a list during reduction sequences to ensure
+new channels are ``fresh''; name hasn't appeared before (a form of
+cofinite quantification)
+  - Defined by a labelled transition semantics (non-standard)
+* Use of partial confluence (appears in linearised channels -- pi calculus not
+session)
+* SMTP mail server case study
+ROF
+* Strengthen the confluence property
+* Plan to formalise a type system to verify correct annotation of channels
+  - annotation gives linearised channels which are necessary for confluence
+RTC
+RCL
+RFW
+POC
+* Use of higher order syntax needs to control for terms not in the language
+(what were these called again?) not a concern for this work; not concerned
+with adequacy of the encoding. Problem for my work?
+* Discuss extraction to OCaml of the server example then say that you need to
+(manually, I presume) replace the constructors for concurrent primitives with
+OCaml functions *with appropriate semantics* (doesn't this defeat the purpose
+of verification by utting manual editing/programming into the process?)
+* They may have pencil-and-paper proof of some of the axioms' validity but I'm
+not convinced they are contributing anything useful with this paper, although
+only a few are assumed true it is not very useful to do such a thing, if you
+intend to use a theorem prover then prove your theorems!
+* I think they axiomatise to much of the important details of their
+development, essentially almost all items presented were axiomatised.
+  - alternatively, perhaps this will myself to do the same (but it's a bit of
+a cop out)
+WIL
+Why do they use Axioms for their channel type encoding?
+* Why do they need the existential n in the definition of infinitely often?
+* Is there a problem with their axiomatisation of the formulas
+(spatial/temporal)? They state that they cannot study the properties of the
+formulas formally, but is there anything else?
+IMP
+The main point to get from this, I think is that I would require similar
+infrastructure in my concurrency setting: proof of confluence (no race
+conditions), non-determinism support (?), 
