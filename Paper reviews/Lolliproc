@@ -14,8 +14,10 @@ express operational semantics
 * Formulation of proof terms in sequent calculus leads to full harnessing of
 concurrency but does not map directly back to mainstream functional languages
 * Natural deduction approach for linear logic, multiple conclusions in typing
-judgments (computational interpretation) maps well to mainstream functional
-languages but not so well to concurrency implications of the logic
+judgments can be negated (types negated -- can be considered as
+continuations) and turned into hypotheses on the left of the turnstile in the
+typing judgments, but not so well to concurrency implications of the logic
+since the semantics depend on evaluating a single term
 WTD
 * Present a language (natural deduction setting) that bridges between
 concurrent functional language as the source and classical linear logic (using
@@ -28,11 +30,43 @@ evaluation contexts is handled at the process level
 advantage of in natural deduction to reduce number of rules (equivalence of
 introduction of t with elimination of t's negation)
 * Modify control operators found in non-linear setting by using parallel
-execution (without discarding any linear values)
+execution (without discarding any linear values), achieve same control
+semantics by using parallel execution and a channel between child and parent
+process (so the eval context receives the result of the child process)
+* Closed channel token indicates that communication finished and that process
+can terminate (provided all linear resources have been used)
+* New control operator semantics split into two; a spawning phase which does
+not block on the parent process, and a waiting phase which blocks the parent
+process until the child process with the corresponding send endpoint returns
+a value
+* intuition of go is that it accepts a function which is then spawned as a
+child process which must execute as the protocol specified by the function
+type; a yield then blocks the parent to receive information from the child
+then both child and parent continue executing the protocol (this is
+essentially an encoding of session types)
+* The go operator defined to take a function which describes a protocol which
+a child process will execute and the dual type of the protocol is returned to
+the parent process on which to yield
+* Annotate go operations with protocol type for process level semantics
+* No new family of types are introduced to represent channels; regular linear
+functions serve this purpose, consequence: bidirectional communication from
+a seemingly unidirectional language
 * Underneath source interface (linear lambda calculus) is process language (a
 la pi calculus) but programmer isn't exposed to processes
 * Seemingly only permits communication in one direction yet can mimic
 bidirectional communication using session types -- elaboration needed
+* Future example enodes sub-computations offloaded to child processes by
+encapsulating work inside a function (the authors call it a ``thunk'')
+* Linking endpoints without having to yield in the parent is possible with a
+clever definition of a function which passes a completion token on to the
+parent process; the first child spawn ends up with linked endpoints,
+communication has thus been established
+* An elaborate example shows how to reserve the direction of a channel rather
+than the spawning processing having the source it gets the sink, additionally
+the example shows that while values may cycle between processes there are
+never any cycles in the communication; essential for soundness proof
+* Processes only appear at runtime; no need to implement process typing rules
+in typechecker (really? Is that what they are saying here pg.13)
 ROF
 * Type soundness (progress and preservation) implies deadlock-freedom and
 correct session typing
@@ -40,8 +74,38 @@ correct session typing
 no non-terminating programs
 * Confluence imposing the same normal form on two reduction sequences starting
 from the same redex prohibits race conditions
+* Expression typing rules ``follow natural-deduction presentation of
+intuitionistic linear calculi''
+* Both term and channel contexts are linear (no weakening or contraction)
+* Progress only considered for processes
+* Coq proofs (need to deal with context permutation since they are linear) but
+are not completed; up to preservation and progress on processes (graph based
+reasoning the issue)
+* Parallel processes form an acyclic communication graph, the restriction of
+one channel between two halves of a parallel composition is essential
+* Used a weight assignment to processes (and channels) to sketch proof of
+strong normalisation
+* Show confluence from strong normalisation and the diamond property (local
+confluence)
 RCL
 RTC
 RFW
 * Unrestricted types, recursive types, nondeterminism
+* Polymorphism (extension to System F-pop)
+* Inclusion of protocol kinds into the kinds of System F-pop rather than the
+syntactic constructs given in Lolliproc
+  - has interesting notions e.g. sending (quantified) types between processes
+* Claimed strong connection between channel endpoints definition and focused
+proofs
 POC
+* Two processes can share only one channel with the send endpoint in one of
+the processes and the receive in the other but is needed for type soundness
+WIL
+* Don't understand how go is both an identity function (therefore accepting
+and returning the same function type) and a primitive which returns the dual
+type of the protocol (I cannot get the dual from negating the function type)
+* Can the processes exist independently? That is, can we construct two
+separate process and link the endpoints? This is done with public access
+capabilities in other works; what would the equivalent be here?
+* How can linearly typed functions (powmod in alice+bob example) be used more
+than once?
