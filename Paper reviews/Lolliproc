@@ -1,0 +1,47 @@
+Title: Lolliproc: to Concurrency from Classical Linear Logic via Curry-Howard
+       and Control
+Authors: Karl Mazurak and Steve Zdancewic
+
+SPL (+CPL)
+* Ad-hoc interaction of concurrency primitives with linearity in typed lambda
+calculi
+* Linear logic applicable concurrency context; ensures non-interference for
+resources allowing parallel execution, can also express stateful computations
+-> good fit for protocol communication (session types)
+* Intuitionistic linear logic used to construct type systems and languages
+similar to mainstream functional languages but do not use concurrency to
+express operational semantics
+* Formulation of proof terms in sequent calculus leads to full harnessing of
+concurrency but does not map directly back to mainstream functional languages
+* Natural deduction approach for linear logic, multiple conclusions in typing
+judgments (computational interpretation) maps well to mainstream functional
+languages but not so well to concurrency implications of the logic
+WTD
+* Present a language (natural deduction setting) that bridges between
+concurrent functional language as the source and classical linear logic (using
+Curry-Howard correspondence) to provide simple concurrency primitives
+which can be directly interpreted in a logical context (cf. ad-hoc previous
+work)
+* Call-by-value with standard reduction semantics excepted handling of
+evaluation contexts is handled at the process level
+* double negation elimination provided in classical linear logic, taken
+advantage of in natural deduction to reduce number of rules (equivalence of
+introduction of t with elimination of t's negation)
+* Modify control operators found in non-linear setting by using parallel
+execution (without discarding any linear values)
+* Underneath source interface (linear lambda calculus) is process language (a
+la pi calculus) but programmer isn't exposed to processes
+* Seemingly only permits communication in one direction yet can mimic
+bidirectional communication using session types -- elaboration needed
+ROF
+* Type soundness (progress and preservation) implies deadlock-freedom and
+correct session typing
+* Strong normalisation: all reduction sequences reach a normal form meaning
+no non-terminating programs
+* Confluence imposing the same normal form on two reduction sequences starting
+from the same redex prohibits race conditions
+RCL
+RTC
+RFW
+* Unrestricted types, recursive types, nondeterminism
+POC
