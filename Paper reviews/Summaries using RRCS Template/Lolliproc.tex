@@ -1,0 +1,185 @@
+\documentclass[11pt]{article}
+\usepackage{gensymb}
+% Set the paper size to A4
+\setlength{\paperheight}{297mm}
+\setlength{\paperwidth}{210mm}
+% Define commands which allow the width and height of the text
+% to be specified. Centre the text on the page.
+\newcommand{\settextwidth}[1]{
+\setlength{\textwidth}{#1}
+\setlength{\oddsidemargin}{\paperwidth}
+\addtolength{\oddsidemargin}{-\textwidth}
+\setlength{\oddsidemargin}{0.5\oddsidemargin}
+\addtolength{\oddsidemargin}{-1in}
+}
+\newcommand{\settextheight}[1]{
+\setlength{\textheight}{#1}
+\setlength{\headheight}{0mm}
+\setlength{\headsep}{0mm}
+\setlength{\topmargin}{\paperheight}
+\addtolength{\topmargin}{-\textheight}
+\setlength{\topmargin}{0.5\topmargin}
+\addtolength{\topmargin}{-1in}
+}
+% Top and bottom margins should be 15mm, so text height is 267mm
+\settextheight{267mm}
+% Left and right margins should be 25mm, so text width is 160mm
+\settextwidth{160mm}
+% No page number
+\pagestyle{empty}
+\setlength{\parskip}{6pt}
+\begin{document}
+\begin{tabular*}{160mm}{|l@{\extracolsep{\fill}}c@{\extracolsep{0pt}}|l|}
+\hline
+Title:
+Lolliproc: to Concurrency from Classical Linear Logic via Curry-Howard and
+Control
+
+& &
+Name:
+Craig McLaughlin
+
+\\ \hline
+Author[s]:
+Karl Mazurak and Steve Zdancewic
+
+& &
+Student number:
+
+
+\\ \hline
+\end{tabular*}
+
+\begin{center}
+\begin{minipage}{140mm}
+\small
+Abstract: %
+There exist several approaches to utilising the power of linear logic in type
+systems and programming languages, from full linear logic incorporating
+classical components to the intuitionistic fragment. However, all approaches
+suffer from either poor integration of concurrency support or a language which
+is not in tune with mainstream functional programming. The current work
+presents a language, Lolliproc, to fill the void which provides a surface
+syntax familiar to the function programmer and simple primitives for
+concurrency which hide the underlying process calculus from the programmer.
+The language semantics ensure deadlock-freedom and absence of race conditions.
+This work serves as an interesting base on which to build lambda calculus
+based type systems which utilise linearity in order to represent interprocess
+communcation via session types. Exploring extensions to the language to
+increase its expressiveness could have far reaching implications for the way
+in which communication protocols are designed and implemented.
+
+\end{minipage}
+\end{center}
+
+Previous work on integrating the features of linear logic into type systems
+and programming languages have focussed on three strands. First, construction
+of functional programming languages that are similiar to the mainstream were
+developed using the intuitionistic portion of linear logic (as opposed to
+classical linear logic) which do not have a strong connection between the
+linearity present in the calculi and the concurrency primitives provided.
+The second approach harnessed the full power of classical linear logic within
+the sequent calculus but it is difficult to map this system back to
+conventional functional languages due to the symmetry inherent in the language
+operations. The third approach invovles a natural deduction system for linear
+logic, which has stronger connection to mainstream functional languages but
+the semantics do not provide a simple view of the concurrency implications of
+the logic and rely on techniques to simulate concurrent evaluation.
+
+The current work presents a language based on natural deduction that bridges
+the gap in the previous works. Specifically, a concurrent functional
+programming language is presented as the source level syntax backed up with an
+underlying process calculus to provide the concurrency mechanisms. The details
+of processes are hidden from the programmer using novel adaptions on control
+operators. The language encodes classical linear logic adding double negation
+elimination as a language primitive. The operational semantics of the linear
+lambda calculus are standard with the exception of performing reduction of
+evaluation contexts at the process level.
+
+The control operators facilitate spawning child processes and waiting in the
+parent process for the child to complete execution. When a process is spawned
+the parent and child are each given an endpoint of a channel (sending end is
+given to the child). A closed channel token indicates that communication has
+finished and that the child process can terminate (provided all linear
+resources have been used). Intuition of control operators is that a
+continuation passed to the spawning operator is a function executing a
+protocol.
+
+ intuition of go is that it accepts a function which is then spawned as a
+child process which must execute as the protocol specified by the function
+type; a yield then blocks the parent to receive information from the child
+then both child and parent continue executing the protocol (this is
+essentially an encoding of session types)
+ The go operator defined to take a function which describes a protocol which
+a child process will execute and the dual type of the protocol is returned to
+the parent process on which to yield
+ Annotate go operations with protocol type for process level semantics
+ No new family of types are introduced to represent channels; regular linear
+functions serve this purpose, consequence: bidirectional communication from
+a seemingly unidirectional language
+ Underneath source interface (linear lambda calculus) is process language (a
+la pi calculus) but programmer isn't exposed to processes
+ Seemingly only permits communication in one direction yet can mimic
+bidirectional communication using session types -- elaboration needed
+ Future example enodes sub-computations offloaded to child processes by
+encapsulating work inside a function (the authors call it a ``thunk'')
+ Linking endpoints without having to yield in the parent is possible with a
+clever definition of a function which passes a completion token on to the
+parent process; the first child spawn ends up with linked endpoints,
+communication has thus been established
+ An elaborate example shows how to reserve the direction of a channel rather
+than the spawning processing having the source it gets the sink, additionally
+the example shows that while values may cycle between processes there are
+never any cycles in the communication; essential for soundness proof
+ Processes only appear at runtime; no need to implement process typing rules
+in typechecker (really? Is that what they are saying here pg.13)
+
+
+
+
+ROF
+ Type soundness (progress and preservation) implies deadlock-freedom and
+correct session typing
+ Strong normalisation: all reduction sequences reach a normal form meaning
+no non-terminating programs
+ Confluence imposing the same normal form on two reduction sequences starting
+from the same redex prohibits race conditions
+ Expression typing rules ``follow natural-deduction presentation of
+intuitionistic linear calculi''
+ Both term and channel contexts are linear (no weakening or contraction)
+ Progress only considered for processes
+ Coq proofs (need to deal with context permutation since they are linear) but
+are not completed; up to preservation and progress on processes (graph based
+reasoning the issue)
+ Parallel processes form an acyclic communication graph, the restriction of
+one channel between two halves of a parallel composition is essential
+ Used a weight assignment to processes (and channels) to sketch proof of
+strong normalisation
+ Show confluence from strong normalisation and the diamond property (local
+confluence)
+
+
+RCL
+RTC
+RFW
+* Unrestricted types, recursive types, nondeterminism
+* Polymorphism (extension to System F-pop)
+* Inclusion of protocol kinds into the kinds of System F-pop rather than the
+syntactic constructs given in Lolliproc
+  - has interesting notions e.g. sending (quantified) types between processes
+* Claimed strong connection between channel endpoints definition and focused
+proofs
+POC
+* Two processes can share only one channel with the send endpoint in one of
+the processes and the receive in the other but is needed for type soundness
+WIL
+* Don't understand how go is both an identity function (therefore accepting
+and returning the same function type) and a primitive which returns the dual
+type of the protocol (I cannot get the dual from negating the function type)
+* Can the processes exist independently? That is, can we construct two
+separate process and link the endpoints? This is done with public access
+capabilities in other works; what would the equivalent be here?
+* How can linearly typed functions (powmod in alice+bob example) be used more
+than once?
+
+\end{document}
