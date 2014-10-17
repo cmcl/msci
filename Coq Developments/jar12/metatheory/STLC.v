@@ -100,8 +100,8 @@ Coercion fvar : atom >-> exp.
 Parameter Y : atom.
 Definition demo_rep1 := abs typ_base (app Y 0).
 
-(** Note that because of the coercions we may write [abs (app Y 0)]
-    instead of [abs (app (fvar Y) (bvar 0))].
+(** Note that because of the coercions we may write [abs typ_base (app Y 0)]
+    instead of [abs typ_base (app (fvar Y) (bvar 0))].
 
     Below is another example: the encoding of (\x:b. \y:b. (y x)).
 *)
@@ -113,25 +113,25 @@ Definition demo_rep2 := abs typ_base (abs typ_base (app 0 1)).
 	 lambda calculus terms using the locally nameless representation.
 
        "two"     :    \s:b->b. \z:b. s (s z)
-
-       "COMB_K"  :    \x:b. \y:b. x
-
-       "COMB_S"  :    \x:b -> b -> b.\y:b -> b.\z:b. x z (y z)
-
 *)
 
-(** <<
+Definition two_rep := abs (typ_arrow typ_base typ_base)
+                          (abs typ_base (app 0 (app 0 1))).
 
-Definition two :=
-  (* FILL IN HERE *)
+(**
+       "COMB_K"  :    \x:b. \y:b. x
+*)
 
-Definition COMB_K :=
-  (* FILL IN HERE *)
+Definition comb_k_rep := abs typ_base (abs typ_base 0).
 
-Definition COMB_S :=
-   (* FILL IN HERE *)
+(**
+       "COMB_S"  :    \x:b -> b -> b.\y:b -> b.\z:b. x z (y z)
+*)
 
->> *)
+Definition comb_s_rep := abs (typ_arrow typ_base
+                                        (typ_arrow typ_base typ_base))
+                             (abs (typ_arrow typ_base typ_base)
+                                  (abs typ_base (app (app 0 2) (app 1 2)))).
 
 (** There are two important advantages of the locally nameless
     representation:
@@ -188,7 +188,6 @@ Fixpoint subst (z : atom) (u : exp) (e : exp)
 
 Notation "[ z ~> u ] e" := (subst z u e) (at level 68).
 
-
 (** To demonstrate how free variable substitution works, we need to
     reason about atom equality.
 *)
@@ -229,13 +228,16 @@ Qed.
 Lemma subst_eq_var: forall (x : atom) u,
   [x ~> u]x = u.
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
+  intros; simpl.
+  destruct (x == x); auto.
+  exfalso; auto.
+Qed.
 
 Lemma subst_neq_var : forall (x y : atom) u,
   y <> x -> [x ~> u]y = y.
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
-
+  intros; simpl; destruct (y == x); auto; []; exfalso; auto.
+Qed.
 
 (*************************************************************************)
 (** * Free variables *)
@@ -306,7 +308,11 @@ Qed.
 Lemma subst_fresh : forall (x : atom) e u,
   x `notin` fv e -> [x ~> u] e = e.
 Proof.
-  (* FILL IN HERE (and delete "Admitted") *) Admitted.
+  induction e; intros; simpl in *; auto; try (solve [f_equal; auto]).
+  Case "fvar".
+    destruct (a == x); auto.
+    fsetdec.
+Qed.
 
 (* Take-home Demo: Prove that free variables are not introduced by
    substitution.
