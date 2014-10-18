@@ -116,13 +116,13 @@ Definition demo_rep2 := abs typ_base (abs typ_base (app 0 1)).
 *)
 
 Definition two_rep := abs (typ_arrow typ_base typ_base)
-                          (abs typ_base (app 0 (app 0 1))).
+                          (abs typ_base (app 1 (app 1 0))).
 
 (**
        "COMB_K"  :    \x:b. \y:b. x
 *)
 
-Definition comb_k_rep := abs typ_base (abs typ_base 0).
+Definition comb_k_rep := abs typ_base (abs typ_base 1).
 
 (**
        "COMB_S"  :    \x:b -> b -> b.\y:b -> b.\z:b. x z (y z)
@@ -131,7 +131,7 @@ Definition comb_k_rep := abs typ_base (abs typ_base 0).
 Definition comb_s_rep := abs (typ_arrow typ_base
                                         (typ_arrow typ_base typ_base))
                              (abs (typ_arrow typ_base typ_base)
-                                  (abs typ_base (app (app 0 2) (app 1 2)))).
+                                  (abs typ_base (app (app 2 0) (app 1 0)))).
 
 (** There are two important advantages of the locally nameless
     representation:
@@ -418,7 +418,8 @@ Lemma demo_open :
   open (app (abs typ_base (app 1 0)) 0) Y =
        (app (abs typ_base (app Y 0)) Y).
 Proof.
-Admitted.
+  unfold open; simpl; auto.
+Qed.
 (* HINT for demo: To show the equality of the two sides below, use the
    tactics [unfold], which replaces a definition with its RHS and
    reduces it to head form, and [simpl], which reduces the term the
@@ -473,7 +474,7 @@ Hint Constructors lc.
     notation, confined to this section. *)
 
 Section BasicOperations.
-Notation Local "{ k ~> u } t" := (open_rec k u t) (at level 67).
+Local Notation "{ k ~> u } t" := (open_rec k u t) (at level 67).
 
 (** The first property we would like to show is the analogue to
     [subst_fresh]: index substitution has no effect for closed terms.
@@ -563,7 +564,7 @@ Proof.
   Case "abs".
     f_equal.
     inversion H.
-    apply  IHe with (j := S j) (u := u) (i := S i) (v := v).
+    apply IHe with (j := S j) (u := u) (i := S i) (v := v).
     auto.
     auto.
   Case "app".
@@ -571,6 +572,18 @@ Proof.
     f_equal.
     eapply IHe1; eauto.
     eapply IHe2; eauto.
+Qed.
+
+Lemma open_rec_lc_core_compact : forall e j v i u,
+  i <> j ->
+  {j ~> v} e = {i ~> u} ({j ~> v} e) ->
+  e = {i ~> u} e.
+Proof.
+  induction e; intros j v i u Neq H; simpl in *; auto
+  ; try (solve [f_equal; inversion H; firstorder])
+  ; destruct (j == n); destruct (i == n); auto; subst n.
+  - exfalso; auto.
+  - simpl in *; destruct (i == i); auto; now (contradict n).
 Qed.
 
 (* Take-home Exercise: We've proven the above lemma very explicitly,
@@ -597,7 +610,7 @@ Proof.
     f_equal.
     unfold open in *.
     apply open_rec_lc_core with
-      (i := S k) (j := 0) (u := u) (v := fvar x).
+      (i := S k) (j := 0) (u := u) (v := x).
     auto.
     auto.
   Case "lc_app".
@@ -607,7 +620,6 @@ Proof.
     auto.
     auto.
 Qed.
-
 
 (** Take-home Exercise [subst_open_rec] *)
 
@@ -623,8 +635,10 @@ Lemma subst_open_rec : forall e1 e2 u (x : atom) k,
   lc u ->
   [x ~> u] ({k ~> e2} e1) = {k ~> [x ~> u] e2} ([x ~> u] e1).
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
-
+  induction e1; intros; simpl; try (solve [f_equal; eauto]).
+  - destruct (k == n); auto.
+  - destruct (a == x); simpl; auto using open_rec_lc.
+Qed.
 
 (** *** Exercise [subst_open_var] *)
 
@@ -642,7 +656,10 @@ Lemma subst_open_var : forall (x y : atom) u e,
   lc u ->
   open ([x ~> u] e) y = [x ~> u] (open e y).
 Proof.
-  (* FILL IN HERE (and delete "Admitted") *) Admitted.
+  intros; unfold open; rewrite <-(subst_neq_var x y u); auto.
+  rewrite <-subst_open_rec; auto.
+  rewrite subst_neq_var; auto.
+Qed.
 
 (** *** Take-home Exercise [subst_intro] *)
 
@@ -659,7 +676,12 @@ Lemma subst_intro : forall (x : atom) u e,
   x `notin` (fv e) ->
   open e u = [x ~> u](open e x).
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
+  intros; unfold open; generalize 0.
+  induction e; intros k; simpl in *; try (solve [f_equal; eauto]).
+  - destruct (k == n); auto using subst_eq_var.
+  - apply notin_singleton_1 in H; destruct (a == x); auto; []
+    ; now (contradict H).
+Qed.
 
 End BasicOperations.
 
