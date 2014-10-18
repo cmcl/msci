@@ -789,7 +789,7 @@ Hint Constructors lc_c.
    properties about it and the new version of lc_c. *)
 
 Section CofiniteQuantification.
-Notation Local "{ k ~> u } t" := (open_rec k u t) (at level 67).
+Local Notation "{ k ~> u } t" := (open_rec k u t) (at level 67).
 
 (* With this new definition, we can almost use the same proof for
    [open_rec_lc], we only need one change. We need to add the line
@@ -833,14 +833,20 @@ Lemma subst_open_rec_c : forall e1 e2 u (x : atom) k,
   lc_c u ->
   [x ~> u] ({k ~> e2} e1) = {k ~> [x ~> u] e2} ([x ~> u] e1).
 Proof.
-(* OPTIONAL EXERCISE *) Admitted.
+  induction e1; intros; simpl in *; try (solve [f_equal; eauto]).
+  - destruct (k == n); auto.
+  - destruct (a == x); simpl; auto using open_rec_lc_c.
+Qed.
 
 Lemma subst_open_var_c : forall (x y : atom) u e,
   y <> x ->
   lc_c u ->
   open ([x ~> u] e) y = [x ~> u] (open e y).
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
+  intros; unfold open; rewrite <-(subst_neq_var x y u); auto.
+  rewrite <-subst_open_rec_c; auto.
+  rewrite subst_neq_var; auto.
+Qed.
 
 (* Exercise [subst_lc_c]:
 
@@ -866,7 +872,11 @@ Proof.
      auto.
   Case "lc_abs_c".
     simpl.
-    (* FILL IN HERE (and delete "Admitted") *) Admitted.
+    apply lc_abs_c with (L := L `union` singleton x).
+    intros; destruct_notin; rewrite subst_open_var_c; auto.
+  Case "lc_app_c".
+    simpl; auto.
+Qed.
 
 End CofiniteQuantification.
 
@@ -938,7 +948,6 @@ Proof.
   Case "app".
      simpl. auto.
 Qed.
-
 
 (*************************************************************************)
 (*                                                                       *)
@@ -1241,9 +1250,16 @@ Proof.
   remember (G ++ E) as E'.
   generalize dependent G.
   induction H; intros G Eq Uniq; subst.
- (* FILL IN HERE (and delete "Admitted") *) Admitted.
-
-     
+  Case "typing_var_c".
+    eauto using binds_weaken.
+  Case "typing_abs_c".
+    pick fresh x and apply typing_abs_c.
+    rewrite_env (((x ~ T1) ++ G) ++ F ++ E).
+    apply H0; auto.
+    simpl_env; apply uniq_push; auto.
+  Case "typing_app_c".
+    eauto.
+Qed.
 
 (** *** Example
 
@@ -1260,7 +1276,6 @@ Proof.
   rewrite_env (nil ++ F ++ E).
   apply typing_c_weakening_strengthened; auto.
 Qed.
-
 
 (*************************************************************************)
 (** * Substitution *)
@@ -1317,7 +1332,10 @@ Lemma typing_subst_var_case : forall (E F : env) u S T (z x : atom),
 Proof.
   intros E F u S T z x H J K.
   simpl.
- (* FILL IN HERE (and delete "Admitted") *) Admitted.
+  destruct (x == z); eauto.
+  Case "x = z".
+    subst; apply binds_mid_eq in H; subst; eauto using typing_c_weakening.
+Qed.
 
 (** *** Note
 
@@ -1332,7 +1350,6 @@ Lemma typing_c_to_lc_c : forall E e T,
 Proof.
   intros E e T H. induction H; eauto.
 Qed.
-
 
 (** *** Exercise
 
@@ -1365,9 +1382,22 @@ Lemma typing_c_subst : forall (E F : env) e u S T (z : atom),
   typing_c E u S ->
   typing_c (F ++ E) ([z ~> u] e) T.
 Proof.
-(* FILL IN HERE (and delete "Admitted") *) Admitted.
+  intros.
+  remember (F ++ (z ~ S) ++ E) as E'.
+  generalize dependent F.
+  induction H; intros F Eq; subst.
+  Case "typing_var_c".
+    eauto using typing_subst_var_case.
+  Case "typing_abs_c".
+    simpl.
+    pick fresh x and apply typing_abs_c.
+    rewrite subst_open_var_c; eauto using typing_c_to_lc_c.
+    rewrite_env (((x ~ T1) ++ F) ++ E).
+    apply H1; auto.
+  Case "typing_app_c".        
+    simpl; eauto.
+Qed.
 
-        
 (** *** Exercise
 
     Complete the proof of the substitution lemma stated in the form we
@@ -1382,7 +1412,10 @@ Lemma typing_c_subst_simple : forall (E : env) e u S T (z : atom),
   typing_c E u S ->
   typing_c E ([z ~> u] e) T.
 Proof.
-(* FILL IN HERE (and delete "Admitted") *) Admitted.
+  intros.
+  rewrite_env (nil ++ E).
+  eauto using typing_c_subst.
+Qed.
 
 (*************************************************************************)
 (** * Values and Evaluation *)
