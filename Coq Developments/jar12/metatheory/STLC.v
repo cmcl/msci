@@ -1507,8 +1507,22 @@ Lemma preservation_c : forall (E : env) e e' T,
 Proof.
   intros E e e' T H.
   generalize dependent e'.
-  induction H; intros e' J.
-(* OPTIONAL EXERCISE *) Admitted.
+  induction H; intros e' J; try (solve [inversion J]).
+  inversion J; subst; try rename e0 into e1.
+  Case "eval_beta_c".
+    inversion H; subst.
+    pick fresh x.
+    rewrite (subst_intro x); auto.
+    eauto using typing_c_subst_simple.
+(* Could easily solve these cases with eauto... *)
+  Case "eval_app_1_c".
+    eapply typing_app_c. apply IHtyping_c1. exact H5.
+    apply H0.
+  Case "eval_app_2_c".
+    eapply typing_app_c. exact H.
+    apply IHtyping_c2. exact H5.
+Qed.
+
 
 (*************************************************************************)
 (** * Progress *)
@@ -1569,9 +1583,29 @@ Proof.
   remember (@nil (atom * typ)) as E.
 
   induction H; subst.
-
-(* FILL IN HERE (and delete "Admitted") *) Admitted.
-
+  Case "typing_var_c".
+    inversion H1.
+  Case "typing_abs_c".
+    left; apply value_abs_c.
+    apply typing_c_to_lc_c in H0; auto.
+  Case "typing_app_c".
+    right; destruct IHtyping_c1; destruct IHtyping_c2; auto.
+    SCase "e1 and e2 are values".
+      (* e1 must be an abstraction *)
+      inversion H2; subst.
+      eexists; auto using eval_beta_c.
+    SCase "e1 is a value, e2 takes a step".
+      inversion H3 as [e' ?].
+      eexists; eauto.
+    SCase "e1 takes a step, e2 is a value -- impossible".
+      inversion H2 as [e' ?].
+      apply typing_c_to_lc_c in H1.
+      eexists; eauto.
+    SCase "e1 takes a step, e2 takes a step".
+      inversion H2 as [e' ?].
+      apply typing_c_to_lc_c in H1.
+      eexists; eauto.
+Qed.
 
 (*************************************************************************)
 (** * Renaming *)
