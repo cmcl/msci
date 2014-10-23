@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>MetatheoryAtom</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library MetatheoryAtom</h1>
+
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Arith.Arith.html#"><span class="id" type="library">Coq.Arith.Arith</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Arith.Max.html#"><span class="id" type="library">Coq.Arith.Max</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#"><span class="id" type="library">Coq.Classes.EquivDec</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Lists.List.html#"><span class="id" type="library">Coq.Lists.List</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Structures.DecidableTypeEx.html#"><span class="id" type="library">Coq.Structures.DecidableTypeEx</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="CoqFSetDecide.html#"><span class="id" type="library">CoqFSetDecide</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="CoqListFacts.html#"><span class="id" type="library">CoqListFacts</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="FSetExtra.html#"><span class="id" type="library">FSetExtra</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="FSetWeakNotin.html#"><span class="id" type="library">FSetWeakNotin</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="LibTactics.html#"><span class="id" type="library">LibTactics</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab246"></a><h1 class="section">Defining atoms</h1>
+
+<div class="paragraph"> </div>
+
+ Atoms are structureless objects such that we can always generate
+    one fresh from a finite collection.  Equality on atoms is <span class="inlinecode"><span class="id" type="var">eq</span></span> and
+    decidable.  We use Coq's module system to make abstract the
+    implementation of atoms. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Module</span> <span class="id" type="keyword">Type</span> <a name="ATOM"><span class="id" type="module">ATOM</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Parameter</span> <a name="ATOM.atom"><span class="id" type="axiom">atom</span></a> : <span class="id" type="keyword">Set</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Parameter</span> <a name="ATOM.eq_atom_dec"><span class="id" type="axiom">eq_atom_dec</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> : <a class="idref" href="MetatheoryAtom.html#ATOM.atom"><span class="id" type="axiom">atom</span></a>, <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">{</span></a><a class="idref" href="MetatheoryAtom.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="MetatheoryAtom.html#y"><span class="id" type="variable">y</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">}</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">{</span></a><a class="idref" href="MetatheoryAtom.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="MetatheoryAtom.html#y"><span class="id" type="variable">y</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">}</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Parameter</span> <a name="ATOM.atom_fresh_for_list"><span class="id" type="axiom">atom_fresh_for_list</span></a> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">forall</span> (<span class="id" type="var">xs</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Datatypes.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="MetatheoryAtom.html#ATOM.atom"><span class="id" type="axiom">atom</span></a>), <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_':'_x_'|'_x_'}'"><span class="id" type="notation">{</span></a><span class="id" type="var">x</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_':'_x_'|'_x_'}'"><span class="id" type="notation">:</span></a> <a class="idref" href="MetatheoryAtom.html#ATOM.atom"><span class="id" type="axiom">atom</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_':'_x_'|'_x_'}'"><span class="id" type="notation">|</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Lists.List.html#In"><span class="id" type="definition">List.In</span></a> <span class="id" type="var">x</span> <a class="idref" href="MetatheoryAtom.html#xs"><span class="id" type="variable">xs</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_':'_x_'|'_x_'}'"><span class="id" type="notation">}</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Hint Resolve</span> <a class="idref" href="MetatheoryAtom.html#ATOM.eq_atom_dec"><span class="id" type="axiom">eq_atom_dec</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">ATOM</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The implementation of the above interface is hidden for
+    documentation purposes. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Module</span> <a name="AtomImpl"><span class="id" type="module">AtomImpl</span></a> : <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">ATOM</span></a>.<br/>
+
+<br/>
+
+<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomImpl</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We make <span class="inlinecode"><span class="id" type="var">atom</span></span>, <span class="inlinecode"><span class="id" type="var">eq_atom_dec</span></span>, and <span class="inlinecode"><span class="id" type="var">atom_fresh_for_list</span></span> available
+    without qualification. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Export</span> <span class="id" type="var">AtomImpl</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+It is trivial to implement the <span class="inlinecode"><span class="id" type="var">DecidableType</span></span> interface with <span class="inlinecode"><span class="id" type="var">atom</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Module</span> <a name="AtomDT"><span class="id" type="module">AtomDT</span></a> &lt;: <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Structures.DecidableTypeEx.html#"><span class="id" type="module">UsualDecidableType</span></a> <span class="id" type="keyword">with</span> <span class="id" type="keyword">Definition</span> <span class="id" type="var">t</span> := <a class="idref" href="MetatheoryAtom.html#AtomImpl.atom"><span class="id" type="axiom">atom</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Definition</span> <a name="AtomDT.t"><span class="id" type="definition">t</span></a> := <a class="idref" href="MetatheoryAtom.html#AtomImpl.atom"><span class="id" type="axiom">atom</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Definition</span> <a name="AtomDT.eq"><span class="id" type="definition">eq</span></a> := @<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#eq"><span class="id" type="inductive">eq</span></a> <a class="idref" href="MetatheoryAtom.html#AtomDT.t"><span class="id" type="definition">t</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Definition</span> <a name="AtomDT.eq_refl"><span class="id" type="definition">eq_refl</span></a> := @<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#refl_equal"><span class="id" type="abbreviation">refl_equal</span></a> <a class="idref" href="MetatheoryAtom.html#AtomDT.t"><span class="id" type="definition">t</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Definition</span> <a name="AtomDT.eq_sym"><span class="id" type="definition">eq_sym</span></a> := @<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#sym_eq"><span class="id" type="abbreviation">sym_eq</span></a> <a class="idref" href="MetatheoryAtom.html#AtomDT.t"><span class="id" type="definition">t</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Definition</span> <a name="AtomDT.eq_trans"><span class="id" type="definition">eq_trans</span></a> := @<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#trans_eq"><span class="id" type="abbreviation">trans_eq</span></a> <a class="idref" href="MetatheoryAtom.html#AtomDT.t"><span class="id" type="definition">t</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">Definition</span> <a name="AtomDT.eq_dec"><span class="id" type="definition">eq_dec</span></a> := <a class="idref" href="MetatheoryAtom.html#AtomImpl.eq_atom_dec"><span class="id" type="axiom">eq_atom_dec</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomDT</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+It is trivial to declare an instance of <span class="inlinecode"><span class="id" type="var">EqDec</span></span> for <span class="inlinecode"><span class="id" type="var">atom</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Instance</span> <a name="EqDec_atom"><span class="id" type="instance">EqDec_atom</span></a> : @<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#EqDec"><span class="id" type="class">EqDec</span></a> <a class="idref" href="MetatheoryAtom.html#AtomImpl.atom"><span class="id" type="axiom">atom</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#eq"><span class="id" type="inductive">eq</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.RelationClasses.html#eq_equivalence"><span class="id" type="instance">eq_equivalence</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">exact</span> <a class="idref" href="MetatheoryAtom.html#AtomImpl.eq_atom_dec"><span class="id" type="axiom">eq_atom_dec</span></a>. <span class="id" type="keyword">Defined</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab247"></a><h1 class="section">Finite sets of atoms</h1>
+
+<div class="paragraph"> </div>
+
+ We use our implementation of atoms to obtain an implementation of
+    finite sets of atoms.  We give the resulting type an intuitive
+    name, as well as import names of set operations for use within
+    this library.  In order to avoid polluting Coq's namespace, we do
+    not use <span class="inlinecode"><span class="id" type="keyword">Module</span></span> <span class="inlinecode"><span class="id" type="keyword">Export</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Module</span> <span class="id" type="keyword">Import</span> <a name="AtomSetImpl"><span class="id" type="module">AtomSetImpl</span></a> : <a class="idref" href="FSetExtra.html#"><span class="id" type="module">FSetExtra.WSfun</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomDT</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="FSetExtra.html#"><span class="id" type="module">FSetExtra.Make</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomDT</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Notation</span> <a name="atoms"><span class="id" type="abbreviation">atoms</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="MetatheoryAtom.html#AtomSetImpl.t"><span class="id" type="axiom">AtomSetImpl.t</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="var">AtomSetDecide</span></span> module provides the <span class="inlinecode"><span class="id" type="var">fsetdec</span></span> tactic for
+    solving facts about finite sets of atoms. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Module</span> <span class="id" type="keyword">Export</span> <a name="AtomSetDecide"><span class="id" type="module">AtomSetDecide</span></a> := <a class="idref" href="CoqFSetDecide.html#"><span class="id" type="module">CoqFSetDecide.WDecide_fun</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomDT</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomSetImpl</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="var">AtomSetNotin</span></span> module provides the <span class="inlinecode"><span class="id" type="var">destruct_notin</span></span> and
+    <span class="inlinecode"><span class="id" type="var">solve_notin</span></span> for reasoning about non-membership in finite sets of
+    atoms, as well as a variety of lemmas about non-membership. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Module</span> <span class="id" type="keyword">Export</span> <a name="AtomSetNotin"><span class="id" type="module">AtomSetNotin</span></a> := <a class="idref" href="FSetWeakNotin.html#"><span class="id" type="module">FSetWeakNotin.Notin_fun</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomDT</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomSetImpl</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Given the <span class="inlinecode"><span class="id" type="var">fsetdec</span></span> tactic, we typically do not need to refer to
+    specific lemmas about finite sets.  However, instantiating
+    functors from the FSets library makes a number of setoid rewrites
+    available.  These rewrites are crucial to developments since they
+    allow us to replace a set with an extensionally equal set (see the
+    <span class="inlinecode"><span class="id" type="var">Equal</span></span> relation on finite sets) in propositions about finite
+    sets. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Module</span> <a name="AtomSetFacts"><span class="id" type="module">AtomSetFacts</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.FSets.FSetFacts.html#"><span class="id" type="module">FSetFacts.WFacts_fun</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomDT</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomSetImpl</span></a>.<br/>
+<span class="id" type="keyword">Module</span> <a name="AtomSetProperties"><span class="id" type="module">AtomSetProperties</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.FSets.FSetProperties.html#"><span class="id" type="module">FSetProperties.WProperties_fun</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomDT</span></a> <a class="idref" href="MetatheoryAtom.html#"><span class="id" type="module">AtomSetImpl</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab248"></a><h1 class="section">Properties</h1>
+
+<div class="paragraph"> </div>
+
+ For any given finite set of atoms, we can generate an atom fresh
+    for it. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="atom_fresh"><span class="id" type="lemma">atom_fresh</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">L</span> : <a class="idref" href="MetatheoryAtom.html#atoms"><span class="id" type="abbreviation">atoms</span></a>, <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_':'_x_'|'_x_'}'"><span class="id" type="notation">{</span></a> <span class="id" type="var">x</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_':'_x_'|'_x_'}'"><span class="id" type="notation">:</span></a> <a class="idref" href="MetatheoryAtom.html#AtomImpl.atom"><span class="id" type="axiom">atom</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_':'_x_'|'_x_'}'"><span class="id" type="notation">|</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="MetatheoryAtom.html#AtomSetImpl.In"><span class="id" type="axiom">In</span></a> <span class="id" type="var">x</span> <a class="idref" href="MetatheoryAtom.html#L"><span class="id" type="variable">L</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_':'_x_'|'_x_'}'"><span class="id" type="notation">}</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">L</span>. <span class="id" type="tactic">destruct</span> (<a class="idref" href="MetatheoryAtom.html#AtomImpl.atom_fresh_for_list"><span class="id" type="axiom">atom_fresh_for_list</span></a> (<a class="idref" href="MetatheoryAtom.html#AtomSetImpl.elements"><span class="id" type="axiom">elements</span></a> <span class="id" type="var">L</span>)) <span class="id" type="keyword">as</span> [<span class="id" type="var">a</span> <span class="id" type="var">H</span>].<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">exists</span> <span class="id" type="var">a</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">J</span>. <span class="id" type="var">contradiction</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> &lt;- <a class="idref" href="CoqListFacts.html#InA_iff_In"><span class="id" type="lemma">CoqListFacts.InA_iff_In</span></a>. <span class="id" type="tactic">auto</span> <span class="id" type="keyword">using</span> @<a class="idref" href="MetatheoryAtom.html#AtomSetImpl.elements_1"><span class="id" type="axiom">elements_1</span></a>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab249"></a><h1 class="section">Tactic support for picking fresh atoms</h1>
+
+</div>
+<div class="code">
+
+<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" type="var">gather_atoms_with</span></span> <span class="inlinecode"><span class="id" type="var">F</span></span> returns the union of all the finite sets
+    <span class="inlinecode"><span class="id" type="var">F</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> where <span class="inlinecode"><span class="id" type="var">x</span></span> is a variable from the context such that <span class="inlinecode"><span class="id" type="var">F</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span>
+    type checks. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">gather_atoms_with</span> <span class="id" type="var">F</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">apply_arg</span> <span class="id" type="var">x</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">type</span> <span class="id" type="var">of</span> <span class="id" type="var">F</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span> -&gt; <span class="id" type="var">_</span> -&gt; <span class="id" type="var">_</span> -&gt; <span class="id" type="var">_</span> =&gt; <span class="id" type="keyword">constr</span>:(@<span class="id" type="var">F</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span> -&gt; <span class="id" type="var">_</span> -&gt; <span class="id" type="var">_</span> =&gt; <span class="id" type="keyword">constr</span>:(@<span class="id" type="var">F</span> <span class="id" type="var">_</span> <span class="id" type="var">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span> -&gt; <span class="id" type="var">_</span> =&gt; <span class="id" type="keyword">constr</span>:(@<span class="id" type="var">F</span> <span class="id" type="var">x</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">rec</span> <span class="id" type="var">gather</span> <span class="id" type="var">V</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="keyword">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <span class="id" type="var">_</span> |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">FH</span> := <span class="id" type="var">apply_arg</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">V</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="keyword">context</span> [<span class="id" type="var">FH</span>] =&gt; <span class="id" type="tactic">fail</span> 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span> =&gt; <span class="id" type="var">gather</span> (<a class="idref" href="MetatheoryAtom.html#AtomSetImpl.union"><span class="id" type="axiom">union</span></a> <span class="id" type="var">FH</span> <span class="id" type="var">V</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span> =&gt; <span class="id" type="var">V</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">L</span> := <span class="id" type="var">gather</span> <span class="id" type="var">empty</span> <span class="id" type="keyword">in</span> <span class="id" type="tactic">eval</span> <span class="id" type="tactic">simpl</span> <span class="id" type="keyword">in</span> <span class="id" type="var">L</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" type="var">beautify_fset</span></span> <span class="inlinecode"><span class="id" type="var">V</span></span> assumes that <span class="inlinecode"><span class="id" type="var">V</span></span> is built as a union of finite
+    sets and returns the same set cleaned up: empty sets are removed
+    and items are laid out in a nicely parenthesized way. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">beautify_fset</span> <span class="id" type="var">V</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">rec</span> <span class="id" type="var">go</span> <span class="id" type="var">Acc</span> <span class="id" type="var">E</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">E</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="MetatheoryAtom.html#AtomSetImpl.union"><span class="id" type="axiom">union</span></a> ?<span class="id" type="var">E1</span> ?<span class="id" type="var">E2</span> =&gt; <span class="id" type="keyword">let</span> <span class="id" type="var">Acc2</span> := <span class="id" type="var">go</span> <span class="id" type="var">Acc</span> <span class="id" type="var">E2</span> <span class="id" type="keyword">in</span> <span class="id" type="var">go</span> <span class="id" type="var">Acc2</span> <span class="id" type="var">E1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="MetatheoryAtom.html#AtomSetImpl.empty"><span class="id" type="axiom">empty</span></a> =&gt; <span class="id" type="var">Acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?<span class="id" type="var">E1</span> =&gt; <span class="id" type="keyword">match</span> <span class="id" type="var">Acc</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="MetatheoryAtom.html#AtomSetImpl.empty"><span class="id" type="axiom">empty</span></a> =&gt; <span class="id" type="var">E1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span> =&gt; <span class="id" type="keyword">constr</span>:(<a class="idref" href="MetatheoryAtom.html#AtomSetImpl.union"><span class="id" type="axiom">union</span></a> <span class="id" type="var">E1</span> <span class="id" type="var">Acc</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">in</span> <span class="id" type="var">go</span> <span class="id" type="var">empty</span> <span class="id" type="var">V</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The tactic <span class="inlinecode"><span class="id" type="var">pick</span></span> <span class="inlinecode"><span class="id" type="tactic">fresh</span></span> <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode"><span class="id" type="keyword">for</span></span> <span class="inlinecode"><span class="id" type="var">L</span></span> takes a finite set of atoms <span class="inlinecode"><span class="id" type="var">L</span></span>
+    and a fresh name <span class="inlinecode"><span class="id" type="var">Y</span></span>, and adds to the context an atom with name
+    <span class="inlinecode"><span class="id" type="var">Y</span></span> and a proof that <span class="inlinecode">~</span> <span class="inlinecode"><span class="id" type="var">In</span></span> <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode"><span class="id" type="var">L</span></span>, i.e., that <span class="inlinecode"><span class="id" type="var">Y</span></span> is fresh for <span class="inlinecode"><span class="id" type="var">L</span></span>.
+    The tactic will fail if <span class="inlinecode"><span class="id" type="var">Y</span></span> is already declared in the context.
+
+<div class="paragraph"> </div>
+
+    The variant <span class="inlinecode"><span class="id" type="var">pick</span></span> <span class="inlinecode"><span class="id" type="tactic">fresh</span></span> <span class="inlinecode"><span class="id" type="var">Y</span></span> is similar, except that <span class="inlinecode"><span class="id" type="var">Y</span></span> is fresh
+    for "all atoms in the context."  This version depends on the
+    tactic <span class="inlinecode"><span class="id" type="var">gather_atoms</span></span>, which is responsible for returning the set
+    of "all atoms in the context."  By default, it returns the empty
+    set, but users are free (and expected) to redefine it. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">gather_atoms</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">constr</span>:<a class="idref" href="MetatheoryAtom.html#AtomSetImpl.empty"><span class="id" type="axiom">empty</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Tactic Notation</span> "pick" "fresh" <span class="id" type="var">ident</span>(<span class="id" type="var">Y</span>) "for" <span class="id" type="keyword">constr</span>(<span class="id" type="var">L</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">Fr</span> := <span class="id" type="tactic">fresh</span> "Fr" <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">L</span> := <span class="id" type="var">beautify_fset</span> <span class="id" type="var">L</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;(<span class="id" type="tactic">destruct</span> (<a class="idref" href="MetatheoryAtom.html#atom_fresh"><span class="id" type="lemma">atom_fresh</span></a> <span class="id" type="var">L</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">Y</span> <span class="id" type="var">Fr</span>]).<br/>
+
+<br/>
+<span class="id" type="keyword">Tactic Notation</span> "pick" "fresh" <span class="id" type="var">ident</span>(<span class="id" type="var">Y</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">L</span> := <span class="id" type="var">gather_atoms</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span> <span class="id" type="keyword">for</span> <span class="id" type="var">L</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">pick_fresh</span> <span class="id" type="var">y</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">y</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Example: We can redefine <span class="inlinecode"><span class="id" type="var">gather_atoms</span></span> to return all the
+    "obvious" atoms in the context using the <span class="inlinecode"><span class="id" type="var">gather_atoms_with</span></span> thus
+    giving us a "useful" version of the "<span class="inlinecode"><span class="id" type="var">pick</span></span> <span class="inlinecode"><span class="id" type="tactic">fresh</span></span>" tactic. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">gather_atoms</span> ::=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">A</span> := <span class="id" type="var">gather_atoms_with</span> (<span class="id" type="keyword">fun</span> <span class="id" type="var">x</span> : <a class="idref" href="MetatheoryAtom.html#atoms"><span class="id" type="abbreviation">atoms</span></a> =&gt; <a class="idref" href="MetatheoryAtom.html#x"><span class="id" type="variable">x</span></a>) <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">B</span> := <span class="id" type="var">gather_atoms_with</span> (<span class="id" type="keyword">fun</span> <span class="id" type="var">x</span> : <a class="idref" href="MetatheoryAtom.html#AtomImpl.atom"><span class="id" type="axiom">atom</span></a> =&gt; <a class="idref" href="MetatheoryAtom.html#AtomSetImpl.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="MetatheoryAtom.html#x"><span class="id" type="variable">x</span></a>) <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">constr</span>:(<a class="idref" href="MetatheoryAtom.html#AtomSetImpl.union"><span class="id" type="axiom">union</span></a> <span class="id" type="var">A</span> <span class="id" type="var">B</span>).<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="example_pick_fresh_use"><span class="id" type="lemma">example_pick_fresh_use</span></a> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span> : <a class="idref" href="MetatheoryAtom.html#AtomImpl.atom"><span class="id" type="axiom">atom</span></a>) (<span class="id" type="var">L1</span> <span class="id" type="var">L2</span> <span class="id" type="var">L3</span>: <a class="idref" href="MetatheoryAtom.html#atoms"><span class="id" type="abbreviation">atoms</span></a>), <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#True"><span class="id" type="inductive">True</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span> <span class="id" type="var">L1</span> <span class="id" type="var">L2</span> <span class="id" type="var">L3</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">k</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+At this point in the proof, we have a new atom <span class="inlinecode"><span class="id" type="var">k</span></span> and a
+      hypothesis <span class="inlinecode"><span class="id" type="var">Fr</span></span> that <span class="inlinecode"><span class="id" type="var">k</span></span> is fresh for <span class="inlinecode"><span class="id" type="var">x</span></span>, <span class="inlinecode"><span class="id" type="var">y</span></span>, <span class="inlinecode"><span class="id" type="var">z</span></span>, <span class="inlinecode"><span class="id" type="var">L1</span></span>, <span class="inlinecode"><span class="id" type="var">L2</span></span>,
+      and <span class="inlinecode"><span class="id" type="var">L3</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">trivial</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

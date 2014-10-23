@@ -1,0 +1,376 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>FSetWeakNotin</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library FSetWeakNotin</h1>
+
+<div class="code">
+
+<br/>
+</div>
+
+<div class="doc">
+Lemmas and tactics for working with and solving goals related to
+    non-membership in finite sets.  The main tactic of interest here
+    is <span class="inlinecode"><span class="id" type="var">solve_notin</span></span>.
+
+<div class="paragraph"> </div>
+
+    Implicit arguments are declared by default in this library. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.FSets.FSetInterface.html#"><span class="id" type="library">Coq.FSets.FSetInterface</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="CoqFSetDecide.html#"><span class="id" type="library">CoqFSetDecide</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab179"></a><h1 class="section">Implementation</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Module</span> <a name="Notin_fun"><span class="id" type="module">Notin_fun</span></a><br/>
+&nbsp;&nbsp;(<span class="id" type="var">E</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Structures.DecidableType.html#"><span class="id" type="module">DecidableType</span></a>) (<span class="id" type="keyword">Import</span> <span class="id" type="var">X</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.FSets.FSetInterface.html#"><span class="id" type="module">FSetInterface.WSfun</span></a> <a class="idref" href="FSetWeakNotin.html#"><span class="id" type="module">E</span></a>).<br/>
+
+<br/>
+<span class="id" type="keyword">Module</span> <span class="id" type="keyword">Import</span> <a name="Notin_fun.D"><span class="id" type="module">D</span></a> := <a class="idref" href="CoqFSetDecide.html#"><span class="id" type="module">CoqFSetDecide.WDecide_fun</span></a> <a class="idref" href="FSetWeakNotin.html#"><span class="id" type="module">E</span></a> <a class="idref" href="FSetWeakNotin.html#"><span class="id" type="module">X</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab180"></a><h1 class="section">Facts about set non-membership</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Section</span> <a name="Notin_fun.Lemmas"><span class="id" type="section">Lemmas</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Variables</span> <a name="Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a name="Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a>  : <a class="idref" href="FSetWeakNotin.html#X.elt"><span class="id" type="definition">elt</span></a>.<br/>
+<span class="id" type="keyword">Variable</span>  <a name="Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a name="Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a> : <a class="idref" href="FSetWeakNotin.html#X.t"><span class="id" type="axiom">X.t</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_empty_1"><span class="id" type="lemma">notin_empty_1</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#X.empty"><span class="id" type="axiom">empty</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_add_1"><span class="id" type="lemma">notin_add_1</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.add"><span class="id" type="axiom">add</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_add_1'"><span class="id" type="lemma">notin_add_1'</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.add"><span class="id" type="axiom">add</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_add_2"><span class="id" type="lemma">notin_add_2</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.add"><span class="id" type="axiom">add</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_add_3"><span class="id" type="lemma">notin_add_3</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.add"><span class="id" type="axiom">add</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_singleton_1"><span class="id" type="lemma">notin_singleton_1</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_singleton_1'"><span class="id" type="lemma">notin_singleton_1'</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_singleton_2"><span class="id" type="lemma">notin_singleton_2</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_remove_1"><span class="id" type="lemma">notin_remove_1</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.remove"><span class="id" type="axiom">remove</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'\/'_x"><span class="id" type="notation">\/</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_remove_2"><span class="id" type="lemma">notin_remove_2</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.remove"><span class="id" type="axiom">remove</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_remove_3"><span class="id" type="lemma">notin_remove_3</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.remove"><span class="id" type="axiom">remove</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_remove_3'"><span class="id" type="lemma">notin_remove_3'</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.remove"><span class="id" type="axiom">remove</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_union_1"><span class="id" type="lemma">notin_union_1</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_union_2"><span class="id" type="lemma">notin_union_2</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_union_3"><span class="id" type="lemma">notin_union_3</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_inter_1"><span class="id" type="lemma">notin_inter_1</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.inter"><span class="id" type="axiom">inter</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'\/'_x"><span class="id" type="notation">\/</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_inter_2"><span class="id" type="lemma">notin_inter_2</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.inter"><span class="id" type="axiom">inter</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_inter_3"><span class="id" type="lemma">notin_inter_3</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.inter"><span class="id" type="axiom">inter</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_diff_1"><span class="id" type="lemma">notin_diff_1</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.diff"><span class="id" type="axiom">diff</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'\/'_x"><span class="id" type="notation">\/</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_diff_2"><span class="id" type="lemma">notin_diff_2</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.diff"><span class="id" type="axiom">diff</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.notin_diff_3"><span class="id" type="lemma">notin_diff_3</span></a> :<br/>
+&nbsp;&nbsp;<a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.diff"><span class="id" type="axiom">diff</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s"><span class="id" type="variable">s</span></a> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas.s'"><span class="id" type="variable">s'</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">fsetdec</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.Lemmas"><span class="id" type="section">Lemmas</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab181"></a><h1 class="section">Hints</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Hint Resolve</span><br/>
+&nbsp;&nbsp;@<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_empty_1"><span class="id" type="lemma">notin_empty_1</span></a> @<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_add_3"><span class="id" type="lemma">notin_add_3</span></a> @<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_singleton_2"><span class="id" type="lemma">notin_singleton_2</span></a> @<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_remove_2"><span class="id" type="lemma">notin_remove_2</span></a><br/>
+&nbsp;&nbsp;@<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_remove_3"><span class="id" type="lemma">notin_remove_3</span></a> @<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_remove_3'"><span class="id" type="lemma">notin_remove_3'</span></a> @<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_union_3"><span class="id" type="lemma">notin_union_3</span></a> @<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_inter_2"><span class="id" type="lemma">notin_inter_2</span></a><br/>
+&nbsp;&nbsp;@<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_inter_3"><span class="id" type="lemma">notin_inter_3</span></a> @<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_diff_2"><span class="id" type="lemma">notin_diff_2</span></a> @<a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_diff_3"><span class="id" type="lemma">notin_diff_3</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab182"></a><h1 class="section">Tactics for non-membership</h1>
+
+<div class="paragraph"> </div>
+
+ <span class="inlinecode"><span class="id" type="var">destruct_notin</span></span> decomposes all hypotheses of the form <span class="inlinecode">~</span> <span class="inlinecode"><span class="id" type="var">In</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">s</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">destruct_notin</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="keyword">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> ?<span class="id" type="var">x</span> ?<span class="id" type="var">s</span> -&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#False"><span class="id" type="inductive">False</span></a> |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">change</span> (<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <span class="id" type="var">x</span> <span class="id" type="var">s</span>) <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> ?<span class="id" type="var">x</span> ?<span class="id" type="var">s</span> -&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#False"><span class="id" type="inductive">False</span></a> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">change</span> (<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <span class="id" type="var">x</span> <span class="id" type="var">s</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <span class="id" type="var">_</span> <a class="idref" href="FSetWeakNotin.html#X.empty"><span class="id" type="axiom">empty</span></a> |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">clear</span> <span class="id" type="var">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> ?<span class="id" type="var">y</span> (<a class="idref" href="FSetWeakNotin.html#X.add"><span class="id" type="axiom">add</span></a> ?<span class="id" type="var">x</span> ?<span class="id" type="var">s</span>) |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">J1</span> := <span class="id" type="tactic">fresh</span> "NotInTac" <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">J2</span> := <span class="id" type="tactic">fresh</span> "NotInTac" <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">pose</span> <span class="id" type="var">proof</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> <span class="id" type="var">J1</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">pose</span> <span class="id" type="var">proof</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> <span class="id" type="var">J2</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_add_1"><span class="id" type="lemma">notin_add_1</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_add_1'"><span class="id" type="lemma">notin_add_1'</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">J1</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_add_2"><span class="id" type="lemma">notin_add_2</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">J2</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> ?<span class="id" type="var">y</span> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> ?<span class="id" type="var">x</span>) |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">J</span> := <span class="id" type="tactic">fresh</span> "NotInTac" <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">pose</span> <span class="id" type="var">proof</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> <span class="id" type="var">J</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_singleton_1"><span class="id" type="lemma">notin_singleton_1</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_singleton_1'"><span class="id" type="lemma">notin_singleton_1'</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">J</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> ?<span class="id" type="var">y</span> (<a class="idref" href="FSetWeakNotin.html#X.remove"><span class="id" type="axiom">remove</span></a> ?<span class="id" type="var">x</span> ?<span class="id" type="var">s</span>) |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">J</span> := <span class="id" type="tactic">fresh</span> "NotInTac" <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_remove_1"><span class="id" type="lemma">notin_remove_1</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">J</span> | <span class="id" type="var">J</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> ?<span class="id" type="var">x</span> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> ?<span class="id" type="var">s</span> ?<span class="id" type="var">s'</span>) |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">J</span> := <span class="id" type="tactic">fresh</span> "NotInTac" <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">pose</span> <span class="id" type="var">proof</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> <span class="id" type="var">J</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_union_1"><span class="id" type="lemma">notin_union_1</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_union_2"><span class="id" type="lemma">notin_union_2</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">J</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> ?<span class="id" type="var">x</span> (<a class="idref" href="FSetWeakNotin.html#X.inter"><span class="id" type="axiom">inter</span></a> ?<span class="id" type="var">s</span> ?<span class="id" type="var">s'</span>) |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">J</span> := <span class="id" type="tactic">fresh</span> "NotInTac" <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_inter_1"><span class="id" type="lemma">notin_inter_1</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">J</span> | <span class="id" type="var">J</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">H</span> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> ?<span class="id" type="var">x</span> (<a class="idref" href="FSetWeakNotin.html#X.diff"><span class="id" type="axiom">diff</span></a> ?<span class="id" type="var">s</span> ?<span class="id" type="var">s'</span>) |- <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">J</span> := <span class="id" type="tactic">fresh</span> "NotInTac" <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_diff_1"><span class="id" type="lemma">notin_diff_1</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">J</span> | <span class="id" type="var">J</span>];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">_</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">idtac</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<span class="inlinecode"><span class="id" type="var">solve_notin</span></span> decomposes hypotheses of the form <span class="inlinecode">~</span> <span class="inlinecode"><span class="id" type="var">In</span></span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">s</span></span> and
+    then tries some simple heuristics for solving the resulting
+    goals. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Ltac</span> <span class="id" type="var">solve_notin</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>;<br/>
+&nbsp;&nbsp;<span class="id" type="var">destruct_notin</span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">first</span> [ <span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_union_3"><span class="id" type="lemma">notin_union_3</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_add_3"><span class="id" type="lemma">notin_add_3</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_singleton_2"><span class="id" type="lemma">notin_singleton_2</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="tactic">apply</span> <a class="idref" href="FSetWeakNotin.html#Notin_fun.notin_empty_1"><span class="id" type="lemma">notin_empty_1</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;];<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">try</span> <span class="id" type="tactic">tauto</span>;<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">fail</span> "Not solvable by [solve_notin]; try [destruct_notin]".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab183"></a><h1 class="section">Examples and test cases</h1>
+
+<div class="paragraph"> </div>
+
+ These examples and test cases are not meant to be exhaustive. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.test_solve_notin_1"><span class="id" type="lemma">test_solve_notin_1</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">G</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> <a class="idref" href="FSetWeakNotin.html#E"><span class="id" type="variable">E</span></a> <a class="idref" href="FSetWeakNotin.html#F"><span class="id" type="variable">F</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#G"><span class="id" type="variable">G</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> <a class="idref" href="FSetWeakNotin.html#E"><span class="id" type="variable">E</span></a> <a class="idref" href="FSetWeakNotin.html#G"><span class="id" type="variable">G</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.test_solve_notin_2"><span class="id" type="lemma">test_solve_notin_2</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">G</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> <a class="idref" href="FSetWeakNotin.html#E"><span class="id" type="variable">E</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a>) <a class="idref" href="FSetWeakNotin.html#F"><span class="id" type="variable">F</span></a>)) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#G"><span class="id" type="variable">G</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'/\'_x"><span class="id" type="notation">/\</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">split</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.test_solve_notin_3"><span class="id" type="lemma">test_solve_notin_3</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'/\'_x"><span class="id" type="notation">/\</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">split</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.test_solve_notin_4"><span class="id" type="lemma">test_solve_notin_4</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">G</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> <a class="idref" href="FSetWeakNotin.html#E"><span class="id" type="variable">E</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a>) <a class="idref" href="FSetWeakNotin.html#F"><span class="id" type="variable">F</span></a>)) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="FSetWeakNotin.html#G"><span class="id" type="variable">G</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.test_solve_notin_5"><span class="id" type="lemma">test_solve_notin_5</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> <a class="idref" href="FSetWeakNotin.html#E"><span class="id" type="variable">E</span></a> (<a class="idref" href="FSetWeakNotin.html#X.union"><span class="id" type="axiom">union</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a>) <a class="idref" href="FSetWeakNotin.html#F"><span class="id" type="variable">F</span></a>)) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="FSetWeakNotin.html#E"><span class="id" type="variable">E</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'/\'_x"><span class="id" type="notation">/\</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">split</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.test_solve_notin_6"><span class="id" type="lemma">test_solve_notin_6</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">E</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.add"><span class="id" type="axiom">add</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="FSetWeakNotin.html#E"><span class="id" type="variable">E</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#E.eq"><span class="id" type="axiom">E.eq</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'/\'_x"><span class="id" type="notation">/\</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="FSetWeakNotin.html#E"><span class="id" type="variable">E</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">split</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="Notin_fun.test_solve_notin_7"><span class="id" type="lemma">test_solve_notin_7</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:'~'_x"><span class="id" type="notation">~</span></a> <a class="idref" href="FSetWeakNotin.html#X.In"><span class="id" type="axiom">In</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="FSetWeakNotin.html#X.singleton"><span class="id" type="axiom">singleton</span></a> <a class="idref" href="FSetWeakNotin.html#x"><span class="id" type="variable">x</span></a>) -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#False"><span class="id" type="inductive">False</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="var">solve_notin</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">End</span> <a class="idref" href="FSetWeakNotin.html#"><span class="id" type="module">Notin_fun</span></a>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

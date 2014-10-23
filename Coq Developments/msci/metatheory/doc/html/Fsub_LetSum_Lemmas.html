@@ -1,0 +1,560 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>Fsub_LetSum_Lemmas</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library Fsub_LetSum_Lemmas</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+Administrative lemmas for Fsub.
+
+<div class="paragraph"> </div>
+
+    Authors: Brian Aydemir and Arthur Chargu\'eraud, with help from
+    Aaron Bohannon, Jeffrey Vaughan, and Dimitrios Vytiniotis.
+
+<div class="paragraph"> </div>
+
+    This file contains a number of administrative lemmas that we
+    require for proving type-safety.  The lemmas mainly concern the
+    relations <span class="inlinecode"><span class="id" type="var">wf_typ</span></span> and <span class="inlinecode"><span class="id" type="var">wf_env</span></span>.
+
+<div class="paragraph"> </div>
+
+    This file also contains regularity lemmas, which show that various
+    relations hold only for locally closed terms.  In addition to
+    being necessary to complete the proof of type-safety, these lemmas
+    help demonstrate that our definitions are correct; they would be
+    worth proving even if they are unneeded for any "real" proofs.
+
+<div class="paragraph"> </div>
+
+    Table of contents:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <a href="#wft">Properties of wf_typ</a>
+
+</li>
+<li> <a href="#oktwft">Properties of wf_env and wf_typ</a>
+
+</li>
+<li> <a href="#okt">Properties of wf_env</a>
+
+</li>
+<li> <a href="#subst">Properties of substitution</a>
+
+</li>
+<li> <a href="#regularity">Regularity lemmas</a>
+
+</li>
+<li> <a href="#auto">Automation</a> 
+</li>
+</ul>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Export</span> <span class="id" type="var">Fsub_LetSum_Infrastructure</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab204"></a><h1 class="section"><a name="wft"></a> Properties of <span class="inlinecode"><span class="id" type="var">wf_typ</span></span></h1>
+
+<div class="paragraph"> </div>
+
+ If a type is well-formed in an environment, then it is locally
+    closed. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">type_from_wf_typ</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span> -&gt; <span class="id" type="var">type</span> <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">eauto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The remaining properties are analogous to the properties that we
+    need to show for the subtyping and typing relations. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_weakening</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">G</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">G</span> ++ <span class="id" type="var">E</span>) <span class="id" type="var">T</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">uniq</span> (<span class="id" type="var">G</span> ++ <span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">G</span> ++ <span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>) <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">G</span> <span class="id" type="var">Hwf_typ</span> <span class="id" type="var">Hk</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">remember</span> (<span class="id" type="var">G</span> ++ <span class="id" type="var">E</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">F'</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">G</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hwf_typ</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">G</span> <span class="id" type="var">Hok</span> <span class="id" type="var">Heq</span>; <span class="id" type="tactic">subst</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "type_all".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">wf_typ_all</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">app_assoc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H0</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_weaken_head</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">uniq</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>) <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">rewrite_env</span> (<span class="id" type="var">empty</span> ++ <span class="id" type="var">F</span>++ <span class="id" type="var">E</span>).<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">wf_typ_weakening</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_narrowing</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">V</span> <span class="id" type="var">U</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">X</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">X</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">V</span> ++ <span class="id" type="var">E</span>) <span class="id" type="var">T</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">X</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">U</span> ++ <span class="id" type="var">E</span>) <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">V</span> <span class="id" type="var">U</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">X</span> <span class="id" type="var">Hwf_typ</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">remember</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">X</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">V</span> ++ <span class="id" type="var">E</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">G</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">F</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Hwf_typ</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">F</span> <span class="id" type="var">Heq</span>; <span class="id" type="tactic">subst</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "wf_typ_var".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">analyze_binds</span> <span class="id" type="var">H</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typ_all".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">wf_typ_all</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">app_assoc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H0</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_strengthening</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">x</span> <span class="id" type="var">U</span> <span class="id" type="var">T</span>,<br/>
+&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">x</span> ~ <span class="id" type="var">bind_typ</span> <span class="id" type="var">U</span> ++ <span class="id" type="var">E</span>) <span class="id" type="var">T</span> -&gt;<br/>
+&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>) <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">x</span> <span class="id" type="var">U</span> <span class="id" type="var">T</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">remember</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">x</span> ~ <span class="id" type="var">bind_typ</span> <span class="id" type="var">U</span> ++ <span class="id" type="var">E</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">G</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">F</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">F</span> <span class="id" type="var">Heq</span>; <span class="id" type="tactic">subst</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "wf_typ_var".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">analyze_binds</span> <span class="id" type="var">H</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "wf_typ_all".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">wf_typ_all</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">app_assoc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H1</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_subst_tb</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">F</span> <span class="id" type="var">Q</span> <span class="id" type="var">E</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span> <span class="id" type="var">T</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">Z</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">Q</span> ++ <span class="id" type="var">E</span>) <span class="id" type="var">T</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">P</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">uniq</span> (<span class="id" type="var">map</span> (<span class="id" type="var">subst_tb</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span>) <span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> (<span class="id" type="var">map</span> (<span class="id" type="var">subst_tb</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span>) <span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>) (<span class="id" type="var">subst_tt</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span> <span class="id" type="var">T</span>).<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">wf_typ_weaken_head</span>, <span class="id" type="var">type_from_wf_typ</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">F</span> <span class="id" type="var">Q</span> <span class="id" type="var">E</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span> <span class="id" type="var">T</span> <span class="id" type="var">WT</span> <span class="id" type="var">WP</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">remember</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">Z</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">Q</span> ++ <span class="id" type="var">E</span>) <span class="id" type="keyword">as</span> <span class="id" type="var">G</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">F</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">WT</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">F</span> <span class="id" type="var">EQ</span> <span class="id" type="var">Ok</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">simpl</span> <span class="id" type="var">subst_tt</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "wf_typ_var".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">X</span> == <span class="id" type="var">Z</span>); <span class="id" type="tactic">subst</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "X &lt;&gt; Z".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">analyze_binds</span> <span class="id" type="var">H</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> (<span class="id" type="var">wf_typ_var</span> (<span class="id" type="var">subst_tt</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span> <span class="id" type="var">U</span>))...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "wf_typ_all".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">wf_typ_all</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">subst_tt_open_tt_var</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rewrite_env</span> (<span class="id" type="var">map</span> (<span class="id" type="var">subst_tb</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span>) (<span class="id" type="var">Y</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">T1</span> ++ <span class="id" type="var">F</span>) ++ <span class="id" type="var">E</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H0</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_open</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">E</span> <span class="id" type="var">U</span> <span class="id" type="var">T1</span> <span class="id" type="var">T2</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">uniq</span> <span class="id" type="var">E</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> (<span class="id" type="var">typ_all</span> <span class="id" type="var">T1</span> <span class="id" type="var">T2</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">U</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> (<span class="id" type="var">open_tt</span> <span class="id" type="var">T2</span> <span class="id" type="var">U</span>).<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">E</span> <span class="id" type="var">U</span> <span class="id" type="var">T1</span> <span class="id" type="var">T2</span> <span class="id" type="var">Ok</span> <span class="id" type="var">WA</span> <span class="id" type="var">WU</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">WA</span>; <span class="id" type="tactic">subst</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">X</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> (<span class="id" type="var">subst_tt_intro</span> <span class="id" type="var">X</span>)...<br/>
+&nbsp;&nbsp;<span class="id" type="var">rewrite_env</span> (<span class="id" type="var">map</span> (<span class="id" type="var">subst_tb</span> <span class="id" type="var">X</span> <span class="id" type="var">U</span>) <span class="id" type="var">empty</span> ++ <span class="id" type="var">E</span>).<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <span class="id" type="var">wf_typ_subst_tb</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab205"></a><h1 class="section"><a name="oktwft"></a> Properties of <span class="inlinecode"><span class="id" type="var">wf_env</span></span> and <span class="inlinecode"><span class="id" type="var">wf_typ</span></span></h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">uniq_from_wf_env</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">E</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> <span class="id" type="var">E</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">uniq</span> <span class="id" type="var">E</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">E</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We add <span class="inlinecode"><span class="id" type="var">uniq_from_wf_env</span></span> as a hint here since it helps blur the
+    distinction between <span class="inlinecode"><span class="id" type="var">wf_env</span></span> and <span class="inlinecode"><span class="id" type="var">uniq</span></span> in proofs.  The lemmas in
+    the MetatheoryEnv library use <span class="inlinecode"><span class="id" type="var">uniq</span></span>, whereas here we naturally
+    have (or can easily show) the stronger <span class="inlinecode"><span class="id" type="var">wf_env</span></span>.  Thus,
+    <span class="inlinecode"><span class="id" type="var">uniq_from_wf_env</span></span> serves as a bridge that allows us to use the
+    environments library. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Hint Resolve</span> <span class="id" type="var">uniq_from_wf_env</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_from_binds_typ</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">U</span> <span class="id" type="var">E</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> <span class="id" type="var">E</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">binds</span> <span class="id" type="var">x</span> (<span class="id" type="var">bind_typ</span> <span class="id" type="var">U</span>) <span class="id" type="var">E</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">U</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">auto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">wf_typ_weaken_head</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> 1; <span class="id" type="tactic">intros</span> <span class="id" type="var">J</span>; <span class="id" type="var">analyze_binds</span> <span class="id" type="var">J</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">injection</span> <span class="id" type="var">BindsTacVal</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">subst</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_from_wf_env_typ</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> (<span class="id" type="var">x</span> ~ <span class="id" type="var">bind_typ</span> <span class="id" type="var">T</span> ++ <span class="id" type="var">E</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_typ_from_wf_env_sub</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> (<span class="id" type="var">x</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">T</span> ++ <span class="id" type="var">E</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab206"></a><h1 class="section"><a name="okt"></a> Properties of <span class="inlinecode"><span class="id" type="var">wf_env</span></span></h1>
+
+<div class="paragraph"> </div>
+
+ These properties are analogous to the properties that we need to
+    show for the subtyping and typing relations. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_env_narrowing</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">V</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span> <span class="id" type="var">U</span> <span class="id" type="var">X</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">X</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">V</span> ++ <span class="id" type="var">E</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">U</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">X</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">U</span> ++ <span class="id" type="var">E</span>).<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">wf_typ_narrowing</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">F</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">U</span> <span class="id" type="var">X</span> <span class="id" type="var">Wf_env</span> <span class="id" type="var">Wf</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Wf_env</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="var">simpl_env</span> <span class="id" type="keyword">in</span> *...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_env_strengthening</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">T</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">x</span> ~ <span class="id" type="var">bind_typ</span> <span class="id" type="var">T</span> ++ <span class="id" type="var">E</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>).<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">wf_typ_strengthening</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">F</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">Wf_env</span>; <span class="id" type="tactic">inversion</span> <span class="id" type="var">Wf_env</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="var">simpl_env</span> <span class="id" type="keyword">in</span> *...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">wf_env_subst_tb</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">Q</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span> <span class="id" type="var">E</span> <span class="id" type="var">F</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> (<span class="id" type="var">F</span> ++ <span class="id" type="var">Z</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">Q</span> ++ <span class="id" type="var">E</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">P</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> (<span class="id" type="var">map</span> (<span class="id" type="var">subst_tb</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span>) <span class="id" type="var">F</span> ++ <span class="id" type="var">E</span>).<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span> 6 <span class="id" type="keyword">using</span> <span class="id" type="var">wf_typ_subst_tb</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">F</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">Wf_env</span> <span class="id" type="var">WP</span>; <span class="id" type="var">simpl_env</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Wf_env</span>; <span class="id" type="var">simpl_env</span> <span class="id" type="keyword">in</span> *; <span class="id" type="tactic">simpl</span> <span class="id" type="var">subst_tb</span>...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab207"></a><h1 class="section"><a name="subst"></a> Environment is unchanged by substitution for a fresh name</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">notin_fv_tt_open</span> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">Y</span> <span class="id" type="var">X</span> : <span class="id" type="var">atom</span>) <span class="id" type="var">T</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">X</span> `<span class="id" type="var">notin</span>` <span class="id" type="var">fv_tt</span> (<span class="id" type="var">open_tt</span> <span class="id" type="var">T</span> <span class="id" type="var">Y</span>) -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">X</span> `<span class="id" type="var">notin</span>` <span class="id" type="var">fv_tt</span> <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">Y</span> <span class="id" type="var">X</span> <span class="id" type="var">T</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">open_tt</span>.<br/>
+&nbsp;<span class="id" type="tactic">generalize</span> 0.<br/>
+&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">T</span>; <span class="id" type="tactic">simpl</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">k</span> <span class="id" type="var">Fr</span>; <span class="id" type="tactic">eauto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">notin_fv_wf</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">E</span> (<span class="id" type="var">X</span> : <span class="id" type="var">atom</span>) <span class="id" type="var">T</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">X</span> `<span class="id" type="var">notin</span>` <span class="id" type="var">dom</span> <span class="id" type="var">E</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">X</span> `<span class="id" type="var">notin</span>` <span class="id" type="var">fv_tt</span> <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">E</span> <span class="id" type="var">X</span> <span class="id" type="var">T</span> <span class="id" type="var">Wf_typ</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Wf_typ</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">Fr</span>; <span class="id" type="tactic">simpl</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "wf_typ_var".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span class="id" type="var">X0</span> `<span class="id" type="keyword">in</span>` (<span class="id" type="var">dom</span> <span class="id" type="var">E</span>))...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <span class="id" type="var">binds_In</span>; <span class="id" type="tactic">eauto</span>. <span class="id" type="var">fsetdec</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "wf_typ_all".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">notin_union</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> (<span class="id" type="var">notin_fv_tt_open</span> <span class="id" type="var">Y</span>)...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">map_subst_tb_id</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">G</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> <span class="id" type="var">G</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">Z</span> `<span class="id" type="var">notin</span>` <span class="id" type="var">dom</span> <span class="id" type="var">G</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">G</span> = <span class="id" type="var">map</span> (<span class="id" type="var">subst_tb</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span>) <span class="id" type="var">G</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">G</span> <span class="id" type="var">Z</span> <span class="id" type="var">P</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">simpl</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">Fr</span>; <span class="id" type="var">simpl_env</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">IHwf_env</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">subst_tt_fresh</span>... <span class="id" type="tactic">eapply</span> <span class="id" type="var">notin_fv_wf</span>; <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">IHwf_env</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">subst_tt_fresh</span>... <span class="id" type="tactic">eapply</span> <span class="id" type="var">notin_fv_wf</span>; <span class="id" type="tactic">eauto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab208"></a><h1 class="section"><a name="regularity"></a> Regularity of relations</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">sub_regular</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">E</span> <span class="id" type="var">S</span> <span class="id" type="var">T</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">sub</span> <span class="id" type="var">E</span> <span class="id" type="var">S</span> <span class="id" type="var">T</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> <span class="id" type="var">E</span> /\ <span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">S</span> /\ <span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">try</span> <span class="id" type="tactic">solve</span> [<span class="id" type="tactic">auto</span> | <span class="id" type="tactic">intuition</span> <span class="id" type="tactic">auto</span>].<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">E</span> <span class="id" type="var">S</span> <span class="id" type="var">T</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "sub_trans_tvar".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intuition</span> <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "sub_all".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Second of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">wf_typ_all</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H1</span> <span class="id" type="var">Y</span>)...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rewrite_env</span> (<span class="id" type="var">empty</span> ++ <span class="id" type="var">Y</span> ~ <span class="id" type="var">bind_sub</span> <span class="id" type="var">S1</span> ++ <span class="id" type="var">E</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> (<span class="id" type="var">wf_typ_narrowing</span> <span class="id" type="var">T1</span>)...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Third of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">wf_typ_all</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H1</span> <span class="id" type="var">Y</span>)...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">typing_regular</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">E</span> <span class="id" type="var">e</span> <span class="id" type="var">T</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">typing</span> <span class="id" type="var">E</span> <span class="id" type="var">e</span> <span class="id" type="var">T</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">wf_env</span> <span class="id" type="var">E</span> /\ <span class="id" type="var">expr</span> <span class="id" type="var">e</span> /\ <span class="id" type="var">wf_typ</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">try</span> <span class="id" type="tactic">solve</span> [<span class="id" type="tactic">auto</span> | <span class="id" type="tactic">intuition</span> <span class="id" type="tactic">auto</span>].<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">E</span> <span class="id" type="var">e</span> <span class="id" type="var">T</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typing_var".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">wf_typ_from_binds_typ</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typing_abs".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">y</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H0</span> <span class="id" type="var">y</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">Hok</span> [<span class="id" type="var">J</span> <span class="id" type="var">K</span>]]...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">Hok</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Second of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">x</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">expr_abs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">type_from_wf_typ</span>, <span class="id" type="var">wf_typ_from_wf_env_typ</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H0</span> <span class="id" type="var">x</span>)...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Third of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">wf_typ_arrow</span>; <span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">wf_typ_from_wf_env_typ</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rewrite_env</span> (<span class="id" type="var">empty</span> ++ <span class="id" type="var">E</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <span class="id" type="var">wf_typ_strengthening</span>; <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typing_app".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHtyping1</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">_</span> [<span class="id" type="var">_</span> <span class="id" type="var">K</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">K</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typing_tabs".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H0</span> <span class="id" type="var">Y</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">Hok</span> [<span class="id" type="var">J</span> <span class="id" type="var">K</span>]]...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">Hok</span>; <span class="id" type="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Second of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">X</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">expr_tabs</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">type_from_wf_typ</span>, <span class="id" type="var">wf_typ_from_wf_env_sub</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H0</span> <span class="id" type="var">X</span>)...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Third of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Z</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">wf_typ_all</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H0</span> <span class="id" type="var">Z</span>)...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typing_tapp".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">sub_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H0</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">R1</span> [<span class="id" type="var">R2</span> <span class="id" type="var">R3</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Second of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">expr_tapp</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eauto</span> <span class="id" type="keyword">using</span> <span class="id" type="var">type_from_wf_typ</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Third of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHtyping</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">R1'</span> [<span class="id" type="var">R2'</span> <span class="id" type="var">R3'</span>]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <span class="id" type="var">wf_typ_open</span>; <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typing_sub".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">sub_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H0</span>)...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typing_let".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Second of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">y</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">expr_let</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H1</span> <span class="id" type="var">y</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">K1</span> [<span class="id" type="var">K2</span> <span class="id" type="var">K3</span>]]...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Third of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">y</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H1</span> <span class="id" type="var">y</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">K1</span> [<span class="id" type="var">K2</span> <span class="id" type="var">K3</span>]]...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rewrite_env</span> (<span class="id" type="var">empty</span> ++ <span class="id" type="var">E</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <span class="id" type="var">wf_typ_strengthening</span>; <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "typing_case".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">repeat</span> <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Second of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">x</span> <span class="id" type="var">and</span> <span class="id" type="tactic">apply</span> <span class="id" type="var">expr_case</span>...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H1</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> [? [? ?]]...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H3</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> [? [? ?]]...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SCase</span> "Third of original three conjuncts".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">y</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<span class="id" type="var">H1</span> <span class="id" type="var">y</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">K1</span> [<span class="id" type="var">K2</span> <span class="id" type="var">K3</span>]]...<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">rewrite_env</span> (<span class="id" type="var">empty</span> ++ <span class="id" type="var">E</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <span class="id" type="var">wf_typ_strengthening</span>; <span class="id" type="var">simpl_env</span>; <span class="id" type="tactic">eauto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">value_regular</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">e</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="var">value</span> <span class="id" type="var">e</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">expr</span> <span class="id" type="var">e</span>.<br/>
+<span class="id" type="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">e</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">auto</span>.<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <span class="id" type="var">red_regular</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">e</span> <span class="id" type="var">e'</span>,<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">red</span> <span class="id" type="var">e</span> <span class="id" type="var">e'</span> -&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="var">expr</span> <span class="id" type="var">e</span> /\ <span class="id" type="var">expr</span> <span class="id" type="var">e'</span>.<br/>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">try</span> <span class="id" type="tactic">solve</span> [<span class="id" type="tactic">auto</span> | <span class="id" type="tactic">intuition</span> <span class="id" type="tactic">auto</span>].<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">e</span> <span class="id" type="var">e'</span> <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">assert</span>(<span class="id" type="var">J</span> := <span class="id" type="var">value_regular</span>); <span class="id" type="tactic">split</span>...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "red_abs".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">rewrite</span> (<span class="id" type="var">subst_ee_intro</span> <span class="id" type="var">y</span>)...<br/>
+&nbsp;&nbsp;<span class="id" type="var">Case</span> "red_tabs".<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="var">pick</span> <span class="id" type="tactic">fresh</span> <span class="id" type="var">Y</span>. <span class="id" type="tactic">rewrite</span> (<span class="id" type="var">subst_te_intro</span> <span class="id" type="var">Y</span>)...<br/>
+<span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab209"></a><h1 class="section"><a name="auto"></a> Automation</h1>
+
+<div class="paragraph"> </div>
+
+ The lemma <span class="inlinecode"><span class="id" type="var">uniq_from_wf_env</span></span> was already added above as a hint
+    since it helps blur the distinction between <span class="inlinecode"><span class="id" type="var">wf_env</span></span> and <span class="inlinecode"><span class="id" type="var">uniq</span></span> in
+    proofs.
+
+<div class="paragraph"> </div>
+
+    As currently stated, the regularity lemmas are ill-suited to be
+    used with <span class="inlinecode"><span class="id" type="tactic">auto</span></span> and <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> since they end in conjunctions.  Even
+    if we were, for example, to split <span class="inlinecode"><span class="id" type="var">sub_regularity</span></span> into three
+    separate lemmas, the resulting lemmas would be usable only by
+    <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> and there is no guarantee that <span class="inlinecode"><span class="id" type="tactic">eauto</span></span> would be able to
+    find proofs effectively.  Thus, the hints below apply the
+    regularity lemmas and <span class="inlinecode"><span class="id" type="var">type_from_wf_typ</span></span> to discharge goals about
+    local closure and well-formedness, but in such a way as to
+    minimize proof search.
+
+<div class="paragraph"> </div>
+
+    The first hint introduces an <span class="inlinecode"><span class="id" type="var">wf_env</span></span> fact into the context.  It
+    works well when combined with the lemmas relating <span class="inlinecode"><span class="id" type="var">wf_env</span></span> and
+    <span class="inlinecode"><span class="id" type="var">wf_typ</span></span>.  We choose to use those lemmas explicitly via <span class="inlinecode">(<span class="id" type="tactic">auto</span></span>
+    <span class="inlinecode"><span class="id" type="keyword">using</span></span> <span class="inlinecode">...)</span> tactics rather than add them as hints.  When used this
+    way, the explicitness makes the proof more informative rather than
+    more cluttered (with useless details).
+
+<div class="paragraph"> </div>
+
+    The other three hints try outright to solve their respective
+    goals. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Hint Extern</span> 1 (<span class="id" type="var">wf_env</span> ?<span class="id" type="var">E</span>) =&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="keyword">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">sub</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="tactic">apply</span> (<span class="id" type="var">proj1</span> (<span class="id" type="var">sub_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H</span>))<br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">typing</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="tactic">apply</span> (<span class="id" type="var">proj1</span> (<span class="id" type="var">typing_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H</span>))<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Hint Extern</span> 1 (<span class="id" type="var">wf_typ</span> ?<span class="id" type="var">E</span> ?<span class="id" type="var">T</span>) =&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="keyword">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">typing</span> <span class="id" type="var">E</span> <span class="id" type="var">_</span> <span class="id" type="var">T</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="tactic">apply</span> (<span class="id" type="var">proj2</span> (<span class="id" type="var">proj2</span> (<span class="id" type="var">typing_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H</span>)))<br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">sub</span> <span class="id" type="var">E</span> <span class="id" type="var">T</span> <span class="id" type="var">_</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="tactic">apply</span> (<span class="id" type="var">proj1</span> (<span class="id" type="var">proj2</span> (<span class="id" type="var">sub_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H</span>)))<br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">sub</span> <span class="id" type="var">E</span> <span class="id" type="var">_</span> <span class="id" type="var">T</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="tactic">apply</span> (<span class="id" type="var">proj2</span> (<span class="id" type="var">proj2</span> (<span class="id" type="var">sub_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H</span>)))<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Hint Extern</span> 1 (<span class="id" type="var">type</span> ?<span class="id" type="var">T</span>) =&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">let</span> <span class="id" type="var">go</span> <span class="id" type="var">E</span> := <span class="id" type="tactic">apply</span> (<span class="id" type="var">type_from_wf_typ</span> <span class="id" type="var">E</span>); <span class="id" type="tactic">auto</span> <span class="id" type="keyword">in</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="keyword">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">typing</span> ?<span class="id" type="var">E</span> <span class="id" type="var">_</span> <span class="id" type="var">T</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="var">go</span> <span class="id" type="var">E</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">sub</span> ?<span class="id" type="var">E</span> <span class="id" type="var">T</span> <span class="id" type="var">_</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="var">go</span> <span class="id" type="var">E</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">sub</span> ?<span class="id" type="var">E</span> <span class="id" type="var">_</span> <span class="id" type="var">T</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="var">go</span> <span class="id" type="var">E</span><br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Hint Extern</span> 1 (<span class="id" type="var">expr</span> ?<span class="id" type="var">e</span>) =&gt;<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="keyword">goal</span> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="var">typing</span> <span class="id" type="var">_</span> ?<span class="id" type="var">e</span> <span class="id" type="var">_</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="tactic">apply</span> (<span class="id" type="var">proj1</span> (<span class="id" type="var">proj2</span> (<span class="id" type="var">typing_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H</span>)))<br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="tactic">red</span> ?<span class="id" type="var">e</span> <span class="id" type="var">_</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="tactic">apply</span> (<span class="id" type="var">proj1</span> (<span class="id" type="var">red_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H</span>))<br/>
+&nbsp;&nbsp;| <span class="id" type="var">H</span>: <span class="id" type="tactic">red</span> <span class="id" type="var">_</span> ?<span class="id" type="var">e</span> |- <span class="id" type="var">_</span> =&gt; <span class="id" type="tactic">apply</span> (<span class="id" type="var">proj2</span> (<span class="id" type="var">red_regular</span> <span class="id" type="var">_</span> <span class="id" type="var">_</span> <span class="id" type="var">H</span>))<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

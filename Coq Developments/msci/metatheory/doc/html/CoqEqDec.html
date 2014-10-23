@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>CoqEqDec</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library CoqEqDec</h1>
+
+<div class="code">
+
+<br/>
+</div>
+
+<div class="doc">
+A type class-based library for working with decidable equality. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#"><span class="id" type="library">Coq.Classes.Equivalence</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#"><span class="id" type="library">Coq.Classes.EquivDec</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Logic.Decidable.html#"><span class="id" type="library">Coq.Logic.Decidable</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab32"></a><h1 class="section">Hints for <span class="inlinecode"><span class="id" type="var">equiv</span></span></h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Hint Extern</span> 0 (?<span class="id" type="var">x</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">?</span></a><span class="id" type="var">x</span>) =&gt; <span class="id" type="tactic">reflexivity</span>.<br/>
+<span class="id" type="keyword">Hint Extern</span> 1 (<span class="id" type="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <span class="id" type="var">_</span>) =&gt; (<span class="id" type="tactic">symmetry</span>; <span class="id" type="tactic">trivial</span>; <span class="id" type="tactic">fail</span>).<br/>
+<span class="id" type="keyword">Hint Extern</span> 1 (<span class="id" type="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'=/='_x"><span class="id" type="notation">=/=</span></a> <span class="id" type="var">_</span>) =&gt; (<span class="id" type="tactic">symmetry</span>; <span class="id" type="tactic">trivial</span>; <span class="id" type="tactic">fail</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab33"></a><h1 class="section">Facts about <span class="inlinecode"><span class="id" type="var">EqDec</span></span></h1>
+
+<div class="paragraph"> </div>
+
+ The <span class="inlinecode"><span class="id" type="var">EqDec</span></span> class is defined in Coq's standard library. 
+</div>
+<div class="code">
+<span class="id" type="keyword">Variable</span> <a name="A"><span class="id" type="variable">A</span></a>:<span class="id" type="keyword">Type</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="equiv_reflexive'"><span class="id" type="lemma">equiv_reflexive'</span></a> : <span class="id" type="keyword">forall</span> `{<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#EqDec"><span class="id" type="class">EqDec</span></a> <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>} (<span class="id" type="var">x</span> : <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span>. <span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#equiv_reflexive"><span class="id" type="instance">equiv_reflexive</span></a>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="equiv_symmetric'"><span class="id" type="lemma">equiv_symmetric'</span></a> : <span class="id" type="keyword">forall</span> `{<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#EqDec"><span class="id" type="class">EqDec</span></a> <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>} (<span class="id" type="var">x</span> <span class="id" type="var">y</span> : <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <a class="idref" href="CoqEqDec.html#y"><span class="id" type="variable">y</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="CoqEqDec.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span>. <span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#equiv_symmetric"><span class="id" type="instance">equiv_symmetric</span></a>; <span class="id" type="tactic">assumption</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="equiv_transitive'"><span class="id" type="lemma">equiv_transitive'</span></a> : <span class="id" type="keyword">forall</span> `{<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#EqDec"><span class="id" type="class">EqDec</span></a> <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>} (<span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span> : <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <a class="idref" href="CoqEqDec.html#y"><span class="id" type="variable">y</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="CoqEqDec.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <a class="idref" href="CoqEqDec.html#z"><span class="id" type="variable">z</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <a class="idref" href="CoqEqDec.html#z"><span class="id" type="variable">z</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span>. <span class="id" type="tactic">eapply</span> @<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#equiv_transitive"><span class="id" type="instance">equiv_transitive</span></a>; <span class="id" type="var">eassumption</span>. <span class="id" type="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" type="keyword">Lemma</span> <a name="equiv_decidable"><span class="id" type="lemma">equiv_decidable</span></a> : <span class="id" type="keyword">forall</span> `{<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#EqDec"><span class="id" type="class">EqDec</span></a> <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>} (<span class="id" type="var">x</span> <span class="id" type="var">y</span> : <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Logic.Decidable.html#decidable"><span class="id" type="definition">decidable</span></a> (<a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.Equivalence.html#:equiv_scope:x_'==='_x"><span class="id" type="notation">===</span></a> <a class="idref" href="CoqEqDec.html#y"><span class="id" type="variable">y</span></a>).<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Logic.Decidable.html#decidable"><span class="id" type="definition">decidable</span></a>. <span class="id" type="tactic">destruct</span> (<span class="id" type="var">x</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#:equiv_scope:x_'=='_x"><span class="id" type="notation">==</span></a> <span class="id" type="var">y</span>); <span class="id" type="tactic">auto</span>. <span class="id" type="keyword">Defined</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab34"></a><h1 class="section">Specializing <span class="inlinecode"><span class="id" type="var">EqDec</span></span></h1>
+
+<div class="paragraph"> </div>
+
+ It is convenient to be able to use a single notation for decidable
+    equality on types.  This can naturally be done using a type class.
+    However, the definition of <span class="inlinecode"><span class="id" type="var">EqDec</span></span> in the EquivDec library is
+    overly general for cases where the equality is <span class="inlinecode"><span class="id" type="var">eq</span></span>: the extra
+    layer of abstraction provided by abstracting over the equivalence
+    relation gets in the way of smooth reasoning.  To get around this,
+    we define a version of that class where the equivalence relation
+    is hard-coded to be <span class="inlinecode"><span class="id" type="var">eq</span></span>.
+
+<div class="paragraph"> </div>
+
+    Implementation note: One should not declare an instance for
+    <span class="inlinecode"><span class="id" type="var">EqDec_eq</span></span> <span class="inlinecode"><span class="id" type="var">A</span></span> directly.  First, declare an instance for <span class="inlinecode">@<span class="id" type="var">EqDec</span></span> <span class="inlinecode"><span class="id" type="var">A</span></span>
+    <span class="inlinecode"><span class="id" type="var">eq</span></span> <span class="inlinecode"><span class="id" type="var">eq_equivalence</span></span>.  Second, let class inference build an instance
+    for <span class="inlinecode"><span class="id" type="var">EqDec_eq</span></span> <span class="inlinecode"><span class="id" type="var">A</span></span> using the instance declaration below.
+
+<div class="paragraph"> </div>
+
+    Implementation note (BEA): Specifying <span class="inlinecode"><span class="id" type="var">eq_equivalence</span></span> explicitly
+    is important.  Following Murphy's Law, if type class inference can
+    find multiple ways of inferring the <span class="inlinecode">@<span class="id" type="var">Equivalence</span></span> <span class="inlinecode"><span class="id" type="var">A</span></span> <span class="inlinecode"><span class="id" type="var">eq</span></span> argument,
+    it will do so in the most inconvenient way possible.
+    Additionally, I choose to infer <span class="inlinecode"><span class="id" type="var">EqDec_eq</span></span> instances from <span class="inlinecode"><span class="id" type="var">EqDec</span></span>
+    instances because the standard library already defines instances
+    for <span class="inlinecode"><span class="id" type="var">EqDec</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" type="keyword">Class</span> <a name="EqDec_eq"><span class="id" type="record">EqDec_eq</span></a> (<span class="id" type="var">A</span> : <span class="id" type="keyword">Type</span>) :=<br/>
+&nbsp;&nbsp;<a name="eq_dec"><span class="id" type="projection">eq_dec</span></a> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">x</span> <span class="id" type="var">y</span> : <a class="idref" href="CoqEqDec.html#A"><span class="id" type="variable">A</span></a>), <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">{</span></a><a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="CoqEqDec.html#y"><span class="id" type="variable">y</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">}</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">{</span></a><a class="idref" href="CoqEqDec.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="CoqEqDec.html#y"><span class="id" type="variable">y</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Specif.html#:type_scope:'{'_x_'}'_'+'_'{'_x_'}'"><span class="id" type="notation">}</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Instance</span> <a name="EqDec_eq_of_EqDec"><span class="id" type="instance">EqDec_eq_of_EqDec</span></a> `(@<a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.EquivDec.html#EqDec"><span class="id" type="class">EqDec</span></a> <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Init.Logic.html#eq"><span class="id" type="inductive">eq</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl4/stdlib/Coq.Classes.RelationClasses.html#eq_equivalence"><span class="id" type="instance">eq_equivalence</span></a>) : <a class="idref" href="CoqEqDec.html#EqDec_eq"><span class="id" type="class">EqDec_eq</span></a> <a class="idref" href="CoqEqDec.html#A"><span class="id" type="axiom">A</span></a>.<br/>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">trivial</span>. <span class="id" type="keyword">Defined</span>.<br/>
+
+<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>
