@@ -31,6 +31,9 @@ Inductive kind : Set :=
   | lin : kind (* linear *)
   | un : kind (* unlimited *).
 
+(** Labels are just natural numbers. *)
+Definition label := nat.
+
 (** Session type definition is standard (cf. Wadler's end points).
 
     S ranges over session types.
@@ -40,8 +43,8 @@ Inductive kind : Set :=
 Inductive session : Set :=
   | s_output : forall k, typ k -> session -> session
   | s_input : forall k, typ k -> session -> session
-  (* choice *)
-  (* branch *)
+  | s_choice : (label -> session) -> session
+  | s_branch : (label -> session) -> session
   | s_zero : session (* end is a keyword; use zero as in pi-calculus *)
 (** typ is ranged over by T, U and V. It differs slightly from the definition
     given in Wadler's paper in that a base type is added.
@@ -52,8 +55,17 @@ with typ : kind -> Set :=
   | typ_tensor : forall kt ku, typ kt -> typ ku -> typ lin
   | typ_labs : forall kt ku, typ kt -> typ ku -> typ lin
   | typ_abs : forall kt ku, typ kt -> typ ku -> typ un
-  | typ_base : forall k, typ k
+  | typ_base : typ un
   | typ_unit : typ un.
+
+(** It is a well-known issue in Coq that the induction principle for mutually
+    defined inductive types is not strong enough we resolve this by using an
+    induction scheme defined to take account of the mutual definition.
+*)
+Scheme ses_typ_ind := Induction for session Sort Prop
+  with typ_ses_ind := Induction for typ Sort Prop.
+
+Combined Scheme typ_ses_mutind from typ_ses_ind, ses_typ_ind.
 
 (** The notation for sessions has been altered from the standard presentation
     to fit within allowable notations in Coq.
@@ -61,5 +73,5 @@ with typ : kind -> Set :=
 Notation "'!' T '#' S" := (s_output _ T S) (at level 68).
 Notation "'?' T '#' S" := (s_input _ T S) (at level 68).
 
-Eval compute in !typ_base un#s_zero.
-Eval compute in !typ_base un#? typ_base un#s_zero.
+Eval compute in !typ_base#s_zero.
+Eval compute in !typ_base#? typ_base#s_zero.
