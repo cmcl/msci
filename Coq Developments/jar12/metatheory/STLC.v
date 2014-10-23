@@ -57,7 +57,7 @@
 *)
 
 Require Import Metatheory.
-
+Require Import Coq.Program.Tactics.
 
 (*************************************************************************)
 (** * Syntax of STLC *)
@@ -1665,7 +1665,7 @@ Proof.
     rewrite_env (nil ++ (y ~ T1) ++ E).
     apply typing_c_subst with (S := T1).
     simpl_env.
-    SCase "(open x s) is well-typed".
+    SCase "(open e x) is well-typed".
       apply typing_c_weakening_strengthened. eauto. auto.
     SCase "y is well-typed".
       eapply typing_var_c; eauto.
@@ -1754,7 +1754,12 @@ Qed.
 (* Take-home exercise. *)
 Lemma lc_c_to_lc : forall e, lc_c e -> lc e.
 Proof.
-(* OPTIONAL EXERCISE *) Admitted.
+  intros e LCC.
+  induction LCC; auto.
+  Case "lc_abs".
+    pick fresh x.
+    apply lc_abs with (x := x); auto.
+Qed.
 
 (** Correspondence of typing and typing_c *)
 
@@ -1762,18 +1767,23 @@ Proof.
 Lemma typing_to_typing_c : forall E e T,
   typing E e T -> typing_c E e T.
 Proof.
-intros E e T H.
-induction H; eauto.
-Case "typing_abs".
-  pick fresh y and apply typing_abs_c; auto.
-  apply typing_c_rename with (x:=x); auto.
+  intros E e T H.
+  induction H; eauto.
+  Case "typing_abs".
+    pick fresh y and apply typing_abs_c; auto.
+    apply typing_c_rename with (x:=x); auto.
 Qed.
 
 (* Take-home exercise. *)
 Lemma typing_c_to_typing : forall E e T,
   typing_c E e T -> typing E e T.
 Proof.
-(* OPTIONAL EXERCISE *) Admitted.
+  intros E e T H.
+  induction H; eauto.
+  Case "typing_abs".
+    pick fresh x.
+    apply typing_abs with (x:=x); auto.
+Qed.
 
 (* Demo. The pattern [eauto using lemma] is a powerful way to completely
    automate all of the cases of a simple proof. *)
@@ -1788,7 +1798,9 @@ Qed.
 Lemma value_c_to_value : forall e,
   value_c e -> value e.
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
+  intros e H.
+  induction H; eauto using lc_c_to_lc.
+Qed.
 
 (* Demo: We can do the same trick with several lemmas. *)
 Lemma eval_to_eval_c : forall e e',
@@ -1802,7 +1814,9 @@ Qed.
 Lemma eval_c_to_eval : forall e e',
   eval_c e e' -> eval e e'.
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
+  intros e e' H.
+  induction H; eauto using lc_c_to_lc, value_c_to_value.
+Qed.
 
 Lemma preservation : forall E e e' T,
   typing E e T ->
@@ -1848,17 +1862,19 @@ Proof.
 eauto using lc_c_to_lc, subst_lc_c, lc_to_lc_c.
 Qed.
 
-(** Take-home exercise. [open_abs] is the analogue of subst_lc for bound variable
-   substitution.
-   HINT: use inversion, subst_intro and subst_lc to prove this lemma.
-**)
+(** Take-home exercise. [open_abs] is the analogue of subst_lc for bound
+    variable substitution.
+    HINT: use inversion, subst_intro and subst_lc to prove this lemma.
+*)
 Lemma open_abs : forall e u T1,
   lc (abs T1 e) ->
   lc u ->
   lc (open e u).
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
-
+  intros e u T1 EH UH.
+  inversion EH; subst.
+  rewrite (subst_intro x); auto using subst_lc.
+Qed.
 
 (* Take-home exercise:
 
@@ -1868,17 +1884,22 @@ Proof.
 Lemma value_to_lc : forall e,
   value e -> lc e.
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
+  intros e H; induction H; auto.
+Qed.
 
 Lemma eval_to_lc : forall e1 e2,
   eval e1 e2 -> lc e1 /\ lc e2.
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
+  intros e1 e2 EV.
+  induction EV; split; destruct_pairs; eauto using value_to_lc, open_abs.
+Qed.
 
 Lemma typing_to_lc : forall E e T,
   typing E e T -> lc e.
 Proof.
-  (* OPTIONAL EXERCISE *) Admitted.
+  intros E e T H.
+  induction H; eauto.
+Qed.
 
 (*************************************************************************)
 (** * Decidability of Typechecking *)
@@ -1909,8 +1930,16 @@ Lemma typing_c_unique : forall E e T1 T2,
   typing_c E e T2 ->
   T1 = T2.
 Proof.
-(* OPTIONAL EXERCISE *) Admitted.
-
+  intros E e T1 T2 H1 H2.
+  generalize dependent T2.
+  induction H1; intros T' H2.
+  Case "typing_var".
+    inversion H2; subst; eauto using binds_unique.
+  Case "typing_abs".
+    inversion H2; subst; f_equal; pick fresh x; eauto.
+  Case "typing_app".
+    inversion H2; subst. apply IHtyping_c1 in H3; congruence.
+Qed.
 
 (* A property P is decidable if we can show the proposition P \/ ~P. *)
 Definition decidable (P : Prop) := (P \/ ~ P).
@@ -1958,7 +1987,8 @@ Proof.
             right.
             intros [S' J'].
             inversion J'; subst.
-            assert (K : typ_base = typ_arrow T1 S'); eauto using typing_c_unique.
+            assert (K : typ_base = typ_arrow T1 S')
+            ; eauto using typing_c_unique.
             inversion K.
           SSSCase "typ_arrow".
             destruct (eq_typ_dec T1 S).
@@ -1967,7 +1997,8 @@ Proof.
                 intros [S' J'].
                 inversion J'; subst.
                 assert (T0 = S); eauto using typing_c_unique.
-                assert (typ_arrow T1 T2 = typ_arrow T0 S'); eauto using typing_c_unique.
+                assert (typ_arrow T1 T2 = typ_arrow T0 S')
+                ; eauto using typing_c_unique.
                 inversion H1; subst; eauto using typing_c_unique.
       SSCase "argument not typeable".
         right. intros [S' J']. inversion J'; subst; eauto.
@@ -1980,7 +2011,7 @@ Qed.
 (* Problematic proof of weakening. *)
 (***********************************************************************)
 
-Lemma typing_weakening_strengthened :  forall E F G e T,
+Lemma typing_weakening_strengthened : forall E F G e T,
   typing (G ++ E) e T ->
   uniq (G ++ F ++ E) ->
   typing (G ++ F ++ E) e T.
@@ -1995,5 +2026,17 @@ Proof.
       apply binds_weaken. apply H0.
   Case "typing_abs".
         apply typing_abs with (x:=x). auto.
-Admitted.
+Abort.
+
+(* Now utilising the typing_c <-> typing relation. *)
+Lemma typing_weakening_strengthened :  forall E F G e T,
+  typing (G ++ E) e T ->
+  uniq (G ++ F ++ E) ->
+  typing (G ++ F ++ E) e T.
+Proof.
+  intros E F G e T H Uniq.
+  apply typing_to_typing_c in H.
+  apply typing_c_to_typing.
+  auto using typing_c_weakening_strengthened.
+Qed.
 
