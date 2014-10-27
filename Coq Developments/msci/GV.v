@@ -43,8 +43,8 @@ Definition label := nat.
 Inductive session : Set :=
   | s_output : forall k, typ k -> session -> session
   | s_input : forall k, typ k -> session -> session
-  | s_choice : (label -> session) -> session
-  | s_branch : (label -> session) -> session
+  | s_choice : list (label * session) -> session
+  | s_branch : list (label * session) -> session
   | s_zero : session (* end is a keyword; use zero as in pi-calculus *)
 (** typ is ranged over by T, U and V. It differs slightly from the definition
     given in Wadler's paper in that a base type is added.
@@ -67,11 +67,18 @@ Scheme ses_typ_ind := Induction for session Sort Prop
 
 Combined Scheme typ_ses_mutind from typ_ses_ind, ses_typ_ind.
 
+(** Define a list of label and behaviour pairs *)
+Definition s_ops := list (label * session).
+
 (** The notation for sessions has been altered from the standard presentation
     to fit within allowable notations in Coq.
 *)
 Notation "'!' T '#' S" := (s_output _ T S) (at level 68).
 Notation "'?' T '#' S" := (s_input _ T S) (at level 68).
-
+Notation "l '=>' s" := (@pair label session l s) (at level 68).
+Print Grammar constr.
+Notation "'<+>{' S1 , .. , SN '}'" := (s_choice (cons S1 .. (cons SN nil) ..))
+                                        (at level 68).
+Print Grammar constr.
 Eval compute in !typ_base#s_zero.
 Eval compute in !typ_base#? typ_base#s_zero.

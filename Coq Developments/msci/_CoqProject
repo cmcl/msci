@@ -1,0 +1,26 @@
+-R . MSciProject
+./GV.v
+./CP.v
+./Metatheory/AssocList.v
+./Metatheory/AssumeList.v
+./Metatheory/CoqEqDec.v
+./Metatheory/CoqFSetDecide.v
+./Metatheory/CoqFSetInterface.v
+./Metatheory/CoqIntro.v
+./Metatheory/CoqListFacts.v
+./Metatheory/CoqUniquenessTacEx.v
+./Metatheory/CoqUniquenessTac.v
+./Metatheory/FSetExtra.v
+./Metatheory/FSetWeakNotin.v
+./Metatheory/Fsub_LetSum_Definitions.v
+./Metatheory/Fsub_LetSum_Infrastructure.v
+./Metatheory/Fsub_LetSum_Lemmas.v
+./Metatheory/Fsub_LetSum_Soundness.v
+./Metatheory/LibDefaultSimp.v
+./Metatheory/LibLNgen.v
+./Metatheory/LibTactics.v
+./Metatheory/MetatheoryAlt.v
+./Metatheory/MetatheoryAtom.v
+./Metatheory/Metatheory.v
+./Metatheory/STLCsol.v
+./Metatheory/STLC.v
