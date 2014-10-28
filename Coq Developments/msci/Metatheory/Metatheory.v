@@ -67,6 +67,11 @@ Notation "E `union` F" :=
   (at level 65, right associativity, format "E  `union`  '/' F")
   : set_hs_scope.
 
+Notation "E `inter` F" :=
+  (AtomSetImpl.inter E F)
+  (at level 65, right associativity, format "E `inter` '/' F")
+  : set_hs_scope.
+
 (** We define some abbreviations for the empty set, singleton
     sets, and the union of two sets. *)
 
@@ -75,6 +80,7 @@ Notation empty := AtomSetImpl.empty.
 Notation remove := AtomSetImpl.remove.
 Notation singleton := AtomSetImpl.singleton.
 Notation union := AtomSetImpl.union.
+Notation inter := AtomSetImpl.inter.
 
 (** Open the notation scopes declared above. *)
 

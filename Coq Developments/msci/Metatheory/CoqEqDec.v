@@ -24,26 +24,28 @@ Hint Extern 1 (_ =/= _) => (symmetry; trivial; fail).
 (** * Facts about [EqDec] *)
 
 (** The [EqDec] class is defined in Coq's standard library. *)
-Variable A:Type.
+Section CoqEqDecSec.
+  Variable A:Type.
 
-Lemma equiv_reflexive' : forall `{EqDec A} (x : A),
-  x === x.
-Proof. intros. apply equiv_reflexive. Qed.
+  Lemma equiv_reflexive' : forall `{EqDec A} (x : A),
+                             x === x.
+  Proof. intros. apply equiv_reflexive. Qed.
 
-Lemma equiv_symmetric' : forall `{EqDec A} (x y : A),
-  x === y ->
-  y === x.
-Proof. intros. apply equiv_symmetric; assumption. Qed.
+  Lemma equiv_symmetric' : forall `{EqDec A} (x y : A),
+                             x === y ->
+                             y === x.
+  Proof. intros. apply equiv_symmetric; assumption. Qed.
 
-Lemma equiv_transitive' : forall `{EqDec A} (x y z : A),
-  x === y ->
-  y === z ->
-  x === z.
-Proof. intros. eapply @equiv_transitive; eassumption. Qed.
+  Lemma equiv_transitive' : forall `{EqDec A} (x y z : A),
+                              x === y ->
+                              y === z ->
+                              x === z.
+  Proof. intros. eapply @equiv_transitive; eassumption. Qed.
 
-Lemma equiv_decidable : forall `{EqDec A} (x y : A),
-  decidable (x === y).
-Proof. intros. unfold decidable. destruct (x == y); auto. Defined.
+  Lemma equiv_decidable : forall `{EqDec A} (x y : A),
+                            decidable (x === y).
+  Proof. intros. unfold decidable. destruct (x == y); auto. Defined.
+End CoqEqDecSec.
 
 
 (* *********************************************************************** *)
