@@ -12,6 +12,8 @@
     DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
 *)
+Require Import Program.
+Set Implicit Arguments.
 
 (** The notion of kind is borrowed from
 
@@ -34,51 +36,59 @@ Inductive kind : Set :=
 (** Labels are just natural numbers. *)
 Definition label := nat.
 
-(** Session type definition is standard (cf. Wadler's end points).
+(** [typ] is ranged over by T, U and V. It differs slightly from the
+    definition given in Wadler's paper in the following ways:
 
-    S ranges over session types.
-
-    TODO: Check if the proofs will need two end terminators.
+      * Session types are defined within this inductive type rather than
+        mutually; a technical convenience since Coq mutually inductive
+        types can be tricky to manipulate,
+      * Choice and branch are binary; this matches the intuition of tensor
+        product which is defined as binary and also maps better to the CP
+        with and plus constructs which are also binary
+      * There is only one end construct (TODO: Check if the proofs will need
+        two end terminators).
 *)
-Inductive session : Set :=
-  | s_output : forall k, typ k -> session -> session
-  | s_input : forall k, typ k -> session -> session
-  | s_choice : list (label * session) -> session
-  | s_branch : list (label * session) -> session
-  | s_zero : session (* end is a keyword; use zero as in pi-calculus *)
-(** typ is ranged over by T, U and V. It differs slightly from the definition
-    given in Wadler's paper in that a base type is added.
-
-*)
-with typ : kind -> Set :=
-  | typ_ses : session -> typ lin
+Inductive typ : kind -> Set :=
+(* Session types section *)
+  | typ_soutput : forall k, typ k -> typ lin -> typ lin
+  | typ_sinput : forall k, typ k -> typ lin -> typ lin
+  | typ_schoice : typ lin -> typ lin -> typ lin
+  | typ_sbranch : typ lin -> typ lin -> typ lin
+  | typ_szero : typ lin (* end is a keyword; use zero as in pi-calculus *)
+(* Other non-session GV types *)
   | typ_tensor : forall kt ku, typ kt -> typ ku -> typ lin
   | typ_labs : forall kt ku, typ kt -> typ ku -> typ lin
   | typ_abs : forall kt ku, typ kt -> typ ku -> typ un
-  | typ_base : typ un
   | typ_unit : typ un.
-
-(** It is a well-known issue in Coq that the induction principle for mutually
-    defined inductive types is not strong enough we resolve this by using an
-    induction scheme defined to take account of the mutual definition.
-*)
-Scheme ses_typ_ind := Induction for session Sort Prop
-  with typ_ses_ind := Induction for typ Sort Prop.
-
-Combined Scheme typ_ses_mutind from typ_ses_ind, ses_typ_ind.
-
-(** Define a list of label and behaviour pairs *)
-Definition s_ops := list (label * session).
 
 (** The notation for sessions has been altered from the standard presentation
     to fit within allowable notations in Coq.
 *)
-Notation "'!' T '#' S" := (s_output _ T S) (at level 68).
-Notation "'?' T '#' S" := (s_input _ T S) (at level 68).
-Notation "l '=>' s" := (@pair label session l s) (at level 68).
-Print Grammar constr.
-Notation "'<+>{' S1 , .. , SN '}'" := (s_choice (cons S1 .. (cons SN nil) ..))
-                                        (at level 68).
-Print Grammar constr.
-Eval compute in !typ_base#s_zero.
-Eval compute in !typ_base#? typ_base#s_zero.
+Notation "'!' T '#' S" := (typ_soutput T S) (at level 68,
+                                             right associativity).
+Notation "'?' T '#' S" := (typ_sinput T S) (at level 68, right associativity).
+Notation "S1 '<+>' S2" := (typ_schoice S1 S2) (at level 68,
+                                               right associativity).
+Notation "S1 <&> S2" := (typ_sbranch S1 S2) (at level 68,
+                                             right associativity).
+
+(** [ty] as defined above is more general than the types handled by GV; the
+    types are considered session types and so could, for example, appear in
+    branch or choice constructs (e.g. a regular function type). To prevent
+    this, a predicate [is_session] is defined over [typ] constructors to
+    restrict where certain constructors may occur.
+
+    S range over session types.
+*)
+Inductive is_session : forall k, typ k -> Prop :=
+  | is_output : forall k (T : typ k) S
+                       (IS: is_session S),
+                  is_session (! T # S)
+  | is_input : forall k (T : typ k) S
+                      (IS: is_session S),
+                 is_session (? T # S)
+  | is_choice : forall S1 S2 (IS1: is_session S1) (IS2: is_session S2),
+                  is_session (S1 <+> S2)
+  | is_branch : forall S1 S2 (IS1: is_session S1) (IS2: is_session S2),
+                  is_session (S1 <&> S2)
+  | is_end : is_session typ_szero.
