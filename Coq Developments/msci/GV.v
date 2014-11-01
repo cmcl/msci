@@ -12,7 +12,7 @@
     DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
 *)
-Require Import Program.
+Require Import ssreflect.
 Set Implicit Arguments.
 
 (** The notion of kind is borrowed from
@@ -92,3 +92,33 @@ Inductive is_session : forall k, typ k -> Prop :=
   | is_branch : forall S1 S2 (IS1: is_session S1) (IS2: is_session S2),
                   is_session (S1 <&> S2)
   | is_end : is_session typ_szero.
+
+(** Define duals for session types. *)
+Reserved Notation "'¬' S" (at level 69, right associativity).
+
+(** It's a pity we obscure the definition of session duals here by defining it
+    as a proof term. This was recommended by Jonathan (jonikelee@gmail.com) on
+    the CoqClub mailing list.
+*)
+Definition session_duals (S: { T : typ lin | is_session T}) :
+  {T : typ lin | is_session T}.
+  destruct S as [T P].
+  induction T; try (by exfalso; inversion P).
+  - assert (IS: is_session T2) by (inversion P; subst; exact IS).
+    specialize (IHT2 IS); inversion IHT2 as [S' IS'].
+    eapply exist; apply is_input with (T:=T1); exact IS'.
+  - assert (IS: is_session T2) by (inversion P; subst; exact IS).
+    specialize (IHT2 IS); inversion IHT2 as [S' IS'].
+    eapply exist; apply is_output with (T:=T1); exact IS'.
+  - assert (IS: is_session T1 /\ is_session T2) by (inversion P; subst; auto).
+    destruct IS as [IS1 IS2].
+    specialize (IHT1 IS1); clear IS1; inversion_clear IHT1 as [S1 IS1].
+    specialize (IHT2 IS2); clear IS2; inversion_clear IHT2 as [S2 IS2].
+    eapply exist; apply is_branch; [exact IS1 | exact IS2].
+  - assert (IS: is_session T1 /\ is_session T2) by (inversion P; subst; auto).
+    destruct IS as [IS1 IS2].
+    specialize (IHT1 IS1); clear IS1; inversion_clear IHT1 as [S1 IS1].
+    specialize (IHT2 IS2); clear IS2; inversion_clear IHT2 as [S2 IS2].
+    eapply exist; apply is_choice; [exact IS1 | exact IS2].
+  - eapply exist; apply is_end.
+Defined.
