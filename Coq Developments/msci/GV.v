@@ -12,7 +12,8 @@
     DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
 *)
-Require Import ssreflect Metatheory.
+Require Import Metatheory Coq.Program.Tactics.
+Require Import ssreflect.
 Set Implicit Arguments.
 
 (** The notion of kind is borrowed from
@@ -153,7 +154,7 @@ Inductive term : Set :=
   | tm_abs : forall k, typ k -> term -> term
   | tm_app : term -> term -> term
   | tm_pair : term -> term -> term
-  | tm_let : term -> term -> term
+  | tm_let : forall kt ku, typ kt -> typ ku -> term -> term -> term
   | tm_send : term -> term -> term
   | tm_recv : term -> term
   | tm_select : label -> term -> term
@@ -161,7 +162,72 @@ Inductive term : Set :=
   | tm_connect : typ lin -> term -> term -> term
   | tm_end : term -> term.
 
+Coercion tm_bvar : nat >-> term.
 Coercion tm_id : atom >-> term.
+
+(** In the style of ``Engineering Formal Metatheory'' (??) we define
+    substitution of expressions for atoms and opening of expressions with
+    bound variables.
+*)
+
+
+(** The following definition of substitution for a free variable assumes the
+    term to be substituted is locally closed.
+*)
+Fixpoint subst (x: atom) (u: term) (t: term) : term :=
+  match t with
+  | tm_id y => if x == y is left _ then u else (tm_id y)
+  | tm_abs k T b => tm_abs T (subst x u b)
+  | tm_app m n => tm_app (subst x u m) (subst x u n)
+  | tm_pair p q => tm_pair (subst x u p) (subst x u q)
+  | tm_let kt ku T U m n => tm_let T U (subst x u m) (subst x u n)
+  | tm_send m n => tm_send (subst x u m) (subst x u m)
+  | tm_recv m => tm_recv (subst x u m)
+  | tm_select l m => tm_select l (subst x u m)
+  | tm_case m ll nl lr nr
+    => tm_case (subst x u m) ll (subst x u nl) lr (subst x u nr)
+  | tm_connect T m n => tm_connect T (subst x u m) (subst x u n)
+  | tm_end m => tm_end (subst x u m)
+  | _ => t
+  end.
+
+Notation "[ x ~> u ] t" := (subst x u t) (at level 68) : gv_scope.
+
+(** Opening a term t is replacing an unbound variable with index k with term
+    u. Assume u is locally closed and is only substituted once if it contains
+    free variables.
+*)
+Fixpoint open_rec (k: nat) (u: term) (t: term) :=
+  match t with
+  | tm_bvar n => if k == n is left _ then u else (tm_bvar n)
+  | tm_abs k' T b => tm_abs T (open_rec (S k) u b)
+  | tm_app m n => tm_app (open_rec k u m) (open_rec k u n)
+  | tm_pair p q => tm_pair (open_rec k u p) (open_rec k u q)
+  | tm_let kt ku T U m n
+    => tm_let T U (open_rec k u m) (open_rec (S (S k)) u n)
+  | tm_send m n => tm_send (open_rec k u m) (open_rec k u m)
+  | tm_recv m => tm_recv (open_rec k u m)
+  | tm_select l m => tm_select l (open_rec k u m)
+  | tm_case m ll nl lr nr
+    => tm_case (open_rec k u m)
+               ll (open_rec (S k) u nl) lr (open_rec (S k) u nr)
+  | tm_connect T m n
+    => tm_connect T (open_rec (S k) u m) (open_rec (S k) u n)
+  | tm_end m => tm_end (open_rec k u m)
+  | _ => t
+  end.
+
+Notation "{ k ~> u } t" := (open_rec k u t) (at level 68) : gv_scope.
+
+(** Opening a term t is replacing the unbound variable with index 0 with term
+    u. Assume u is locally closed and is only substituted once if it contains
+    free variables.
+*)
+Fixpoint open t u := open_rec 0 u t.
+
+(** A locally closed term has no unbounded variables. *)
+(* Inductive lc : term -> Prop :=*)
+
 
 (** Typing environments are lists of (atom,typ) pairs. *)
 Definition tenv := list (atom * (typ lin + typ un)).
@@ -181,13 +247,32 @@ Definition un_env (G : tenv) : Prop := forall x (T : typ un)
     However, I'm going to adopt the ∈ notation below since it will be easier
     to differentiate between the environment notation.
 *)
-Reserved Notation "G ⊢ t ∈ T" (at level 30).
+Reserved Notation "Φ ⊢ t ∈ T" (at level 30).
 
 Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
   | wt_tm_unid : forall x T, (x ~ inr T) ⊢ x ∈ T
   | wt_tm_lid : forall x T, (x ~ inl T) ⊢ x ∈ T
   | wt_tm_unit : nil ⊢ tm_unit ∈ typ_unit
-  | wt_tm_weaken : forall G x N k (U: typ k) T (WT: G ⊢ N ∈ U),
-                     (G ++ (x ~ inr T)) ⊢ N ∈ U
+  | wt_tm_weaken : forall Φ x N k (U: typ k) T (WT: Φ ⊢ N ∈ U),
+                     (Φ ++ (x ~ inr T)) ⊢ N ∈ U
 (*  | wt_tm_contract : *)
-where "G ⊢ t ∈ T" := (wt_tm G t T) : gv_scope.
+(*  | wt_tm_labs : *)
+  | wt_tm_send : forall k Φ Ψ M (T: typ k) N S
+                        (IS: is_session S)
+                        (WTM: Φ ⊢ M ∈ T) (WTN: Ψ ⊢ N ∈ ! T # S),
+                   (Φ ++ Ψ) ⊢ tm_send M N ∈ S
+  | wt_tm_recv : forall k Φ M (T: typ k) S
+                        (WT: Φ ⊢ M ∈ ? T # S) (IS: is_session S),
+                   Φ ⊢ tm_recv M ∈ typ_tensor T S
+  | wt_tm_l_select : forall Φ M S1 S2
+                            (IS: is_session (S1 <+> S2))
+                            (WT: Φ ⊢ M ∈ (S1 <+> S2)),
+                       Φ ⊢ tm_select lb_inl M ∈ S1
+  | wt_tm_r_select : forall Φ M S1 S2
+                            (IS: is_session (S1 <+> S2))
+                            (WT: Φ ⊢ M ∈ (S1 <+> S2)),
+                       Φ ⊢ tm_select lb_inr M ∈ S2
+  | wt_tm_end : forall k Φ M (T: typ k) (WT: Φ ⊢ M ∈ typ_tensor T typ_szero),
+                  Φ ⊢ tm_end M ∈ T
+where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
+

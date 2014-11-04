@@ -29,13 +29,13 @@ Inductive prop : Type :=
   | pp_top : prop (* unit for with *).
 
 (** Define some friendly notation. *)
-Notation "A `times` B" := (pp_times A B) (at level 68, left associativity)
+Notation "A ⨂ B" := (pp_times A B) (at level 68, left associativity)
                                          : cp_scope.
-Notation "A `par` B" := (pp_par A B) (at level 68, left associativity)
+Notation "A ⅋ B" := (pp_par A B) (at level 68, left associativity)
                                      : cp_scope.
-Notation "A `plus` B" := (pp_plus A B) (at level 68, left associativity)
+Notation "A ⨁ B" := (pp_plus A B) (at level 68, left associativity)
                                        : cp_scope.
-Notation "A `with` B" := (pp_with A B) (at level 68, left associativity)
+Notation "A & B" := (pp_with A B) (at level 68, left associativity)
                                        : cp_scope.
 Notation "'!' A" := (pp_accept A) (at level 68, left associativity)
                                   : cp_scope.
@@ -51,10 +51,10 @@ Fixpoint prop_dual (pp : prop) : prop :=
   match pp with
   | pp_var X => pp_dvar X
   | pp_dvar X => pp_var X
-  | A `times` B => ¬A `par` ¬B
-  | A `par` B => ¬A `times` ¬B
-  | A `plus` B => ¬A `with` ¬B
-  | A `with` B => ¬A `plus` ¬B
+  | A ⨂ B => ¬A ⅋ ¬B
+  | A ⅋ B => ¬A ⨂ ¬B
+  | A ⨁ B => ¬A & ¬B
+  | A & B => ¬A ⨁ ¬B
   | ! A => ? ¬A
   | ? A => ! ¬A
   | pp_forall X A => pp_exists X (¬A)
@@ -86,10 +86,10 @@ Fixpoint prop_subst (B A : prop) (X : pvar) : prop :=
   match B with
   | pp_var Y => if X == Y then A else pp_var Y
   | pp_dvar Y => if X == Y then ¬A else pp_dvar Y
-  | A' `times` B' => {{A // X}}A' `times` {{A // X}} B'
-  | A' `par` B' => {{A // X}}A' `par` {{A // X}} B'
-  | A' `plus` B' => {{A // X}}A' `plus` {{A // X}} B'
-  | A' `with` B' => {{A // X}}A' `with` {{A // X}} B'
+  | A' ⨂ B' => {{A // X}}A' ⨂ {{A // X}} B'
+  | A' ⅋ B' => {{A // X}}A' ⅋ {{A // X}} B'
+  | A' ⨁ B' => {{A // X}}A' ⨁ {{A // X}} B'
+  | A' & B' => {{A // X}}A' & {{A // X}} B'
   | ! A' => ! {{A // X}}A'
   | ? A' => ? {{A // X}}A'
   | pp_forall Y A' => pp_forall Y ({{A // X}}A')
@@ -136,3 +136,4 @@ Inductive wf_penv : penv -> Prop :=
       forall (x : atom) (p : prop) (xs : penv)
              (NIN: x `notin` dom xs),
         wf_penv ((x,p) :: xs).
+
