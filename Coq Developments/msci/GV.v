@@ -12,7 +12,7 @@
     DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
 *)
-Require Import ssreflect.
+Require Import ssreflect Metatheory.
 Set Implicit Arguments.
 
 (** The notion of kind is borrowed from
@@ -32,9 +32,6 @@ Set Implicit Arguments.
 Inductive kind : Set :=
   | lin : kind (* linear *)
   | un : kind (* unlimited *).
-
-(** Labels are just natural numbers. *)
-Definition label := nat.
 
 (** [typ] is ranged over by T, U and V. It differs slightly from the
     definition given in Wadler's paper in the following ways:
@@ -65,12 +62,15 @@ Inductive typ : kind -> Set :=
     to fit within allowable notations in Coq.
 *)
 Notation "'!' T '#' S" := (typ_soutput T S) (at level 68,
-                                             right associativity).
+                                             right associativity) : gv_scope.
 Notation "'?' T '#' S" := (typ_sinput T S) (at level 68, right associativity).
 Notation "S1 '<+>' S2" := (typ_schoice S1 S2) (at level 68,
-                                               right associativity).
+                                               right associativity)
+                                              : gv_scope.
 Notation "S1 <&> S2" := (typ_sbranch S1 S2) (at level 68,
-                                             right associativity).
+                                             right associativity) : gv_scope.
+Delimit Scope gv_scope with gv.
+Open Scope gv_scope.
 
 (** [ty] as defined above is more general than the types handled by GV; the
     types are considered session types and so could, for example, appear in
@@ -92,9 +92,6 @@ Inductive is_session : forall k, typ k -> Prop :=
   | is_branch : forall S1 S2 (IS1: is_session S1) (IS2: is_session S2),
                   is_session (S1 <&> S2)
   | is_end : is_session typ_szero.
-
-(** Define duals for session types. *)
-Reserved Notation "'¬' S" (at level 69, right associativity).
 
 (** It's a pity we obscure the definition of session duals here by defining it
     as a proof term. This was recommended by Jonathan (jonikelee@gmail.com) on
@@ -122,3 +119,75 @@ Definition session_duals (S: { T : typ lin | is_session T}) :
     eapply exist; apply is_choice; [exact IS1 | exact IS2].
   - eapply exist; apply is_end.
 Defined.
+
+Notation "'¬' S" := (session_duals (exist _ S _)) (at level 69,
+                                                   right associativity)
+                                                  : gv_scope.
+(** FIXME: Unfortunately the definition does not prevent placing non-session
+    [typ] constructors within the continuation part of a session:
+
+    Eval compute in ¬(! typ_unit # (typ_tensor typ_unit typ_unit)).
+
+    In the inductive hypothesis is it assumed the continuation is a session
+    so perhaps if this isn't true we can conclude the dual is a session
+    (assume anything from absurdity).
+
+*)
+
+(** Define a label type for binary branch and choice. *)
+Inductive label : Set :=
+  | lb_inr : label
+  | lb_inl : label.
+
+(** Define the terms of GV. We follow the approach in the UPenn Metatheory
+    library, defining free variables as atoms and bound variables as de
+    Bruijn indices.
+
+*)
+Inductive term : Set :=
+(* Rule for bound variables *)
+  | tm_bvar : nat -> term
+(* Rules representing those in the paper: *)
+  | tm_id : atom -> term
+  | tm_unit : term
+  | tm_abs : forall k, typ k -> term -> term
+  | tm_app : term -> term -> term
+  | tm_pair : term -> term -> term
+  | tm_let : term -> term -> term
+  | tm_send : term -> term -> term
+  | tm_recv : term -> term
+  | tm_select : label -> term -> term
+  | tm_case : term -> label -> term -> label -> term -> term
+  | tm_connect : typ lin -> term -> term -> term
+  | tm_end : term -> term.
+
+Coercion tm_id : atom >-> term.
+
+(** Typing environments are lists of (atom,typ) pairs. *)
+Definition tenv := list (atom * (typ lin + typ un)).
+Definition un_env (G : tenv) : Prop := forall x (T : typ un)
+                                              (IN: x `in` dom G),
+                                         binds x (inr T) G.
+
+(** To get Coq to accept the '~' notation used here, we need to make sure t
+    and T are parsed as identifiers.
+
+    Reserved Notation "G |- t ~ T" (at level 68, t ident, T ident).
+
+    Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
+      | wt_tm_unid : forall x T, (x ~ inr T) |- x ~ T
+    where "G '|-' t ~ T" := (wt_tm G t T) : gv_scope.
+
+    However, I'm going to adopt the ∈ notation below since it will be easier
+    to differentiate between the environment notation.
+*)
+Reserved Notation "G ⊢ t ∈ T" (at level 30).
+
+Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
+  | wt_tm_unid : forall x T, (x ~ inr T) ⊢ x ∈ T
+  | wt_tm_lid : forall x T, (x ~ inl T) ⊢ x ∈ T
+  | wt_tm_unit : nil ⊢ tm_unit ∈ typ_unit
+  | wt_tm_weaken : forall G x N k (U: typ k) T (WT: G ⊢ N ∈ U),
+                     (G ++ (x ~ inr T)) ⊢ N ∈ U
+(*  | wt_tm_contract : *)
+where "G ⊢ t ∈ T" := (wt_tm G t T) : gv_scope.
