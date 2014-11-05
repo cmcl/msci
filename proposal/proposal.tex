@@ -37,31 +37,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}\label{intro}
 
-briefly explain the context of the project problem
+Two aspects of programming language research are relevant for the problem. The first is concerned with static type systems for ensuring runtime safety properties for concurrent communication systems. The second is the increasing use of proof assistants and interactive theorem provers, for studying and mechanically verifying the semantics and properties of programming languages.
+
+\subsection{On Communication}
 
 Distributed communication systems are becoming increasing prevalent in modern society. To facilitate communication between concurrently executing agents requires complex network protocols to define the type and sequencing of messages. Typically these protocols are implemented in systems programming languages, such as C, which provide no correctness guarantees of the implementation. Furthermore, programming in these languages is often extremely error-prone, as one has a myriad of unsafe features at one's disposal. As more businesses begin to conduct transactions over the Web, it is imperative that they can reason about the communication protocols upon which they rely.
 
 Encoding communication protocols as \textit{session types} is one approach to achieve guarantees about correctness. One particular variant of session types are \textit{binary} session types~\footnote{There are also \textit{multiparty} session types, but I do not discuss them here.}. A binary session type specifies communication between two agents, and it specifies the order and type of messages to be sent or received by an agent in the system. The two agents have dual session types such that, for example, when one is expecting to receive a message the other is expecting to send a message; both session types agree on the type of message to be exchanged. In this way, correctness of communication can be statically assured by providing communicating agents with \textit{channels} that have dual session types. A channel is defined as a bi-directional conduit for exchanging messages, not unlike a socket in network programming. In contrast to sockets, however, a channel is associated with an explicit type which provides a description of its protocol. Thus, in session-based systems a channel is usually provided as a primitive type.
 
-it is thus clear that the need for
-construct an argument for the use of a proof assistant and interactive theorem
-proving technologies to formalise a framework for developing type systems
-involving session types that are based on lambda calculi so that we can use
-such a development to reason about a variety of type systems while minimising
-proof effort tie this into an introduction into the subfield of session types
-and what they are good for essentially motivating our project in this space
-additionally we can introduce the reader to the discipline of interactive
-theorem proving and formal methods more generally as a way to formalise
-programming languages highlighting the benefits of reusability increased
+\subsection{On Verification}
+
+construct an argument for the use of a proof assistant and interactive theorem proving technologies to formalise a framework for developing type systems involving session types that are based on lambda calculi so that we can use such a development to reason about a variety of type systems while minimising proof effort tie this into an introduction into the subfield of session types and what they are good for essentially motivating our project in this space additionally we can introduce the reader to the discipline of interactivetheorem proving and formal methods more generally as a way to formalise programming languages highlighting the benefits of reusability increased
+
 correctness and something what else could we say i think it would appropriate
 to mention that the session types studied so far include both pi and lambda
 calculi and it may be beneficil if the reader was informed also the pi
 calculus paradigms do not fit well into the existing mainstream programming
 language paradigms this seems like it should be in the statement of the problem section down below also i should read more of jtod's slides because this writing just keep writing malarky might just be what i need to pound out the pages because it eliminates thoughts as they come into the head what else adopt and focus we have in the problem statement but perhaps those paragraphs should be re-jigged for up here multithreaded functional programming with linear typing for session types a number of these systems use different type systems but they are based on all the lambda calculus fundamentally so to have a generic framework to encode these variants would save on proof engineering effort as is championed by the POPLMARK challenge aimed at reducing the effort for researchers to code programming language metatheory it provides a library needed to perform various things define various parts of programming languages viewed to be difficult to formalise including handling binders and freshness they also mention handling of linear typing but renege on actually formulating this as part of their challenge they insist it is a future work here is the future
 
-\subsection{A subsection}
-Please note your proposal need not follow the included section headings - this
-is only a suggested structure. Also add subsections etc as required
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Statement of Problem}
