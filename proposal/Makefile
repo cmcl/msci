@@ -1,6 +1,6 @@
 
 TEX:=proposal.tex
-DEPS:=biblio.bib
+DEPS:=proposal.bib
 PDFS:=$(TEX:%.tex=%.pdf)
 
 all: $(PDFS)
