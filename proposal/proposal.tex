@@ -2,7 +2,7 @@
 
 \usepackage{graphicx}
 \usepackage[style=alphabetic,natbib=true]{biblatex}
-\addbibresource{proposal}
+\addbibresource{proposal.bib}
 
 % alternative font if you prefer
 %\usepackage{times}
@@ -39,20 +39,9 @@
 
 briefly explain the context of the project problem
 
-computing distributed communication rise of internet networked communication
-the protocols have an effect on the communication and if the protocol is wrong
-distributed communicatin now a propenent is most peoples' daily lives
-whether it be posting pictures on social media websites sharing videos
-or even so much as sending emails all require a well-defined protocol to
-specify the type and order of messages to be sent and received between the two
-or more communicating partners
-mainstream programming languages used to build such systems often fail to meet
-the strong guarantees that the correct type of messages will be sent or that
-the ordering between messages is preserved
-the rise of e-commerce and increasing reliance on software systems in the
-areas of aviation/transport mean that much confidence in these systems is placed thus it is of great importance that there exist strong guarantees of correctness
+Distributed communication systems are becoming increasing prevalent in modern society. To facilitate communication between concurrently executing agents requires complex network protocols to define the type and sequencing of messages. Typically these protocols are implemented in systems programming languages, such as C, which provide no correctness guarantees of the implementation. Furthermore, programming in these languages is often extremely error-prone, as one has a myriad of unsafe features at one's disposal. As more businesses begin to conduct transactions over the Web, it is imperative that they can reason about the communication protocols upon which they rely.
 
-
+Encoding communication protocols as \textit{session types} is one approach to achieve guarantees about correctness. One particular variant of session types are \textit{binary} session types~\footnote{There are also \textit{multiparty} session types, but I do not discuss them here.}. A binary session type specifies communication between two agents, and it specifies the order and type of messages to be sent or received by an agent in the system. The two agents have dual session types such that, for example, when one is expecting to receive a message the other is expecting to send a message; both session types agree on the type of message to be exchanged. In this way, correctness of communication can be statically assured by providing communicating agents with \textit{channels} that have dual session types. A channel is defined as a bi-directional conduit for exchanging messages, not unlike a socket in network programming. In contrast to sockets, however, a channel is associated with an explicit type which provides a description of its protocol. Thus, in session-based systems a channel is usually provided as a primitive type.
 
 it is thus clear that the need for
 construct an argument for the use of a proof assistant and interactive theorem
@@ -85,8 +74,8 @@ calculus type systems involving session types using interactive theorem
 proving (in particular, the system Coq). The motivation for the framework is
 that it will enable a whole class of related languages and type systems to be
 formalised with little extra proof effort. Inspired by previous work on a
-mechanised framework of pi calculus type systems~\cite{Gay:2001:FFP}, we shift
-to the lambda calculus to provide a basis on which session types for
+mechanised framework for pi calculus type systems~\cite{Gay:2001:FFP}, we
+shift to the lambda calculus to provide a basis on which session types for
 mainstream programming languages can be studied whilst taking advantage of
 previous proof effort and specialising only for those parts unique to the
 particular system.
@@ -96,7 +85,7 @@ session polymorphism, session subtyping, and permitting different forms of
 aliasing within the type system. The majority of previous session type systems
 for mainstream programming languages has focussed exclusively on linear type
 systems. One disadvantage of a linear type system is the need to re-bind
-objects after each operation~\cite{Gay:2010:LTT}. Principally, we intend to
+objects after each operation~\cite{Gay:2010:LAST}. Principally, we intend to
 instantiate the framework with a type system that provides the benefits of
 aliasing with the guarantees of linearity, termed ``adoption and focus''. The
 ``adoption and focus'' type system is non-trivial requiring special language
@@ -115,8 +104,13 @@ present an overview of relevant previous work including articles, books, and
 existing software products. Critically evaluate the strengths and weaknesses
 of the previous work.
 
-System F-pop, session polymorphism formalised in Coq, Simon's Isabelle/HOL
+System F-pop~\cite{Mazurak:2010:LLT}
+session polymorphism formalised in Coq, Simon's Isabelle/HOL
 development.
+Philip Wadler's Propositions as Sessions~\cite{Wadler:2012}
+Simon J. Gay and Vasco Vasconcelos (LAST)~\cite{Gay:2010:LAST}
+Lolliproc~\cite{Mazurak:2010:LCC}
+PhD thesis~\cite{Mazurak:2013:LPP}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Proposed Approach}
