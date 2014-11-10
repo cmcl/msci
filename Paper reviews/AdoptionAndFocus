@@ -73,10 +73,10 @@ present in the capabilities then a reference of a type ``guarded'' by the key
 may be used, otherwise all such references are invalid.
 
 The focus construct is used in patterns like: ``let x = focus e_1 in e_2''
-with the semantics that a capability of form p -> t is created, if e_1 has
-type p_1 -> t, and added to the capabilities for use in e_2. The key p_1
-is temporarily removed from the capabilities in the typing of e_2 so that
-any nonlinear references to the (evaluation of) e_2 are invalidated.
+with the semantics that a capability of form p -> t (p fresh) is created, if
+e_1 has type p_1 -> t, and added to the capabilities for use in e_2.
+The key p_1 is temporarily removed from the capabilities in the typing of e_2
+so that any nonlinear references to the (evaluation of) e_2 are invalidated.
 Another seemingly contradictory explanation of the focus construct:
 e_2 can remove p from the capabilities yet it's later stated that at the end
 of e_2 the capabilities must contain a mapping of p -> t so that no alias can

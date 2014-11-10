@@ -1,0 +1,10 @@
+Title: Strongly Typed Term Representation in Coq
+Authors: Nick Benton, Chung-Kil Hur, Andrew J. Kennedy, and Conor McBride
+
+SPL (+CPL)
+* PL researchers stay clear of intrinsic encodings and favour untyped terms with typing judgments with additional typed premises (extrinsic)
+* Previous attempts at intrinsic encoding (Sozeau) led to equality coercions (?) having to be performed
+WTD
+* Describe encoding of simply-typed and polymorphic language in Coq where terms are indexed by types (intrinsic)
+ROF
+RFW

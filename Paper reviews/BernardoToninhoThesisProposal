@@ -1,0 +1,13 @@
+Page 7, writes ``weakening (``If I assume something, I can assume it multiple times'') and contraction (``I need not use all assumptions in a proof'')'' shouldn't it be the other way around?
+
+SPL (+CPL)
+* Modifies approach by Caires and Pfenning
+  - different assignment of exponentials which gives a more appropriate mapping of proof reduction to process reduction
+  - syntax driven rules rather than using pi calculus proof term assignment
+  - proof term assignment uses substructural operational semantics discarding the requirement for structural congruence rules for typing e.g. parallel composition
+* F star uses value-dependent types; can apparently encode session types -- usinng linear function types as in F-pop?
+ROF
+* Develop theory of linear logical relations for studying equivalences of session-based pi calculus processes; reasoning about termination and confluence
+WTD
+* Identifies process with single channel
+  - claims a motivation for the use of intuitionistic linear logic rather than classical (or full) linear logic which disallows identifying a process with a single channel (see Linear logic propositions as session types by Caires, Pfenning and Toninho, or Propositions as sessions by Wadler -- classical linear logic, using dual)

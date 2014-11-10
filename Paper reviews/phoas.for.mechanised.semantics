@@ -1,0 +1,8 @@
+Title: Parametric Higher-Order Abstract Syntax
+Author: Adam Chlipala
+
+SPL (+CPL)
+* First-order approaches require more overhead in managing syntax (substitution, well-formedness, etc) -- first-order for my approach and the one advocated in eingeering metatheory
+WTD
+ROF
+RFW
