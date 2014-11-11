@@ -38,3 +38,11 @@ tested with formalisations of the simply-typed lambda calculus, System F_sub,
 the calculus of constructions. The formalisations followed the POPLMARK
 challenge (type soundness, preservation, progress).
 
+SPL (+CPL)
+* Paper presentations usually follow named variable approach but this is more difficult to use in a formal setting requiring one to reason about alpha-equivalence of names
+* Another approach suggest by prior work is to use de Bruijn indices to represent variables with out-of-range numbers representing free variables in some environment; there are significant issues with handling weakening and ordering in the enviornments since usually the position in the enviornment of free variables is significant to the encoding (unbound indices represent position in environment)
+* In both approaches one must be careful about variable capture in substiution, lifting in the case of de Bruijn and performing alpha-conversion in the named case
+WTD
+ROF
+RFW
+POC

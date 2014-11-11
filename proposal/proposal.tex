@@ -47,7 +47,22 @@ Encoding communication protocols as \textit{session types} is one approach to ac
 
 \subsection{On Verification}
 
+Interactive theorem proving and proof assistants has seen an upsurge in recent years. Especially within the domain of programming language research, there is a strong emphasis now on providing mechanised proofs accompanying any work in the area. 
+
+POPLMARK
+--------
+SPL (+CPL)
+* Most formalisations are informal, making it difficult to extend the development to a larger setting.
+* Mistakes can easily slip into a development nullifying work
+* Considerable manual effort must be expended to update all proofs to support an extension and it is not immediately obvious which definitions may need updated
+* A lot of proof assistants offer a platform with which to study languages rigorously
+WTD
+
+
 The increasing use of proof assitants and interactive theorem proving in programming language research has spiked....
+
+Most research on session type systems has consisted of an informal presentation of the languages being defined. That is, the semantics and proofs are performed manually rather than aided by a proof assistant.
+
 POPLMARK
 save on proof engineering effort as is championed by the POPLMARK challenge aimed at reducing the effort for researchers to code programming language metatheory it provides a library needed to perform various things define various parts of programming languages viewed to be difficult to formalise including handling binders and freshness they also mention handling of linear typing but renege on actually formulating this as part of their challenge they insist it is a future work here is the future
 Metatheory library
@@ -101,13 +116,15 @@ present an overview of relevant previous work including articles, books, and
 existing software products. Critically evaluate the strengths and weaknesses
 of the previous work.
 
+Here I will briefly distinguish between pi and lambda calculi, since the majority of mechanisations have been in the pi calculus. I will then discuss the various systems which have been informally formalised. A possible outline of a plan:
+
 System F-pop~\cite{Mazurak:2010:LLT}
 session polymorphism formalised in Coq, Simon's Isabelle/HOL
 development.
 Philip Wadler's Propositions as Sessions~\cite{Wadler:2012}
 Simon J. Gay and Vasco Vasconcelos (LAST)~\cite{Gay:2010:LAST}
 Lolliproc~\cite{Mazurak:2010:LCC}
-PhD thesis~\cite{Mazurak:2013:LPP}
+\citeauthor{Mazurak:2013:LPP}'s PhD thesis~\cite{Mazurak:2013:LPP}
 
 Roughly can be split into
 

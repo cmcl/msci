@@ -1,0 +1,13 @@
+Title:
+Authors:
+
+SPL (+CPL)
+* Most formalisations are informal, making it difficult to extend the development to a larger setting.
+* Mistakes can easily slip into a development nullifying work
+* Considerable manual effort must be expended to update all proofs to support an extension and it is not immediately obvious which definitions may need updated
+* A lot of proof assistants offer a platform with which to study languages rigorously
+WTD
+* Present challenges based on mechanising aspects of programming languages deemed tricky; hope is to provide an array of alternatives
+* Focus is on variable binding techniques, handling complex inductions such as mutual definitions, allow for experimenting with real implementations, reuse
+RFW
+* Note that linear handling of type environments as a future aspect to consider -- doesn't the metatheory library handle this?
