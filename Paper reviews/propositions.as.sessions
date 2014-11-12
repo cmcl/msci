@@ -1,0 +1,43 @@
+Title: Propositions as Sessions
+Author: Phil Wadler
+
+SPL (+CPL)
+* 
+WTD
+* CP process calculus
+  - difference between it and pi calculus: names bound in output not created
+from a binder --> point of difference in our formalism if we represent bounds
+as de Bruijn indices because explicit naming of bound vars will cause problems
+  - axiom rule: mentions Bellin & Scott using prop. vars instead of propositions; does this mean prop. vars are free variables and can occur without a binder like forall or exists?
+  - cut rule is a binder; change our formalism to reflect this i.e. remove atom argument in cut rule and parallel comp. --> we still get the assurance that gamma and delta are distinct via uniqueness
+  - structural rules for cut: swap two subprocesses under parallel composition; two pars are associative; reduce a cut and an axiom to a named substitution in a process --> can be defined as two reflexive and transitive inductive types over cp rules
+  - associativity performs two tasks the pi calculus equivalent but also scope extrusion which is only valid if the binder is not in the process we now bind over e.g. (nu x . P) | Q = nu x. (P | Q) iff x \notin Q ---> what is scope extrusion in cofinite representation?
+  - change the rules for input and output to not mention the binder need to differentiate between an empty input/output and one with an implicit binder in the surface syntax
+  - principal cut reductions for dual types: the cut of input and output takes advantage of the same bound name being chosen --> in the Coq formalism we should try to quantify over this reduction relation with some list of free names such that the reduction picks the same name on both sides; I believe this can be achieved by simply quantifying over all hypthoses. Note the corresponding pi calculus rule performs substitution to achieve the same result
+  - one may convert between A x B and B x A using a neat flipping trick (does this work for all CP operator mutual duals?)
+  - 1 = end output; bot = end input
+  - all of the principal cut reductions are over a binder. This could get messy...
+  - for the branch case perhaps the judgment should be Q \/ R for derivation x.case(Q,R) since we actually have to choose one; we don't want both hypthoses
+  - Mix rule defined using the input/output units to stitch two processes together; parallel execution
+  - contract rule for server replication performs replication for each free name in the server's environment so that each client receives their own copy of the server's service
+  - polymorphism: existential = type application (lambda calculus) = sending a type (polymorphic pi calculus)
+  - forall rule: treat X as a de Bruijn index? The issue here is that we then have both names for channels and propositional variables both being treated as de Bruijn indices. I think this is okay though, since they are different types; one is binding propositions
+  - So apparently one can have unfinished processes waiting on communication occurring across a channel; I thought these were linear environments and so had to be used entirely
+  - What is the simplest way to code up these relations? Can I avoid writing them up by hand?
+  - Well, the reduction relation follows a similar pattern to a standard reduction relation for, say the lambda calculus, it just has extra explicit rules defining a translation between the derivation on the left and the derivation on the right
+  - Theorem 1 looks like it can be proven using induction on the reduction relation
+  - Theorem 2 looks like induction on P |- Gamma
+  - So instantiation of a polymorphic type by a polymorphic type (impredicative polymorphism) is allowed --> how to handle this in the induction;
+see Gallier (1990)
+* GV calculus
+  - the two end session types may have to be used to guarantee termination unless I look into the work by Lindley and Morris where they have just one end, but this may be specific to their operational semantics
+  - it might be best to go with Wadler's approach at least initially but look into the Lindley and Morris paper
+  - GV has weakening for untyped values which is translated into weakening for a type dual of (translate T) and since all unlimited types are translated to !A for some A the dual of that is ?A and then one can apply the correct weakening rule of CP
+  - relates translations of functions in GV to classical linear logic counterparts and, for unlimited functions, to call-by-name or call-by-value semantics
+  - Translation in CPS style using channel to transmit the result of the translation
+  - How to obtain the channel with which to perform the translation? [[M]]_z?
+ROF
+RFW
+POC
+WIL
+* How can I build GV such that it will be easily extendable to HGV?
