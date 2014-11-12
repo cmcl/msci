@@ -42,7 +42,48 @@ SPL (+CPL)
 * Paper presentations usually follow named variable approach but this is more difficult to use in a formal setting requiring one to reason about alpha-equivalence of names
 * Another approach suggest by prior work is to use de Bruijn indices to represent variables with out-of-range numbers representing free variables in some environment; there are significant issues with handling weakening and ordering in the enviornments since usually the position in the enviornment of free variables is significant to the encoding (unbound indices represent position in environment)
 * In both approaches one must be careful about variable capture in substiution, lifting in the case of de Bruijn and performing alpha-conversion in the named case
+* Other researchers have used different representations for bound and free variables resp. such as a locally named representation (bound/free names distinct) or a locally nameless (bound - de Brujin indices, free - named representation)
+ - both approaches prevent variable capture during substitution but in locally named representations its more difficult to handle alpha-conversion of names
+* HOAS delegates substitution and alpha-equivalence reasoning to the meta language
+* Strong HOAS (where terms appear in a negative position) are not directly encodable in Coq instead one must use weak HOAS which uses a separate type for the binder; we must now define substitution rather than getting it for free from the metalanguage
+* Gordon first to use locally nameless representation for binders
+  - operates on closed terms
+  - requires several induction principles to strengthen hypthoses
+  - not the same as cofinite approach since the abs case only reasons about one variable (picking one fresh name from some finite set)
+* McKinna and Pollack's named approach
+  - too weak intro rule for typing abs (needs to hold for all names not in environment)
+* Leroy's POPLMARK solution follows McKinna and Pollack's idea
+  - no exists-fresh definition
+  - requires to proof lemmas about rules with binders allowing exists-fresh definitions
 WTD
+* Choose locally nameless approach; HOAS not fully general-purpose
+* locally nameless doesn't require shifting operations as in complete de Bruijn case, no variable capture nor issues with structural recursion
+* Terms admit unbound indices; define predicate on locally closed terms.
+  - substitution requires assumption about substitute term; it is usually an free variable but it may in some cases be a term and it is assumed this term is locally closed
+* Opening term definition for simply typed lambda calculus only works if zero is only unbound index
+* The important point here is that *no* bound variables are explicitly mentioned in terms; it is implicit so we can choose an appropriately fresh name
+* Define opening and substitution for bound variables and also free variable substitution with associated properties
+* Define closing a term as well
+* Typing relation ensures it holds for locally closed expressions since there is *no* bound variable case!! -- I should enforce this too! (CP + GV formalisms)
+* Also, to ensure well-environments are used in typing they check uniqueness only in the free variable case but not in any other case -- is this sound? Why? If so, can I do the same with CP/GV?
+* Locally closed terms not onerous to maintain since some definitions implicitly ensure it
+* The authors consider adequacy of their representation -- I should do this too, especially if I start changing the judgments
+* Co-finite quantification used to avoid having to peform renamings of variables used to open abstractions i.e. exists-fresh provides induction principles which yield induction hypotheses that only hold for one particular variable -- it is too weak an induction principle and thus may result in having to renaming the actual variable in question if it turns out said variable is not fresh enough
+  - Informal proofs don't have this problem since we appeal to the assumption that all variable names are sufficiently fresh
+* Stronger induction principle given by considering all names not in some finite set L to type the abstraction opening; L can be chosen to be sufficiently large when applying the induction hypothesis
+* Some cases require renaming even with cofinite quantification e.g. showing type checking is deciable
+  - for abs case required to pick fresh var to show body typechecks
+  - however, this choice may have affected whether the body type checked so we require a renaming lemma (proved using substitution and weakening -- can I have weakening?) This could be a complicated issue in my development since I do not want to allow weakening
+* Formalised 1A+2A of POPLMARK challenge (subtyping F_sub and type safety)...
+* ..., Calculus of Constructions ...
+  - proof of confluence parallel beta reduction
+  - typing inversion results
+  - preservation
+* Multi-binders represented bvars as (x,y) pair (binder x and bound variable y of that binder x) -- could be useful for my GV formalisation for connect-with-to rule
+* infrastructure - machinery for core lemmas e.g. substitution, proportional to number of binding constructs
+* Satisfy POPLMARK criteria: transparency, low overhead, not specific to particular theorem prover
 ROF
 RFW
+* Integration with Ott
+* automatic generation of infrastructure proofs
 POC
