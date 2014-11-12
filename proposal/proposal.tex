@@ -1,7 +1,8 @@
 \documentclass{mprop}
 
+\usepackage{hyperref}
 \usepackage{graphicx}
-\usepackage[style=alphabetic,natbib=true]{biblatex}
+\usepackage[style=alphabetic,natbib=true,maxbibnames=100]{biblatex}
 \addbibresource{proposal.bib}
 
 % alternative font if you prefer
@@ -47,27 +48,23 @@ Encoding communication protocols as \textit{session types} is one approach to ac
 
 \subsection{On Verification}
 
-Interactive theorem proving and proof assistants has seen an upsurge in recent years. Especially within the domain of programming language research, there is a strong emphasis now on providing mechanised proofs accompanying any work in the area. 
+In programming language research, work on static type systems is usually presented on paper complete with informal proofs of correctness for the system properties. Most types systems in the session types community have been developed in this way. However, it is more difficult to extend work using this approach as may be unclear how changes affect proofs and one will typically have to re-consider all proofs to be convinced the properties still hold. More generally, unassisted formalisms are error-prone to develop and do not provide a firm basis upon which other researchers can experiment; often it will require ``rolling your own'' compiler for the language of interest.
 
-POPLMARK
---------
+Proof assistants such as Coq~\cite{Coq:manual} offer a platform on which to develop programming languages and type systems and associated proofs of properties with strong guarantees of correctness. Not only is proving with a proof assistant much less error-prone than the unaided approach, it also eases extension of the system since the proof assistant will highlight parts of proofs that have been affected by changes. However, one may have to prove more properties using this approach since this setting does not permit appealing to human intuition. For example, alpha-equivalence and freshness and binders are usually assumed in informal presentations, whereas in the mechanised setting one has to explicitly encode and reason about these properties~\cite{Aydemir:2005:MMM, Aydemir:2008:EFM}.
 
+Interactive theorem proving and proof assistants has seen an upsurge in use in recent years. Especially within the domain of programming language research, there is a strong emphasis on providing mechanised proofs accompanying work in the area. Indeed, \citeauthor{Aydemir:2005:MMM} have published a series of challenges on mechanising programming languages aimed at providing a starting point for comparing different representation techniques~\cite{Aydemir:2005:MMM}. Another aim is to provide reusable libraries for common reasoning needed across programming language developments, e.g. handling of typing environments. This effort has resulted in a number of different approaches for representing programming languages within proof assistants. For instance, \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM} present a representation of lambda calculi where bound variables are represented as \textit{de Bruijn indices}~\footnote{A de Bruijn index is a number used to represent a bound variable which indicates the position of its binder (starting from zero for the innermost binder). For example, $\lambda~(\lambda~1)$ corresponds to $\lambda x. \lambda y. x$, i.e. the constant function.} and free variables are represented as named terms; the \textit{locally nameless} representation. Their work resulted in a library for handling commonly occurring aspects in programming lanuage metatheory which has been used since in other developments~\cite{Park:2014:MMW}. Resuable libaries reduce the proof engineering effort needed for later works, in contrast to the pen-and-paper approach, and some proof assistants (as is the case with Coq) allow one to extract a program from the development which can provide a typechecker or compiler for the language formalised~\footnote{Curry-Howard strikes again; a proof of decidability of typechecking corresponds to a program implementing a typechecker for the language.}
 
-The increasing use of proof assitants and interactive theorem proving in programming language research has spiked....
+%% Most research on session type systems has consisted of an informal presentation of the languages being defined. That is, the semantics and proofs are performed manually rather than aided by a proof assistant.
 
-Most research on session type systems has consisted of an informal presentation of the languages being defined. That is, the semantics and proofs are performed manually rather than aided by a proof assistant.
+%% POPLMARK
+%% save on proof engineering effort as is championed by the POPLMARK challenge aimed at reducing the effort for researchers to code programming language metatheory it provides a library needed to perform various things define various parts of programming languages viewed to be difficult to formalise including handling binders and freshness they also mention handling of linear typing but renege on actually formulating this as part of their challenge they insist it is a future work here is the future
+%% Metatheory library
 
-POPLMARK
-save on proof engineering effort as is championed by the POPLMARK challenge aimed at reducing the effort for researchers to code programming language metatheory it provides a library needed to perform various things define various parts of programming languages viewed to be difficult to formalise including handling binders and freshness they also mention handling of linear typing but renege on actually formulating this as part of their challenge they insist it is a future work here is the future
-Metatheory library
-
-construct an argument for the use of a proof assistant and interactive theorem proving technologies to formalise a framework for developing type systems involving session types that are based on lambda calculi so that we can use such a development to reason about a variety of type systems while minimising proof effort tie this into an introduction into the subfield of session types and what they are good for essentially motivating our project in this space additionally we can introduce the reader to the discipline of interactivetheorem proving and formal methods more generally as a way to formalise programming languages highlighting the benefits of reusability increased
-
-correctness and something what else could we say i think it would appropriate
-to mention that the session types studied so far include both pi and lambda
-calculi and it may be beneficil if the reader was informed also the pi
-calculus paradigms do not fit well into the existing mainstream programming
-language paradigms this seems like it should be in the statement of the problem section down below also i should read more of jtod's slides because this writing just keep writing malarky might just be what i need to pound out the pages because it eliminates thoughts as they come into the head what else adopt and focus we have in the problem statement but perhaps those paragraphs should be re-jigged for up here multithreaded functional programming with linear typing for session types a number of these systems use different type systems but they are based on all the lambda calculus fundamentally so to have a generic framework to encode these variants would 
+%% correctness and something what else could we say i think it would appropriate
+%% to mention that the session types studied so far include both pi and lambda
+%% calculi and it may be beneficil if the reader was informed also the pi
+%% calculus paradigms do not fit well into the existing mainstream programming
+%% language paradigms this seems like it should be in the statement of the problem section down below also i should read more of jtod's slides because this writing just keep writing malarky might just be what i need to pound out the pages because it eliminates thoughts as they come into the head what else adopt and focus we have in the problem statement but perhaps those paragraphs should be re-jigged for up here multithreaded functional programming with linear typing for session types a number of these systems use different type systems but they are based on all the lambda calculus fundamentally so to have a generic framework to encode these variants would 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Statement of Problem}
@@ -152,7 +149,8 @@ for free variables and de Brujin indices for bound variables. There was
 also novel use of cofinite quantification to rules with bindings to increase
 the strength of the induction principles and reduce the amount of renaming
 of bound variables (due to freshness issues) significantly. The theory was
-tested with formalisations of the simply-typed lambda calculus, System F_sub,
+tested with formalisations of the simply-typed lambda calculus,
+System $F_{<:}$,
 the calculus of constructions. The formalisations followed the POPLMARK
 challenge (type soundness, preservation, progress).
 
