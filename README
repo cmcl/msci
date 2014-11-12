@@ -1,0 +1,12 @@
+Formalisation of Session-based Lambda Calculus Type Systems
+------------------------------------------------------------
+
+For the Coq development see: ./Coq Developments/msci/
+
+The Makefile should compile both the top-level proof scripts and the UPenn
+Metatheory library.
+
+Note the .dir_locals.el file (currently) has a hardcoded directory path for
+looking for the Coq files. This file is loaded by Proof General when
+interacting with the Coq system. You do not require to change it if you do not
+intend to run the development.
