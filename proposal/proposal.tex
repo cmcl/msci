@@ -69,36 +69,24 @@ Interactive theorem proving and proof assistants has seen an upsurge in use in r
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Statement of Problem}
 
-clearly state the problem to be addressed in your forthcoming project. Explain
-why it would be worthwhile to solve this problem.
-
 The aim of this project is to develop a framework for formalising lambda
 calculus type systems involving session types using interactive theorem
 proving (in particular, the system Coq). The motivation for the framework is
 that it will enable a whole class of related languages and type systems to be
 formalised with little extra proof effort. Inspired by previous work on a
-mechanised framework for pi calculus type systems~\cite{Gay:2001:FFP}, we
+mechanised framework for pi calculus type systems~\cite{Gay:2001:FFP} we
 shift to the lambda calculus to provide a basis on which session types for
 mainstream programming languages can be studied whilst taking advantage of
 previous proof effort and specialising only for those parts unique to the
-particular system.
+particular system. The framework will be heavily based on calculi developed by \citeauthor{Walder:2012}~\cite{Wadler:2012} describing a relationship between classical linear logic (based on previous work by \citeauthor{Caires:2010:STI}~\cite{Caires:2010:STI}) and a functional session-based language (based on previous work by \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST}).
+
+These ideas can be expanded by considering the recent work by \citeauthor{Lindley:2014:SAP} \cite{Lindley:2014:SAP} who extend GV by \cite{Wadler:2012} to HGV, supporting session forwarding, replication and polymorphism.
 
 From the generic framework, a number of directions can be explored including
 session polymorphism, session subtyping, and permitting different forms of
-aliasing within the type system. The majority of previous session type systems
-for mainstream programming languages has focussed exclusively on linear type
-systems. One disadvantage of a linear type system is the need to re-bind
-objects after each operation~\cite{Gay:2010:LAST}. Principally, we intend to
-instantiate the framework with a type system that provides the benefits of
-aliasing with the guarantees of linearity, termed ``adoption and focus''. The
-``adoption and focus'' type system is non-trivial requiring special language
-features, e.g. to manage capabilities which can be thought as a form of object
-liveness mechanism, so the framework design must support such flexibility by,
-e.g allowing the typing judgements to be extended such that the capabilities
-can be included in soundness results. The instantiation will demonstrate that
-the framework supports a wide range of languages and type systems providing
-researchers the ability to harness the power of formal verification in the
-design, implementation and documentation of session-based type systems.
+aliasing within the type system. Initially, it will be interesting to extend the work of \citeauthor{Walder:2012} to consider session polymorphism corresponding to the quantifiers in the CP process calculus
+
+The majority of previous session type systems for mainstream programming languages have focussed exclusively on linear type systems. One disadvantage of a linear type system is the need to re-bind objects after each operation~\cite{Gay:2010:LAST}. Principally, we intend to instantiate the framework with a type system that provides the benefits of aliasing with the guarantees of linearity, termed ``adoption and focus''. The ``adoption and focus'' type system is non-trivial requiring special language features, e.g. to manage capabilities which can be thought as a form of object liveness mechanism, so the framework design must support such flexibility by, e.g allowing the typing judgements to be extended such that the capabilities can be included in soundness results. The instantiation will demonstrate that the framework supports a wide range of languages and type systems providing researchers the ability to harness the power of formal verification in the design, implementation and documentation of session-based type systems.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background Survey}
