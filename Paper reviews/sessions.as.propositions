@@ -1,0 +1,26 @@
+Title: Sessions as Propositions
+Authors: Sam Lindley and J. Garrett Morris
+
+SPL (+CPL)
+* Previous work investigates relationship between linear logic and pi calculus
+* Extended to relationship between a process calculus and functional programming language
+* Provided translation from process calculus (CP) to functional language but is one way since process calculus more expressive than functional language
+WTD
+* Provide extended functional language, HGV and provide translation to a session-typed fragment, HGVpi that preserves typing
+* Translation from HGVpi to CP and vice versa provided
+* HGVpi simplifies translation from HGV to CP
+* HGV provides variables (session variables to be quantified over, presumably)
+* HGV provides server/client session types
+* Remove terminate construct as in GV by treating end? as unlimited (support for weakening and contraction)
+* Also have a fork term (cf. with-connect-to in GV) -- sounds better, corresponds closer to GV
+* 'fork x.M' returns the output end session type and types at the dual of x
+* link implements session forwarding and has more power available to it than an equivalent in GV/LAST since HGV supports polymorphic session types
+* HGVpi translates non-session aspects of HGV into session-type equivalents via a translation relation (-)*
+* Note that the translation for functions and tensor product types looks like the opposite of what one would expect (parallels the translation of GV into CP in Wadler's paper) but this is because it types the interface offered to a client; authors suggest "implementation and interface" duality; implementing a linear function corresponds to input on a channel therefore we need output on the other end of the channel --> interface which is provided
+ROF
+RFW
+* Study work by Dardha et al. who provide CPS translation of pi calculus extended with session types to linear pi calculus (investigate relationship with current work's translation)
+* Semantics for HGV, prove correspondence with CP cut elimination
+* Recursion: fixed points in linear logic
+* non-determinism
+POC
