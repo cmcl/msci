@@ -101,7 +101,10 @@ The background for this project can be categorised roughly as work on session ty
 
 \subsubsection{In the \pi Calculus}\label{sec:pis}
 
-So we have work on pi calculus and linear logic by \citeauthor{Caires:2010:STI}~\cite{Caires:2010:STI}.
+\citeauthor{Caires:2010:STI} \cite{Caires:2010:STI} provide a $\pi$ calculus type system with session types.
+They use a labelled transition system to represent process reduction with observable actions on channels.
+The relationship with intuitionistic linear logic provides absence of deadlocks in session-based communication.
+There is structural and congruence rules for processes.
 
 \subsubsection{In the \lambda Calculus}\label{sec:lam}
 
@@ -114,6 +117,8 @@ Given the systems non-trivial features such as recursive session types (?) and b
 \subsubsection{Fusion}
 
 A number of systems incorporate both a functional language surface syntax with and translation to a more primitive process calculus. \citeauthor{Wadler:2012}'s recent work~\cite{Wadler:2012} fuses together a process calculus, CP, based on earlier work, on a relationship between the $\pi$ calculus and linear logic, by \citeauthor{Caires:2010:STI} with a functional language, GV, based on LAST by \citeauthor{Gay:2010:LAST}. The work describes a continuation-passing style (CPS) translation from GV to CP treating session types as propositions in a classical linear logic.
+The process calculus is slightly different to that described in the $\pi$DILL apart from being classical in nature the constructs for server replication are different, CP provides a weakening and contraction semantics whereas this is encode in one rule for process reduction by caires
+Wadler also dispenses with the structural rules; subsumed by the Assoc and Swap typing derivations and the cut reduction (double check why he does this)
 
 Other work similar in vain to ... is Lolliproc~\cite{Mazurak:2010:LCC} and classical extension to second-order logic by \citeauthor{Mazurak:2013:LPP}'s PhD thesis~\cite{Mazurak:2013:LPP}.
 

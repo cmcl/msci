@@ -10,6 +10,13 @@ WTD
 * only consider binary choice -- so do I, link back to this paper
 * Differs in server reduction than presented in Wadler paper; only one output term no ?x<y>.Q
 * labelled transition system to describe process reductions and performing actions
+* 1 corresponding to the end session type -- the grammar doesn't prevent it from being used as a value within a session e.g. !1.1 which is also possible in GV; is it prevent by the typing rules?
+* Distinct linear and non-linear environments
+* Singleton right-hand side environments; denotes the communication performed by process P when composed with a process whose communication behaviour matches channels defined in the linear/nonlinear environments of P
+* Have a 0 process construct not present in Wadler's system.
+* Define sequent calculus for dual intuitionistic linear logic
+* Define a typed extraction procedure from a dual intuitionistic linear logic formula to a pi calculus process
+* cut elimination in DILL corresponds to process reduction in pi calculus up to structural congruence
 ROF
 RFW
 POC
