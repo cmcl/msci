@@ -2,6 +2,7 @@
 
 \usepackage{hyperref}
 \usepackage{graphicx}
+\usepackage{cmll}
 \usepackage[style=alphabetic,natbib=true,maxbibnames=100]{biblatex}
 \addbibresource{proposal.bib}
 
@@ -78,7 +79,7 @@ mechanised framework for pi calculus type systems~\cite{Gay:2001:FFP} we
 shift to the lambda calculus to provide a basis on which session types for
 mainstream programming languages can be studied whilst taking advantage of
 previous proof effort and specialising only for those parts unique to the
-particular system. The framework will be heavily based on calculi developed by \citeauthor{Walder:2012}~\cite{Wadler:2012} describing a relationship between classical linear logic (CP) and a functional language with session types (GV). GV is a minimal functional language supporting linearity so I believe such a basis will be general enough to support reasoning about a large class of functional languages with similar base properties.
+particular system. The framework will be heavily based on calculi developed by \citeauthor{Wadler:2012}~\cite{Wadler:2012} describing a relationship between classical linear logic (CP) and a functional language with session types (GV). GV is a minimal functional language supporting linearity so I believe such a basis will be general enough to support reasoning about a large class of functional languages with similar base properties.
 
 From this framework, a number of directions can be explored including
 session polymorphism, session subtyping, and permitting different forms of
@@ -95,28 +96,23 @@ These extensions will argue that the framework supports a wide range of language
 %% existing software products. Critically evaluate the strengths and weaknesses
 %% of the previous work.
 
-The background for this project can be categorised roughly as work on session types (sub-divided into pi and lambda calculi variants, \S \ref{sec:pis} and \S \ref{sec:lam}, respectively) and work on formal verification using proof assistants (particularly focussed on programming language mechanisation). Finally, some recent work has merged these two disciplines by verifying session-based pi calculus systems (\S \ref{sec:asts})
+The background for this project can be categorised roughly as work on session types (sub-divided into $\pi$ and $\lambda$-calculi variants, \S \ref{sec:pis} and \S \ref{sec:lam}, respectively) and work on formal verification using proof assistants (particularly focussed on programming language mechanisation). Finally, some recent work has merged these two disciplines by verifying a session-based $\pi$-calculus system (\S \ref{sec:asts}).
 
 \subsection{Session-based Type Systems and Linear Logic}\label{sec:sts}
 
-\subsubsection{In the \pi Calculus}\label{sec:pis}
+\subsubsection{In the $\pi$-calculus}\label{sec:pis}
 
-\citeauthor{Caires:2010:STI} \cite{Caires:2010:STI} provide a $\pi$ calculus type system with session types.
-They use a labelled transition system to represent process reduction with observable actions on channels.
-The relationship with intuitionistic linear logic provides absence of deadlocks in session-based communication.
-There is structural and congruence rules for processes.
+\citeauthor{Caires:2010:STI} \cite{Caires:2010:STI} present a connection between $\pi$-calculus type system with session types and intuitionistic linear logic. They equate linear propositions with session types of the process calculus via a bidirectional translation relation. They use a labelled transition system to represent process reduction with observable actions on channels. They represent dual intuitionistic linear logic as a sequent calculus providing logical connectives which have session-based interpretations. Process reduction steps are equated with proof reduction via cut elimination. The relationship with intuitionistic linear logic provides absence of deadlocks in session-based communication for the process calculus.
 
-\subsubsection{In the \lambda Calculus}\label{sec:lam}
+\subsubsection{In the $\lambda$-calculus}\label{sec:lam}
 
-Simon Gay inter-process thingL
-Previous work by the same authors ... had nonstandard operational semantics due to handling of channels.
+\citeauthor{Gay:2008:STI}~\cite{Gay:2008:STI} provide a $\lambda$-calculus based language with session types for channel primitives. The type system is nonstandard, featuring an additional environment for tracking the session types of channels; these types are modified during term reduction to reflect communication. The extra channel environment is provided to support possible aliasing of channels by treating channel variables as a pointers or references into the channel environment. So, for a channel $c$ of session type $S$, a variable $x$ referring to this channel would be declared to have type $Chan~c$. The typing judgements and term reduction relation must be augmented to handle these environments. Unfortunately, a side-effect of this is that function types must specify the pre and post-states of channel environments and therefore, the type of arguments cannot work up to alpha-equivalence of channel identifiers. That is, if two channels $c$ and $d$ have the same session type, one cannot define a function to operate on variables of either channel type since the function definition will explicitly mention the identifier for the channel (in this case either, $Chan~c$ or $Chan~d$). However, the system does provide an attractive non-linear channel type which has been neglected in favour of a linear treatment of channels in more recent work~\cite{Gay:2010:LAST,Mazurak:2010:LCC,Wadler:2012}. Certainly, it is the case that an aliased approach would fit better with mainstream programming languages and perhaps the ``adoption and focus'' system~\cite{Fahndrich:2002} could offer some insights.
 
-The work on a linear functional language with session types by \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} is the main influence for the current project from the body of work on session-based $\lambda$ calculus type systems. They provide a paper proofs of their systems type (and runtime?) safety. 
-Given the systems non-trivial features such as recursive session types (?) and buffered channels it will more difficult to extend these proofs manually. A mechanised version would provide stronger guarantees of correctness and allow others to more easily alter proofs as a result of changes made to the language.
+The work on a linear functional language with session types by \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} is the main influence for the current project from the body of work on session-based $\lambda$-calculus type systems. They provide paper proofs of their systems type (and runtime?) safety. Given the systems non-trivial features such as recursive session types and buffered channels for supporting asynchronous communication it will more difficult to extend these proofs manually. A mechanised version would provide stronger guarantees of correctness and allow others to more easily alter proofs as a result of changes made to the language.
 
 \subsubsection{Fusion}
 
-A number of systems incorporate both a functional language surface syntax with and translation to a more primitive process calculus. \citeauthor{Wadler:2012}'s recent work~\cite{Wadler:2012} fuses together a process calculus, CP, based on earlier work, on a relationship between the $\pi$ calculus and linear logic, by \citeauthor{Caires:2010:STI} with a functional language, GV, based on LAST by \citeauthor{Gay:2010:LAST}. The work describes a continuation-passing style (CPS) translation from GV to CP treating session types as propositions in a classical linear logic.
+A number of systems incorporate both a functional language surface syntax with and translation to a more primitive process calculus. \citeauthor{Wadler:2012}'s recent work~\cite{Wadler:2012} fuses together a process calculus, CP, based on earlier work, on a relationship between the $\pi$-calculus and linear logic, by \citeauthor{Caires:2010:STI} with a functional language, GV, based on LAST by \citeauthor{Gay:2010:LAST}. The work describes a continuation-passing style (CPS) translation from GV to CP treating session types as propositions in a classical linear logic.
 The process calculus is slightly different to that described in the $\pi$DILL apart from being classical in nature the constructs for server replication are different, CP provides a weakening and contraction semantics whereas this is encode in one rule for process reduction by caires
 Wadler also dispenses with the structural rules; subsumed by the Assoc and Swap typing derivations and the cut reduction (double check why he does this)
 
@@ -144,7 +140,7 @@ In contrast to a higher-order approach
 though the first-order encoding has its disadvantages namely one has to reason about variable substitution since without a higher-order approach this is not handled automatically by the meta-language
 the locally nameless representation is chosen with a few simplifying assumptions regarding variable substitution and closed terms
 
-One may need to avoid certain tricky formulations. For instance, instead of providing n-ary branch and choice in GV, we provide only binary versions of these operators to simplify the development. This change is not restrictive however, since CP itself provides only binary versions of $\par$ and $&$. Likewise, on a more technical note, we almagmate all types into one inductive definition and provide a predicate for restricting propositions to consider only valid session types. \citeauthor{Wadler:2012} defines the GV grammar as a mutually recursive; session types are types which may contain types as subcomponents (arguments to send, for example). Unfortunately, handling mutually inductive definitions in Coq can be quite involved; requiring one to rely on the Coq system being able to provide a stronger mutual induction principle or defining one manual. Such a definition is possible, but it complicates elimination via the induction principle.
+One may need to avoid certain tricky formulations. For instance, instead of providing n-ary branch and choice in GV, we provide only binary versions of these operators to simplify the development. This change is not restrictive however, since CP itself provides only binary versions of plus ($\oplus$) and with ($\with$) constructs. Likewise, on a more technical note, we almagmate all types into one inductive definition and provide a predicate for restricting propositions to consider only valid session types. \citeauthor{Wadler:2012} defines the GV grammar as a mutually recursive; session types are types which may contain types as subcomponents (arguments to send, for example). Unfortunately, handling mutually inductive definitions in Coq can be quite involved; requiring one to rely on the Coq system being able to provide a stronger mutual induction principle or defining one manual. Such a definition is possible, but it complicates elimination via the induction principle.
 ( since the standard induction tactic will not work?)
 
 Engineering Formal Metatheory
