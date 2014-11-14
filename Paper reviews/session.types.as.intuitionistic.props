@@ -2,7 +2,14 @@ Title: Session Types as Intuitionistic Linear Propositions
 Authors: Luís Caires and Frank Pfenning
 
 SPL (+CPL)
+* Previous work utilising linearity in pi calculus based type systems did so in an ad-hoc informal fashion merely taking advantage of it w.r.t typing contexts or channel usage semantics
 WTD
+* present connection between session types in pi calculus type system and intuitionistic linear propositions
+* correspondence between proof reductions/conversion and process reductions/equivalence
+* absence of deadlocks
+* only consider binary choice -- so do I, link back to this paper
+* Differs in server reduction than presented in Wadler paper; only one output term no ?x<y>.Q
+* labelled transition system to describe process reductions and performing actions
 ROF
 RFW
 POC
