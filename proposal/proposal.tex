@@ -96,7 +96,7 @@ These extensions will argue that the framework supports a wide range of language
 %% existing software products. Critically evaluate the strengths and weaknesses
 %% of the previous work.
 
-The background for this project can be categorised roughly as work on session types (sub-divided into $\pi$ and $\lambda$-calculi variants, \S \ref{sec:pis} and \S \ref{sec:lam}, respectively) and work on formal verification using proof assistants (particularly focussed on programming language mechanisation). Finally, some recent work has merged these two disciplines by verifying a session-based $\pi$-calculus system (\S \ref{sec:asts}).
+The background for this project can be categorised roughly as previous work on session-based type systems (sub-divided into $\pi$ and $\lambda$-calculi variants, \S \ref{sec:pis} and \S \ref{sec:lam}, respectively) and previous work on formal verification using proof assistants (particularly focussed on programming language mechanisation). Finally, some recent work has merged these two disciplines by verifying a session-based $\pi$-calculus system (\S \ref{sec:asts}).
 
 \subsection{Session-based Type Systems and Linear Logic}\label{sec:sts}
 
@@ -112,28 +112,41 @@ The work on a linear functional language with session types by \citeauthor{Gay:2
 
 \subsubsection{Fusion}
 
-A number of systems incorporate both a functional language surface syntax with and translation to a more primitive process calculus. \citeauthor{Wadler:2012}'s recent work~\cite{Wadler:2012} fuses together a process calculus, CP, based on earlier work, on a relationship between the $\pi$-calculus and linear logic, by \citeauthor{Caires:2010:STI} with a functional language, GV, based on LAST by \citeauthor{Gay:2010:LAST}. The work describes a continuation-passing style (CPS) translation from GV to CP treating session types as propositions in a classical linear logic.
-The process calculus is slightly different to that described in the $\pi$DILL apart from being classical in nature the constructs for server replication are different, CP provides a weakening and contraction semantics whereas this is encode in one rule for process reduction by caires
-Wadler also dispenses with the structural rules; subsumed by the Assoc and Swap typing derivations and the cut reduction (double check why he does this)
+A number of systems incorporate both a functional language surface syntax with and translation to a more primitive process calculus. We shall focus on two such systems presented recently which have a connection to linear logic.
 
-Other work similar in vain to ... is Lolliproc~\cite{Mazurak:2010:LCC} and classical extension to second-order logic by \citeauthor{Mazurak:2013:LPP}'s PhD thesis~\cite{Mazurak:2013:LPP}.
+Lolliproc~\cite{Mazurak:2010:LCC} provides a functional language with concurrency primitives as a surface syntax on top of an underlying process calculus. The process calculus provides classial linear logical interpretation for the functional language, utilising double negation elimination to provide session type duality. Concurrency is provided by control operators which, respectively, spawn a child process and wait for a child process to completed. The spawning process creates a channel between parent and child process; a channel is represented as a continuation and the type denotes the communication protocol (i.e. session type) between parent and child. The surface syntax is an effective abstraction layer for the programmer since it does not expose the underlying process calculus. The system has proofs for type safety, strong normalisation and confluence. Confluence provides the guarantee that no race conditions can occur, strong normalisation prohibits nonterminating programs and type safety assures deadlock freedom. Deadlock-freedom is implied by the acyclic communication graphs (progress of process reduction) which occur between parallel processes; follows from permitting only one channel between two halves of parallel composition construct in $\pi$-calculus. Most of the development is supported by Coq proof scripts with remaining issues due to reasoning about communication graphs. The development does not provide primitive send and receives; instead, these are encoded as linear functions. 
+%% and classical extension to second-order logic by \citeauthor{Mazurak:2013:LPP}'s PhD thesis~\cite{Mazurak:2013:LPP}.
+
+\citeauthor{Wadler:2012}'s recent work~\cite{Wadler:2012} brings together a process calculus, CP, based on the earlier work by \citeauthor{Caires:2010:STI} with a functional language, GV, based on LAST by \citeauthor{Gay:2010:LAST}. The work describes a continuation-passing style (CPS) translation from GV to CP treating session types as propositions in a classical linear logic. The process calculus is slightly different to that described in the $\pi$DILL~\cite{Caires:2010:STI}, apart from being classical in nature, the constructs for server replication are modified; CP provides a weakening and contraction rules whereas these are encode in one rule for process reduction by \citeauthor{Caires:2010:STI}. Additionally, rather than a sequent calculus, \citeauthor{Walder:2012} uses a natural deduction style for defining the process calculus. As presented, GV does not support all features of CP and thus the translation is one way (GV to CP). \citeauthor{Lindley:2014:SAP}~\cite{Lindley:2014:SAP} extend GV to provide support for polymorphism and replication, following a similar CPS translation scheme.
+
+%% Wadler also dispenses with the structural rules; subsumed by the Assoc and Swap typing derivations and the cut reduction (double check why he does this)
 
 \subsection{Mechanising Programming Language Metatheory}
 
+metatheory/poplmark papers.
+
 \subsubsection{Applications to Session-based Type Systems}\label{sec:asts}
 
-session polymorphism formalised in Coq
+%\citeauthor{
+%An extensible approach to session polymorphism
+\citeauthor{Goto:2014}~\cite{Goto:2014} provide a $\pi$-calculus session-based type system providing session polymorphism. The system is more general than session polymorphism via subtyping~\cite{Gay:2005:SST}. The authors mechanise their type system and its properties in the Coq proof assistant. However, the system mechanised is restricted to the $\pi$-calculus and the main focus is proving soundness properties for the deduction rules allowing polymorphism on input, rather than a more general basis for studying programming with session types.
 
 \subsection{Formal Tidbits}
 
-Simon's pi calculus framework may be worth mentioning here
-System F-pop~\cite{Mazurak:2010:LLT}
+While not related to session-based type systems
+\citeauthor{Gay:2001:FFP} provides a $\pi$-calculus framework in Isabelle/HOL
+had the aim of mechanising in mind for session type support with linear and non-linear type system design
+name introduction in proof development from custome user-defined tactics are an issue. in coq one can specify the names directly and allow custom tactics to receive arguments for names. generally setting the hypotheses up correctly will provide suitable names automatically and it is only during destruction of some hypotheses that Coq may generate unsuitable names
+
+% System F-pop~\cite{Mazurak:2010:LLT}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Proposed Approach}\label{sec:approach}
 
 state how you propose to solve the software development problem. Show that
 your proposed approach is feasible, but identify any risks.
+
+I intend to mechanise the calculi described by \citeauthor{Wadler:2012}~\cite{Wadler:2012} using the Coq proof assistant.
 
 First order approach taken - represent bound variables as de Bruijn indices
 In contrast to a higher-order approach
