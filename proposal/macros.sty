@@ -1,0 +1,23 @@
+\usepackage{mathpartir}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{color,graphics}
+
+% listings
+\definecolor{ltblue}{rgb}{0,0.4,0.4}
+\definecolor{dkblue}{rgb}{0,0.1,0.6}
+\definecolor{dkgreen}{rgb}{0,0.4,0}
+\definecolor{dkviolet}{rgb}{0.3,0,0.5}
+\definecolor{dkred}{rgb}{0.5,0,0}
+\usepackage{listings}
+\usepackage{lstocaml}
+\usepackage{lstcoq}
+
+% misc
+\newcommand\code[1]{{\tt\small #1}}
+\newcommand\tac{\coqinline|aac_reflexivity|}
+\newcommand\aacrewrite{\coqinline|aac_rewrite|}
+\newcommand\aacinstances{\coqinline|aac_instances|}
+\newcommand\eqac{\mathrel{\equiv_{AC}}}
+\newcommand\fresh[2]{#1 \# #2}
+\newcommand\match[4]{#1:#2\lhd #3:#4}
