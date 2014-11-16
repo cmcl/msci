@@ -161,12 +161,9 @@ Another aspect of the encoding is how to define terms. The intrinsic encoding de
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Work Plan}
 
-show how you plan to organize your work, identifying intermediate deliverables
-and dates.
+I aim to have completed the GV and CP definitions complete with reduction and commuting conversion rules for CP by the end of December. This will require definition of infrastructure for handling binders for both GV, CP channels and CP propositional variables and inductive definitions for well-typed terms, commuting conversions, and CP principal cut reductions. So far I have completed some of the definitions for well-typed terms and CP process rules; the remaining rules require the infrastructure for substitution and opening of binders.
 
-I aim to have completed the GV and CP definitions complete with reduction and commuting conversion rules for CP by the end of December. This will require definition of infrastructure for handling binders for both GV, CP channels and CP propositional variables; 
-
-It remains to define the translation between GV and CP which I envisage will be the bulk of the work, requiring several rules on typing derivations; I envisage being able to define these as inductive datatype constructors.
+After December, it remains to define the translation between GV and CP which I envisage will be the bulk of the work, requiring several rules on typing derivations; I envisage being able to define these as inductive datatype constructors but I shall take care to reuse any suitable libraries that are available, e.g. if there is a library for handling CPS translations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
