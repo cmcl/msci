@@ -165,7 +165,7 @@ Inductive term : Set :=
 Coercion tm_bvar : nat >-> term.
 Coercion tm_id : atom >-> term.
 
-(** In the style of ``Engineering Formal Metatheory'' (??) we define
+(** In the style of ``Engineering Formal Metatheory'' we define
     substitution of expressions for atoms and opening of expressions with
     bound variables.
 *)
@@ -225,9 +225,35 @@ Notation "{ k ~> u } t" := (open_rec k u t) (at level 68) : gv_scope.
 *)
 Fixpoint open t u := open_rec 0 u t.
 
-(** A locally closed term has no unbounded variables. *)
-(* Inductive lc : term -> Prop :=*)
-
+(** A locally closed term has no unbounded variables. Note also using
+    cofinite quantification with binding constructs. *)
+Inductive lc : term -> Prop :=
+  | lc_id : forall (x:atom), lc (tm_id x)
+  | lc_unit : lc tm_unit
+  | lc_abs : forall k (L:atoms) (T:typ k) M
+                    (CO: forall (x:atom), x `notin` L -> lc (open M x)),
+               lc (tm_abs T M)
+  | lc_app : forall M N (MLC: lc M) (NLC: lc N), lc (tm_app M N)
+  | lc_pair : forall M N (MLC: lc M) (NLC: lc N), lc (tm_pair M N)
+  | lc_let : forall kt ku (L:atoms) (T:typ kt) (U:typ ku) M N
+                    (MLC: lc M)
+                    (NCO: forall (x y:atom)
+                                 (XL: x `notin` L `union` singleton y)
+                                 (YL: y `notin` L),
+                            lc ({1 ~> x} (open N y))),
+               lc (tm_let T U M N)
+  | lc_send : forall M N (MLC: lc M) (NLC: lc N), lc (tm_send M N)
+  | lc_recv : forall M (MLC: lc M), lc (tm_recv M)
+  | lc_select : forall lbl M, lc (tm_select lbl M)
+  | lc_case : forall (L:atoms) M NL NR (MLC: lc M)
+                     (NLCO: forall (x:atom), x `notin` L -> lc (open NL x))
+                     (NRCO: forall (x:atom), x `notin` L -> lc (open NR x)),
+                lc (tm_case M lb_inl NL lb_inr NR)
+  | lc_connect : forall (L:atoms) (T:typ lin) M N
+                        (MCO: forall (x:atom), x `notin` L -> lc (open M x))
+                        (NCO: forall (x:atom), x `notin` L -> lc (open N x)),
+                   lc (tm_connect T M N)
+  | lc_end : forall M (MLC: lc M), lc (tm_end M).
 
 (** Typing environments are lists of (atom,typ) pairs. *)
 Definition tenv := list (atom * (typ lin + typ un)).
@@ -275,4 +301,3 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
   | wt_tm_end : forall k Φ M (T: typ k) (WT: Φ ⊢ M ∈ typ_tensor T typ_szero),
                   Φ ⊢ tm_end M ∈ T
 where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
-
