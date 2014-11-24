@@ -281,7 +281,9 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
   | wt_tm_unit : nil ⊢ tm_unit ∈ typ_unit
   | wt_tm_weaken : forall Φ x N k (U: typ k) T (WT: Φ ⊢ N ∈ U),
                      (Φ ++ (x ~ inr T)) ⊢ N ∈ U
-(*  | wt_tm_contract : *)
+  | wt_tm_contract : forall Φ x x' (T: typ un) N k (U:typ k)
+                            (WT: (Φ ++ (x ~ inr T) ++ (x' ~ inr T)) ⊢ N ∈ U),
+                       (Φ ++ (x ~ inr T)) ⊢ (subst x' x N) ∈ U
 (*  | wt_tm_labs : *)
   | wt_tm_send : forall k Φ Ψ M (T: typ k) N S
                         (IS: is_session S)
