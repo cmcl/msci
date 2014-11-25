@@ -2,8 +2,8 @@
 
 % Include Coq lstlisting language definition and things upon which it depends.
 \usepackage{macros}
-
 \usepackage{hyperref}
+
 \usepackage{listings}
 \usepackage{lstcoq}
 \usepackage{graphicx}
@@ -20,6 +20,7 @@
 %\usepackage{fancyheadings}
 
 \newcommand{\fpop}{System F${}^\circ$\xspace}
+\newcommand{\1}{\textbf{1}\xspace}
 
 % other potentially useful packages
 %\uspackage{amssymb,amsmath}
@@ -76,9 +77,9 @@ particular system. The framework will be heavily based on calculi developed by \
 
 From this framework, a number of directions can be explored including
 session polymorphism, session subtyping, and permitting different forms of
-aliasing within the type system. The recent work by \citeauthor{Lindley:2014:SAP} \cite{Lindley:2014:SAP}, who extend GV to HGV supporting session forwarding, replication and polymorphism, would be a interesting place to start when looking to add these extensions.
+aliasing within the type system. The recent work by \citeauthor{Lindley:2014:SAP} \cite{Lindley:2014:SAP}, who extend GV to HGV supporting session forwarding, replication and polymorphism, would be an interesting place to start when looking to add these extensions.
 
-Additionally, the majority of previous session type systems for mainstream programming languages have focussed exclusively on linear type systems. One disadvantage of a linear type system is the need to re-bind objects after each operation~\cite{Gay:2010:LAST}. We could look to extend the GV type system to provide the benefits of aliasing with the guarantees of linearity, termed ``adoption and focus'' as introduced by~\citeauthor{Fahndrich:2002} \cite{Fahndrich:2002}. The ``adoption and focus'' type system is non-trivial requiring special language features, e.g. to manage capabilities which can be thought as a form of object liveness mechanism, so the GV typing judgements must be extended such that the capabilities can be included in soundness results. A translation to CP must also be defined for the ``adopt'' and ``focus'' constructs.
+Additionally, the majority of previous session type systems for mainstream programming languages have focussed exclusively on linear type systems. One disadvantage of a linear type system is the need to re-bind objects after each operation~\cite{Gay:2010:LAST}. One could extend the GV type system to provide the benefits of aliasing with the guarantees of linearity, termed ``adoption and focus'' as introduced by~\citeauthor{Fahndrich:2002} \cite{Fahndrich:2002}. The ``adoption and focus'' type system is non-trivial requiring special language features, e.g. to manage capabilities which can be thought as a form of object liveness mechanism, so the GV typing judgements must be extended such that the capabilities can be included in soundness results. A translation to CP must also be defined for the ``adopt'' and ``focus'' constructs.
 
 These extensions will argue that the framework supports a wide range of languages and type systems, providing researchers the ability to harness the power of formal verification in the design, implementation and documentation of session-based type systems.
 
@@ -93,11 +94,40 @@ The background for this project can be categorised roughly as previous work on s
 
 \subsection{Session-based Type Systems and Linear Logic}\label{sec:sts}
 
-\subsubsection{In the $\pi$-calculus}\label{sec:pis}
+\subsubsection{In the \texorpdfstring{$\pi$}{pi}-calculus}\label{sec:pis}
 
-\citeauthor{Caires:2010:STI} \cite{Caires:2010:STI} present a connection between $\pi$-calculus type system with session types and intuitionistic linear logic. They equate linear propositions with session types of the process calculus via a bidirectional translation relation. They use a labelled transition system to represent process reduction with observable actions on channels. They represent dual intuitionistic linear logic as a sequent calculus providing logical connectives which have session-based interpretations. Process reduction steps are equated with proof reduction via cut elimination. The relationship with intuitionistic linear logic provides absence of deadlocks in session-based communication for the process calculus. The correspondence of session types to linear logic propositions is an important step in providing a solid logical foundation for a concurrent type theory; in the same way ``sequential'' type theory ($\lambda$-calculi) profitted from a logical perspective. However, for session types to become a more usable tool for programming distributed communication systems (the ultimate goal, of course, is to write more correct programs), we cannot be expected to program directly in the $\pi$-calculus; a more mainstream programming paradigm must be built upon these solid logical foundations. With that in mind, enter the $\lambda$-calculus!
+\citeauthor{Caires:2010:STI} \cite{Caires:2010:STI} present a connection between a $\pi$-calculus type system with session types ($\pi$DILL) and dual intuitionistic linear logic (DILL)~\cite{Barber:1996}. They equate linear propositions with session types of the process calculus via a bidirectional translation relation. They use a binary reduction relation and a labelled transition system to represent process reduction and process action with its environment as is standard~\cite{Sangiorgi:2001}.
 
-\subsubsection{In the $\lambda$-calculus}\label{sec:lam}
+They represent dual intuitionistic linear logic as a sequent calculus providing logical connectives which have session-based interpretations in $\pi$DILL. Consider their rules for branch and choice in $\pi$DILL
+
+... here are the rules ...
+
+Note that branch and choice both have some notion of branching (R rules for +/L rules for \&) and at least for \& this is counter-intuitive in session-based setting, since the intutition for \& is that of offering a choice between alternatives rather than making the choice. Here, however, the intuition should be extended to account for its location in the typing judgement. The channel is on the left of the sequent which caires and pfenning suggest as some service providing to the process.
+
+While in the case of branch and choice, which have different semantics this is mitigated somewhat but as can be seen, there are two rules for selecting a branch, one for branch and another for choice if we consider their server example
+
+As noted by Wadler...jfp there is a certain amount of redundancy in the two-sided nature of the rules forcing one to commit to a certain convention when typing a communication system. Consider, an equivalent system to the buy/quote example given by caires and pfen. In the following, the types Book, Quote and Receipt can be considered synoms for the type \1 as in caires and pfenning.
+
+... server example here ...
+
+The derivation for ClientBody is T1R, T implies R, T tensor R, T plus R2. Except for the final rule, these are exact opposites of the rules used for ...
+
+The final system is near identical to the one produced by the example given caires and pfenning. Here the client communicates along the channel $c$ on the right and the server utilises the channel $c$ on the left. This typing, while correct, violates the intuition given by caires and pfenning of the context providing the services used by the process. The example above suggests the server utilises some channel provided by the client. On the other hand, one could imagine such a channel being setup between two communicating agents; the ``owner'' of the channel is largely irrelevant. Note that clientproto is in fact the dual of serverproto in Wadler's classical process calculus.
+
+then it is clear the server is providing a choice to the client indicated by the branch (\&). Yet an equal derivation can be obtained
+
+Consider a shopper which operates according to a certain protocol. the idea being that the shopper can conduct transactions with any server which provides the desired service. Concretely, suppose the shopper operates according to the following protocol (a similar example to the one produced by caires and pfenning ... and inspired by gay and vasco)
+
+choice (buy : ! Book . ! Card . ? Receipt . end, quote : ! Book . ? Price . end)
+
+then in $\pi$DILL we can construct a shopper protocol (treating book, card, address
+
+Process reduction steps are equated with proof reduction via cut elimination. The relationship with intuitionistic linear logic provides absence of deadlocks in session-based communication for the process calculus.
+
+The correspondence of session types to linear logic propositions is an important step in providing a solid logical foundation for a concurrent type theory; in the same way ``sequential'' type theory ($\lambda$-calculi) profitted from a logical perspective. However, for session types to become a more usable tool for programming distributed communication systems (the ultimate goal, of course, is to write more correct programs), we cannot be expected to program directly in the $\pi$-calculus; a more mainstream programming paradigm must be built upon these solid logical foundations. With that in mind, enter the $\lambda$-calculus!
+
+\subsubsection{In the \texorpdfstring{$\lambda$}{lambda}-calculus}
+\label{sec:lam}
 
 \citeauthor{Gay:2008:STI}~\cite{Gay:2008:STI} provide a $\lambda$-calculus based language with session types for channel primitives. The type system is nonstandard, featuring an additional environment for tracking the session types of channels; these types are modified during term reduction to reflect communication. The extra channel environment is provided to support possible aliasing of channels by treating channel variables as pointers or references into the channel environment. So, for a channel $c$ of session type $S$, a variable $x$ referring to this channel would be declared to have type $Chan~c$ and $c~:~S$ would be in the channel enviornment. The typing judgements and term reduction relation must be augmented to handle these environments. Unfortunately, a side-effect of this is that function types must specify the pre and post-states of channel environments and therefore, the type of arguments cannot work up to alpha-equivalence of channel identifiers. That is, if two channels $c$ and $d$ have the same session type, one cannot define a function to operate on variables of either channel type since the function definition will explicitly mention the identifier for the channel (in this case either, $Chan~c$ or $Chan~d$). However, the system does provide an attractive non-linear channel type which has been neglected in favour of a linear treatment of channels in more recent work~\cite{Gay:2010:LAST,Mazurak:2010:LCC,Wadler:2012}. Certainly, it is the case that an aliased approach would fit better with mainstream programming languages and perhaps the ``adoption and focus'' system~\cite{Fahndrich:2002} could offer some insights.
 
@@ -149,7 +179,17 @@ I intend to mechanise the calculi described by \citeauthor{Wadler:2012}~\cite{Wa
 
 Following \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM}, I use the locally nameless first-order representation for binders and free variables, preventing variable capture issues present in other first-order representations. Likewise, I make some simplifying assumptions about variable substitution, namely that \textit{closed} terms (terms with no unbound indices) are substituted for variables, which avoids having to define lifting constructs on the substitute term. The typing rules will not contain a rule for an unbound index so this decision is sound. A consequence is that we must define a notion of opening language terms involving binders as described by~\citeauthor{Aydemir:2008:EFM}. For example, an abstraction with body term $t$ which is well-typed if $t$ is well-typed when its unbound index, representing the argument to the abstraction, is replaced by some fresh variable $x$, written $t^x$. Some terms in GV require multiple binders but I believe it will be straightforward to extend this notion. Unfortunately, I must define similar operations on CP terms and handle substitution and opening on them as well as propositions which can accept propositional variables. I hope to be able to generalise as much as possible with the help of the Metatheory library. Alternatively, I could have chosen a higher-order abstract syntax (HOAS) approach such as the parametric version (PHOAS) described by~\citeauthor{Chlipala:2008:PHOAS}~\cite{Chlipala:2008:PHOAS}. PHOAS relies on the metalanguage (Coq, in this case) for handling binders and substitution so has less overhead in managing syntax than the locally nameless approach. However, variables are now parameters defined at the level of the metalanguage so can represent terms not valid in the language being mechanised. Further, a higher-order approach would prevent the use of the Metatheory library which provides a number of useful tactics for manipulating typing contexts.
 
-For handling binder freshness, I chose to adopt the cofinite quantification approach described by~\cite{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM}, which excludes a finite set of variables from being considered as the binder. In contrast, the traditional ``exists-fresh'' approach, where the binder is only required to be fresh within the abstraction's body, does not produce strong enough induction principles in some cases.
+For handling binder freshness, I chose to adopt the cofinite quantification approach described by~\cite{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM}, which excludes a finite set of variables from being considered as the binder. In contrast, the traditional ``exists-fresh'' approach, where the binder is only required to be fresh within the abstraction's body, does not produce strong enough induction principles in some cases. This change will necessitate changes to the typing rules of GV and CP. Consider for instance the connect with rule in GV~\cite{Wadler:2012}:
+
+... connect with rule here ... ... connect rule using cofinite quantification
+
+The conclusion binds a variable
+
+Consider also the rule for output in CP~\cite{Wadler:2012} and its corresponding version used here:
+
+... output in CP ... ... version used here with cofinite quantification ...
+
+The rule here ... is this needed? What are we showing here with the different version?
 
 While the aim is to be faithful to \citeauthor{Wadler:2012}'s description, I may need to alter the approach slightly to avoid tricky formulations. For instance, instead of providing n-ary branch and choice in GV, we provide only binary versions of these operators to simplify the development. This change is not restrictive however, since CP itself provides only binary versions of plus ($\oplus$) and with ($\with$) constructs. Likewise, on a more technical note, we amalgamate all types into one inductive definition and provide a predicate for restricting typing rules to consider only valid session types. \citeauthor{Wadler:2012} defines GV types as a set of mutually recursive definitions; session types are types which may contain types as subcomponents (arguments to send, for example). Unfortunately, handling mutually inductive definitions in Coq can be quite involved; requiring one to either rely on the Coq system to provide a stronger mutual induction principle or defining one manually. Such a definition is possible, but it complicates elimination via the induction principle.
 % ( since the standard induction tactic will not work?)
@@ -164,6 +204,8 @@ Another aspect of the encoding is how to define terms. The intrinsic encoding de
 I aim to have completed the GV and CP definitions including reduction and commuting conversion rules for CP by the end of December. This will require definition of infrastructure for handling binders for both GV, CP channels and CP propositional variables, and inductive definitions for well-typed terms, commuting conversions and CP principal cut reductions. So far I have completed some of the definitions for well-typed terms and CP process rules; the remaining rules require the infrastructure for substitution and opening of binders.
 
 After December, it remains to define the translation between GV and CP which I envisage will be the bulk of the work, requiring several rules on typing derivations; I envisage being able to define these as inductive datatype constructors but I shall take care to reuse any suitable libraries that are available, e.g. a library for handling CPS translations.
+
+ For this step of the work, I allocated one month. For the remainder, I shall look to extend the definitions of GV and CP using the definitions I have provided
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

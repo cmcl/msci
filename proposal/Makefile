@@ -6,7 +6,7 @@ PDFS:=$(TEX:%.tex=%.pdf)
 all: $(PDFS)
 
 proposal.pdf:proposal.tex $(DEPS)
-	latexmk -pdf proposal.tex
+	latexmk -xelatex proposal.tex
 
 clean:
 	rm -f *.log *.aux *.toc *.out
