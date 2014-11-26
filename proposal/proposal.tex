@@ -24,6 +24,8 @@
 
 \addbibresource{proposal.bib}
 
+\input{macros}
+
 % alternative font if you prefer
 %\usepackage{times}
 
@@ -436,33 +438,29 @@ Some recent mechanisation effort focuses on providing a basis for studying
 linearity within type systems. This work is of interest to the current project
 since most session-based type systems assume a strictly linear type system
 which requires re-binding of channel identifiers, such as in the functional
-setting of \citeauthor{Gay:2010:LAST}. As discussed previously, it would be
-interesting to study a system for supporting side-effecting functions (aka
-closures) for session channels. In order to achieve this, operational
-semantics for GV would need to be defined, and the recent draft by
-\citeauthor{Lindley:2014:SPS} may provide some useful insights on how best to
-do this. \citeauthor{Mazurak:2010:LLT} present an extension to System F
-(termed \fpop) with a notion describing types as having linear or non-linear
-\textit{kind}~\cite{Mazurak:2010:LLT}. This extension is motivated by previous
-work on incorporating linearity into type systems. Overall, previous attempts
-either hamper the inclusion of desirable programming features (such as
-polymorphism), or do not adequately reflect non-linearity as the common case
-leading to awkward programming. \fpop avoids these deficiencies by
-categorising types into kinds whilst maintaining similar semantics to System
-F. Mechanised proofs for type soundness and parametricity are presented, and
-the semantics allow non-linear types to be treated as linear. Examples show
-the system can provide a wide range of permissions on interfaces, from full
-exclusive access to read-only shared references. The system is very close to
-the Alms language described by \citeauthor{Aldrich:2009} but has the advantage
-that the soundness results (type safety and parametricity) have been entirely
-mechanised in Coq. It would be interesting to see if one could encode the
-``adopt'' and ``focus'' constructs in this system to compare its
-expressiveness to Alms. The ``adopt'' rule can be encoded similarly to the
-ShareRef example~\cite{Mazurak:2010:LLT}. It is not immediately clear how to
-encode the ``focus'' rule within the present semantics, as one needs to
-prevent non-linear access to its argument implying the presence of knowledge
-about aliasing within the typing judgements; absence of aliasing is not
-identified with linear kinded types in \fpop.
+setting of \citeauthor{Gay:2010:LAST}. \citeauthor{Mazurak:2010:LLT} present
+an extension to System F (termed \fpop) with a notion describing types as
+having linear or non-linear \textit{kind}~\cite{Mazurak:2010:LLT}. This
+extension is motivated by previous work on incorporating linearity into type
+systems. Overall, previous attempts either hamper the inclusion of desirable
+programming features (such as polymorphism), or do not adequately reflect
+non-linearity as the common case leading to awkward programming. \fpop avoids
+these deficiencies by categorising types into kinds whilst maintaining similar
+semantics to System F. Mechanised proofs for type soundness and parametricity
+are presented, and the semantics allow non-linear types to be treated as
+linear. Examples show the system can provide a wide range of permissions on
+interfaces, from full exclusive access to read-only shared references. The
+system is very close to the Alms language described by
+\citeauthor{Aldrich:2009} but has the advantage that the soundness results
+(type safety and parametricity) have been entirely mechanised in Coq. It would
+be interesting to see if one could encode the ``adopt'' and ``focus''
+constructs in this system to compare its expressiveness to Alms. The ``adopt''
+rule can be encoded similarly to the ShareRef
+example~\cite{Mazurak:2010:LLT}. It is not immediately clear how to encode the
+``focus'' rule within the present semantics, as one needs to prevent
+non-linear access to its argument implying the presence of knowledge about
+aliasing within the typing judgements; absence of aliasing is not identified
+with linear kinded types in \fpop.
 
 While not related to programming language metatheory,
 \citeauthor{Gay:2001:FFP}~\cite{Gay:2001:FFP} provides a $\pi$-calculus
@@ -495,14 +493,18 @@ Ltac my_tactic :=
 
 \citeauthor{Goto:2014}~\cite{Goto:2014} provide a $\pi$-calculus session-based
 type system providing session polymorphism. The system is more general than
-session polymorphism via subtyping~\cite{Gay:2005:SST}. more general how?
-
-
-The authors mechanise their type system and its properties in the Coq proof
-assistant. However, the system mechanised is restricted to the $\pi$-calculus
-and the main focus is proving soundness properties for the deduction rules
-allowing polymorphism on input, rather than a more general basis for studying
-programming with session types.
+session polymorphism via subtyping~\cite{Gay:2005:SST} in that it is capable
+of typing a generic forwarding process between mutually dual session
+types. Defining such a process is not possible using subtyping since one
+wishes to restrict the types to be dual, not a subtype of some other
+type. This more general form of polymorphism is achieved by permitting input
+on all session types (including \lstinline{end}, the terminal session type)
+and then employing transition hypotheses to ensure the type permits such
+input. The authors mechanise their type system and its properties in the Coq
+proof assistant. However, the mechanised system is restricted to the
+$\pi$-calculus and the main focus is proving soundness properties for the
+deduction rules allowing polymorphism, rather than a more general basis for
+studying programming with session types.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Proposed Approach}\label{sec:approach}
@@ -633,6 +635,13 @@ envisage will be the bulk of the work, requiring several rules on typing
 derivations; I envisage being able to define these as inductive datatype
 constructors but I shall take care to reuse any suitable libraries that are
 available, e.g. a library for handling CPS translations.
+
+As discussed previously, it would be
+interesting to study a system for supporting side-effecting functions (aka
+closures) for session channels. In order to achieve this, operational
+semantics for GV would need to be defined, and the recent draft by
+\citeauthor{Lindley:2014:SPS} may provide some useful insights on how best to
+do this. 
 
 For this step of the work, I allocated one month. For the remainder, I shall
 look to extend the definitions of GV and CP using the definitions I have
