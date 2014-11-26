@@ -9,7 +9,19 @@
 \usepackage{graphicx}
 \usepackage{xspace}
 \usepackage{cmll}
-\usepackage[style=alphabetic,natbib=true,maxbibnames=100]{biblatex}
+
+\usepackage[style=alphabetic,sorting=nymt,natbib=true,
+  maxbibnames=100]{biblatex}
+
+\DeclareSortingScheme{nymt}{
+  \sort{
+    \field{author}
+    \field{year}
+    \field{month}
+    \field{title}
+  }
+}
+
 \addbibresource{proposal.bib}
 
 % alternative font if you prefer
@@ -69,17 +81,23 @@ calculus type systems involving session types using interactive theorem
 proving (in particular, the system Coq). The motivation for the framework is
 that it will enable a whole class of related languages and type systems to be
 formalised with little extra proof effort. Inspired by previous work on a
-mechanised framework for $\pi$-calculus type systems~\cite{Gay:2001:FFP}, we
+mechanised framework for $\pi$-calculus type systems~\cite{Gay:2001:FFP}, I
 shift to the lambda calculus to provide a basis on which session types for
 mainstream programming languages can be studied, whilst taking advantage of
 previous proof effort and specialising only for those parts unique to the
 particular system. The framework will be heavily based on calculi developed by \citeauthor{Wadler:2012}~\cite{Wadler:2012} describing a relationship between classical linear logic (CP) and a functional language with session types (GV). GV is a minimal functional language supporting linearity so I believe such a basis will be general enough to support reasoning about a large class of functional languages with similar base properties.
 
 From this framework, a number of directions can be explored including
-session polymorphism, session subtyping, and permitting different forms of
+session polymorphism session subtyping, and permitting different forms of
 aliasing within the type system. The recent work by \citeauthor{Lindley:2014:SAP} \cite{Lindley:2014:SAP}, who extend GV to HGV supporting session forwarding, replication and polymorphism, would be an interesting place to start when looking to add these extensions.
 
-Additionally, the majority of previous session type systems for mainstream programming languages have focussed exclusively on linear type systems. One disadvantage of a linear type system is the need to re-bind objects after each operation~\cite{Gay:2010:LAST}. One could extend the GV type system to provide the benefits of aliasing with the guarantees of linearity, termed ``adoption and focus'' as introduced by~\citeauthor{Fahndrich:2002} \cite{Fahndrich:2002}. The ``adoption and focus'' type system is non-trivial requiring special language features, e.g. to manage capabilities which can be thought as a form of object liveness mechanism, so the GV typing judgements must be extended such that the capabilities can be included in soundness results. A translation to CP must also be defined for the ``adopt'' and ``focus'' constructs.
+%remove the adoption and focus stuff and add something about typestate
+
+Additionally, the majority of previous session type systems for mainstream programming languages have focussed exclusively on linear type systems. One disadvantage of a linear type system is the need to re-bind objects after each operation~\cite{Gay:2010:LAST}. One could extend the GV type system to provide the benefits of aliasing with the guarantees of linearity which has been studied in several systems using a variety of alias control forms~\cite{Fahndrich:2002,Mazurak:2010:LLT,Tov:2011}. Another approach which has been utilised in previous session-based $\lambda$-calculus type systems, is to support side-effecting functions by allowing functions to close over channels in the environment~\cite{Gay:2003:STI,Vasconcelos:2006:TCM}. An interesting extension to the base GV type system would be to incorporate the closure semantics into the type system which would permit functions to modify session-typed channels in the environment. The typing rules would be similar to that described by \citeauthor{Gay:2010:MST} for typing expressions in an object-oriented setting for session types~\cite{Gay:2010:MST}, e.g. the rule for lambda abstraction could be:
+
+... lambda abstraction ...
+
+The $\Gamma$, $\Gamma '$ environments represent pre and post-states of variables satisfied by term $t$. The typing for the function argument is inspired by typestate-oriented programming~\cite{Aldrich:2009} and says that the function expects a channel behaving according to protocol $A$ and alters the state of the channel internally producing a channel behaving according to protocol $B$. It remains to be seen whether such typing rules can be encoded as described in the GV setting.
 
 These extensions will argue that the framework supports a wide range of languages and type systems, providing researchers the ability to harness the power of formal verification in the design, implementation and documentation of session-based type systems.
 
@@ -114,6 +132,8 @@ The derivation for ClientBody is T1R, T implies R, T tensor R, T plus R2. Except
 
 The final system is near identical to the one produced by the example given caires and pfenning. Here the client communicates along the channel $c$ on the right and the server utilises the channel $c$ on the left. This typing, while correct, violates the intuition given by caires and pfenning of the context providing the services used by the process. The example above suggests the server utilises some channel provided by the client. On the other hand, one could imagine such a channel being setup between two communicating agents; the ``owner'' of the channel is largely irrelevant. Note that clientproto is in fact the dual of serverproto in Wadler's classical process calculus.
 
+most important: duality of sessions is obscured in $\pi$DILL because of the nature of the typing judgements
+
 then it is clear the server is providing a choice to the client indicated by the branch (\&). Yet an equal derivation can be obtained
 
 Consider a shopper which operates according to a certain protocol. the idea being that the shopper can conduct transactions with any server which provides the desired service. Concretely, suppose the shopper operates according to the following protocol (a similar example to the one produced by caires and pfenning ... and inspired by gay and vasco)
@@ -122,16 +142,24 @@ choice (buy : ! Book . ! Card . ? Receipt . end, quote : ! Book . ? Price . end)
 
 then in $\pi$DILL we can construct a shopper protocol (treating book, card, address
 
-Process reduction steps are equated with proof reduction via cut elimination. The relationship with intuitionistic linear logic provides absence of deadlocks in session-based communication for the process calculus.
+Process reduction steps are equated with proof reduction via cut elimination. The relationship with proof normalisation in DILL provides absence of deadlocks in session-based communication for the process calculus.
 
 The correspondence of session types to linear logic propositions is an important step in providing a solid logical foundation for a concurrent type theory; in the same way ``sequential'' type theory ($\lambda$-calculi) profitted from a logical perspective. However, for session types to become a more usable tool for programming distributed communication systems (the ultimate goal, of course, is to write more correct programs), we cannot be expected to program directly in the $\pi$-calculus; a more mainstream programming paradigm must be built upon these solid logical foundations. With that in mind, enter the $\lambda$-calculus!
 
 \subsubsection{In the \texorpdfstring{$\lambda$}{lambda}-calculus}
 \label{sec:lam}
 
-\citeauthor{Gay:2008:STI}~\cite{Gay:2008:STI} provide a $\lambda$-calculus based language with session types for channel primitives. The type system is nonstandard, featuring an additional environment for tracking the session types of channels; these types are modified during term reduction to reflect communication. The extra channel environment is provided to support possible aliasing of channels by treating channel variables as pointers or references into the channel environment. So, for a channel $c$ of session type $S$, a variable $x$ referring to this channel would be declared to have type $Chan~c$ and $c~:~S$ would be in the channel enviornment. The typing judgements and term reduction relation must be augmented to handle these environments. Unfortunately, a side-effect of this is that function types must specify the pre and post-states of channel environments and therefore, the type of arguments cannot work up to alpha-equivalence of channel identifiers. That is, if two channels $c$ and $d$ have the same session type, one cannot define a function to operate on variables of either channel type since the function definition will explicitly mention the identifier for the channel (in this case either, $Chan~c$ or $Chan~d$). However, the system does provide an attractive non-linear channel type which has been neglected in favour of a linear treatment of channels in more recent work~\cite{Gay:2010:LAST,Mazurak:2010:LCC,Wadler:2012}. Certainly, it is the case that an aliased approach would fit better with mainstream programming languages and perhaps the ``adoption and focus'' system~\cite{Fahndrich:2002} could offer some insights.
+A series of works by \citeauthor{Gay:2003:STI}~\cite{Gay:2003:STI} and \citeauthor{Vasconcelos:2006:TCM}~\cite{Vasconcelos:2006:TCM} provide a $\lambda$-calculus based language with session types for channel primitives. The type system is nonstandard, featuring an additional environment for tracking the session types of channels; these types are modified during term reduction to reflect communication. The extra channel environment is provided to support possible aliasing of channels by treating channel variables as pointers or references into the channel environment. So, for a channel $c$ of session type $S$, a variable $x$ referring to this channel would be declared to have type $Chan~c$ and $c~:~S$ would be in the channel enviornment. The typing judgements and term reduction relation must be augmented to handle these environments. Unfortunately, a side-effect of this is that function types must specify the pre and post-states of channel environments and therefore, the type of arguments cannot work up to alpha-equivalence of channel identifiers. That is, if two channels $c$ and $d$ have the same session type, one cannot define a function to operate on variables of either channel type since the function definition will explicitly mention the identifier for the channel (in this case either, $Chan~c$ or $Chan~d$). However, the system does provide an attractive non-linear channel type which has been neglected in favour of a linear treatment of channels in more recent works~\cite{Gay:2010:LAST,Mazurak:2010:LCC,Wadler:2012}. Certainly, it is the case that an aliased approach would fit better with mainstream programming languages and perhaps studying a similar system could offer some insights.
 
-The work on a linear functional language with session types by \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} is the main influence for the current project from the body of work on session-based $\lambda$-calculus type systems. They provide paper proofs of their systems type safety. Given the systems non-trivial features such as recursive session types and buffered channels for supporting asynchronous communication it will more difficult to extend these proofs manually. A mechanised version would provide stronger guarantees of correctness and allow others to more easily alter proofs as a result of changes made to the language.
+The ``adoption and focus'' system~\cite{Fahndrich:2002} provides a notion of aliased access to linear resources. The type system requires special language features, e.g. to manage capabilities which can be thought as a form of object liveness mechanism, so GV typing judgements would need to be extended such that the capabilities can be included in soundness results. A extension to the translation to CP to incorporate the ``adopt'' and ``focus'' constructs would also need to be defined. It is not immediately clear how these features would assist in the management of session typed channels. The ``focus'' rule (and linearity generally) enforces an invariant on the focussed object (channel) such that the type is maintained during the focus operation:
+
+... copy of focus operation here ...
+
+Such a rule would appear to only benefit recursive session types. Indeed, focussing on a non-recursive channel would be pointless since one would be prevented from communicating across it since the focus rule requires maintenance of the channel type. Further, it would be undesirable to permit modification of a session type without guaranteeing exclusive access to the channel since this could lead to invalid communication e.g. trying to communicate on a closed channel.
+
+The Alms language~\cite{Aldrich:2009} provides a functional language with affine types based on linear logic. A notion of type \textit{kind} is used to distinguish between affine and unrestricted values. The typing judgements use two contexts; one for variables with unrestricted kind and another for variables of affine type and type variables. Functions are also labelled with a kind which may depend on their arguments e.g. a multiple argument function must have affine kinding if it accepts an affine typed resource as an argument other than the final argument. The reason for this is simply to prevent the function from using an affine resource more than once. Additionally, functions act as closures over their environments so their qualifier may be determined by a free variable in the environment, and a relation is provided to calculate the appropriate kind qualifier. Type variables are provided to support kind polymorphism of function qualifiers. The system is expressive enough to implement session types as a module using a similar approach to \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} although treating channels as affine rather than linearly typed. \citeauthor{Aldrich:2009} note that Alms' type system can support the ``adoption and focus'' system but do not specify details or whether any changes are necessary to their typing judgements. Moreover, \citeauthor{Fahndrich:2002} do not provide operational semantics or soundness results for the ``adoption and focus'' type system.
+
+The work on a linear functional language with session types by \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} is the main influence for the current project from the body of work on session-based $\lambda$-calculus type systems. They provide paper proofs of their system's type safety. Given the non-trivial features of the type system such as recursive session types and buffered channels for supporting asynchronous communication it will be challenging to extend these proofs manually. A mechanised version would provide stronger guarantees of correctness and allow others to more easily alter proofs as a result of changes made to the language.
 
 \subsubsection{Fusion}
 
@@ -144,7 +172,7 @@ Concurrency is provided by control operators which, respectively, spawn a child 
 \citeauthor{Mazurak:2010:LCC} present proofs for type safety, strong normalisation and confluence. Confluence provides the guarantee that no race conditions can occur, strong normalisation prohibits nonterminating programs and type safety assures deadlock-freedom. Deadlock-freedom is implied by the acyclic communication graphs (progress of process reduction) which occur between parallel processes; follows from permitting only one channel between two halves of parallel composition construct in $\pi$-calculus. Most of the development is supported by Coq proof scripts with remaining issues due to reasoning about communication graphs. The development does not provide primitive send and receives; instead, these are encoded as linear functions. 
 %% and classical extension to second-order logic by \citeauthor{Mazurak:2013:LPP}'s PhD thesis~\cite{Mazurak:2013:LPP}.
 
-\citeauthor{Wadler:2012}'s recent work~\cite{Wadler:2012} brings together a process calculus, CP, based on the earlier work by \citeauthor{Caires:2010:STI} with a functional language, GV, based on LAST by \citeauthor{Gay:2010:LAST}. The work describes a continuation-passing style (CPS) translation from GV to CP treating session types as propositions in a classical linear logic. The process calculus is slightly different to that described in by $\pi$DILL~\cite{Caires:2010:STI}, apart from being classical in nature, the constructs for server replication are modified; CP provides a weakening and contraction rules whereas these are encoded in one rule for process reduction by \citeauthor{Caires:2010:STI}. Additionally, rather than a two-sided sequent calculus, \citeauthor{Wadler:2012} uses one-sided sequents for defining the process calculus. As presented, GV does not support all features of CP and thus the translation is one way (GV to CP). \citeauthor{Lindley:2014:SAP}~\cite{Lindley:2014:SAP} extend GV to provide support for polymorphism and replication, following a similar CPS translation scheme.
+\citeauthor{Wadler:2012}'s recent work~\cite{Wadler:2012} brings together a process calculus, CP, based on the earlier work by \citeauthor{Caires:2010:STI} with a functional language, GV, based on LAST by \citeauthor{Gay:2010:LAST}. The work describes a continuation-passing style (CPS) translation from GV to CP treating session types as propositions in a classical linear logic. The process calculus is slightly different to that described in by $\pi$DILL~\cite{Caires:2010:STI}, apart from being classical in nature, the constructs for server replication are modified; CP provides a weakening and contraction rules whereas these are encoded in one rule for process reduction by \citeauthor{Caires:2010:STI}. Additionally, rather than a two-sided sequent calculus, \citeauthor{Wadler:2012} uses one-sided sequents for defining the process calculus. As presented, GV does not support all features of CP and thus the translation is one way (GV to CP). \citeauthor{Lindley:2014:SAP}~\cite{Lindley:2014:SAP} extend GV to provide support for polymorphism and replication, following a similar CPS translation scheme. Lastly, \citeauthor{Lindley:2014:SPS}~\cite{Lindley:2014:SPS} describe operational semantics for GV and their system has greater similarities with LAST than prior GV works, for example, by treating send and receive as linear functions rather than language primitives.
 
 %% Wadler also dispenses with the structural rules; subsumed by the Assoc and Swap typing derivations and the cut reduction (double check why he does this)
 
@@ -167,7 +195,10 @@ Ltac my_tactic :=
 
 \subsubsection{Applications to Session-based Type Systems}\label{sec:asts}
 
-\citeauthor{Goto:2014}~\cite{Goto:2014} provide a $\pi$-calculus session-based type system providing session polymorphism. The system is more general than session polymorphism via subtyping~\cite{Gay:2005:SST}. The authors mechanise their type system and its properties in the Coq proof assistant. However, the system mechanised is restricted to the $\pi$-calculus and the main focus is proving soundness properties for the deduction rules allowing polymorphism on input, rather than a more general basis for studying programming with session types.
+\citeauthor{Goto:2014}~\cite{Goto:2014} provide a $\pi$-calculus session-based type system providing session polymorphism. The system is more general than session polymorphism via subtyping~\cite{Gay:2005:SST}. more general how?
+
+
+ The authors mechanise their type system and its properties in the Coq proof assistant. However, the system mechanised is restricted to the $\pi$-calculus and the main focus is proving soundness properties for the deduction rules allowing polymorphism on input, rather than a more general basis for studying programming with session types.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Proposed Approach}\label{sec:approach}
@@ -206,6 +237,10 @@ I aim to have completed the GV and CP definitions including reduction and commut
 After December, it remains to define the translation between GV and CP which I envisage will be the bulk of the work, requiring several rules on typing derivations; I envisage being able to define these as inductive datatype constructors but I shall take care to reuse any suitable libraries that are available, e.g. a library for handling CPS translations.
 
  For this step of the work, I allocated one month. For the remainder, I shall look to extend the definitions of GV and CP using the definitions I have provided
+
+I am going to look into adapting adoption and focus for the GV setting to allow one to control aliasing on session typed channels independent of their session characteristics so the aim is not to manipulate a linear type but to provide a nonlinear view of some resource and when changes are to be made, enforce some non-aliased view such that there no references in the context
+perhaps the notion I'm looking for is to prevent sending on a guarded type or enforce the guarded type must be preserved in the adoption block
+the trick in the adoption and focus system is that the type will be deallocated when its adopter's lifetime ends; I suspect in our system this is not useful since we will only be permitted to use a channel in a non-aliased context
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
