@@ -1,0 +1,11 @@
+Title: Practical Affine Types
+Authors: Jesse A. Tov and Riccardo Pucella
+
+SPL (+CPL)
+WTD
+* Use a dual context: unrestricted + affine environments
+* Claim to support adoption and focus -- how?
+* Uses kind qualifiers on function types; requires arrow kinds with type variables to allow polymorphism -- specifies how the function may be used
+* Functions with multiple arguments act as closures requiring the qualifier annotations on the arrows to restrict their use if they contain affine types
+POC
+* Functions qualified with kind must still return the capability from a function similar to returning the resource in linear function types -- provide extension to get around the explicit re-binding

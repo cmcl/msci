@@ -9,7 +9,9 @@
 \usepackage{graphicx}
 \usepackage{xspace}
 \usepackage{cmll}
-
+\usepackage{prooftree}
+\usepackage{amsmath}
+\newcommand{\typestate}[2]{{#1}\gg{#2}}
 \usepackage[style=alphabetic,sorting=nymt,natbib=true,
   maxbibnames=100]{biblatex}
 
@@ -24,7 +26,7 @@
 
 \addbibresource{proposal.bib}
 
-\input{macros}
+\input{propmacros}
 
 % alternative font if you prefer
 %\usepackage{times}
@@ -164,7 +166,18 @@ to that described by \citeauthor{Gay:2010:MST} for typing expressions in an
 object-oriented setting for session types~\cite{Gay:2010:MST}, e.g. the rule
 for lambda abstraction could be:
 
-... lambda abstraction ...
+%% \begin{prooftree}
+%% \AxiomC{$\Gamma , x \colon A \triangleright t \colon T \triangleleft \Gamma ' , x \colon B$}
+%% \UnaryInfC{$\Gamma \triangleright t \colon (A \gg B) \rightarrow T \triangleleft \Gamma '$} 
+%% \end{prooftree}
+
+\begin{gather*}
+  \frac{
+    \typeds{\Gamma,\typedid{x}{A}}{t}{T}{\Gamma',\typedid{x}{B}}
+  }{
+    \typeds{\Gamma}{\abs{x}{t}}{\fn{\typestate{A}{B}}{T}}{\Gamma'}
+  }\quad
+\end{gather*}
 
 The $\Gamma$, $\Gamma '$ environments represent pre and post-states of
 variables satisfied by term $t$. The typing for the function argument is
@@ -210,15 +223,18 @@ They represent dual intuitionistic linear logic as a sequent calculus
 providing logical connectives which have session-based interpretations in
 $\pi$DILL. Consider their rules for branch and choice in $\pi$DILL:
 
-... here are the rules ...
+\input{sill-branch-choice-rules}
 
 Note that branch and choice both have some notion of branching (R rules for
-+/L rules for \&) and at least for \& this is counter-intuitive in
-session-based setting, since the intutition for \& is that of offering a
-choice between alternatives rather than making the choice. Here, however, the
-intuition should be extended to account for its location in the typing
-judgement. The channel is on the left of the sequent which caires and pfenning
-suggest as some service providing to the process.
+$\oplus$/L rules for $\with$) and at least for \& this is counter-intuitive in
+a session-based setting, since the intutition for \& is that of
+\emph{offering} a choice between alternatives rather than \emph{making} the
+choice. Here, however, the intuition should be extended to account for its
+location in the typing judgement. The channel is on the left of the sequent,
+and \citeauthor{Caires:2010:STI} suggest one consider the context as services
+being provided to the typed process. Thus, the type of channels in the context
+is really the type of the other endpoint of the channel, and the typed process
+behaves according to the dual protocol. For example, considering $\SILLbranchLTwo$, and taking $A^\bot$ to represent the dual of a protocol $A$, the typed process is behaving according to the protocol $\BChoice{A^\bot}{B^\bot}$, selecting from alternatives (in this case, $\inrterm$) and then behaving according to the selected protocol (in this case, protocol $B^\bot$).
 
 While in the case of branch and choice, which have different semantics this is
 mitigated somewhat but as can be seen, there are two rules for selecting a
@@ -661,9 +677,10 @@ related properties. Additionally, it will also require a theoretical treatment
 prior to undertaking the development task, in contrast to the preceding
 development work which mostly utilises results from the literature.
 
-I shall review and update the above plan throughtout the project as I proceed
-to the various milestones I have set out, and whenever I identify changing
-circumstances.
+There is a risk of being unable to perform the side-effecting extension as
+sketched in \S \ref{sec:approach}. I shall review and update the above plan
+throughtout the project as I proceed to the various milestones I have set out,
+and if required will alter the above plans if necessary.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
