@@ -1,0 +1,20 @@
+\begin{gather*}
+  \prooftree
+    \begin{array}{l}
+      \afsequent{\Delta}{\Gamma}{C}
+                {\typedid{e_1}{\Tguard{G}{h}}}
+                {\tensor{C_1}{C_2}} \\
+      \capsequent{\Delta}{C_1}{G} \\
+      \rho~\mbox{fresh} \\
+      \afsequent{\Delta}{\Gamma[\typedid{x}{\AFtr{\rho}}]}
+                {\tensor{C_2}{\AFcap{\rho}{h}}}
+                {\typedid{e_2}{\tau_2}}
+                {\tensor{C_3}{\AFcap{\rho}{h}}}
+    \end{array}
+  \justifies
+    \afsequent{\Delta}{\Gamma}{C}
+              {\typedid{\LetFocus{x}{e_1}{e_2}}{\tau_2}}
+              {\tensor{C_1}{C_3}}
+  \using{\mbox{[focus]}}
+  \endprooftree
+\end{gather*}
