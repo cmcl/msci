@@ -651,20 +651,22 @@ contrast, the traditional ``exists-fresh'' approach, where the binder is only
 required to be fresh within the abstraction's body, does not produce strong
 enough induction principles in some cases. This change will necessitate
 changes to the typing rules of GV and CP. Consider for instance the Connect
-rule in GV~\cite{Wadler:2014} (Connect) and its corresponding cofinite
-quantification version (ConnectCO):
+rule in GV~\cite{Wadler:2014} (C) and its corresponding cofinite
+quantification version (CCO):
+\input{with-connect-rule}
 
-... connect with rule here ... ... connect rule using cofinite quantification
-
-The conclusion binds a variable in Connect but a type in ConnectCO. Thus, in
-the premise for ConnectCO one can choose a suitably fresh $x$. The same change is made to the rules for CP so that, for example, output which allocates a fresh variable $y$ no longer names $y$ in the conclusion:
-
-... output in CP ... ... version used here with cofinite quantification ...
+The conclusion binds a variable in (C) but a type in (CCO). Thus, in the
+premise for (CCO) one can choose a suitably fresh $x$ in each premise. Note
+that, $L$ can be chosen such that $\Psi \cup \Phi \cup \fv(M) \cup \fv(N)
+\subseteq L$, where $\fv(M)$ are the set of free variables in term $M$, and
+$x$ can be the same in both premises. Similar changes are made to the rules
+for CP so that, for example, output which allocates a fresh variable $y$ no
+longer names $y$ in the conclusion: \input{cp-output}
 
 Since the name $y$ is assumed to be fresh in the original presentation these
 changes do not alter the typing of processes nor the semantics of the
 translation from GV to CP. An equivalence between ``exists-fresh'' and
-cofinite quantification definitions of the simply-typed $\lambda$ calculus is
+cofinite quantification definitions of the simply-typed $\lambda$-calculus is
 given by \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM}. In general, I
 do not aim to formally prove adequacy of the mechanisation.
 

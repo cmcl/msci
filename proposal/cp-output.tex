@@ -1,0 +1,19 @@
+\begin{gather*}
+  \prooftree
+    \cpsequent{P}{\Gamma,\typedid{y}{A}}\quad
+    \cpsequent{Q}{\Delta,\typedid{x}{B}}
+  \justifies
+    \cpsequent{\CPoutput{x}{y}{P}{Q}}
+              {\Gamma,\Delta,\typedid{x}{\tensor{A}{B}}}
+  \using{\otimes}
+  \endprooftree
+  \quad \leadsto \quad
+  \prooftree
+    \forall \typedid{y}{A} \notin L .
+      (\cpsequent{P}{\Gamma,\typedid{y}{A}})\quad
+    \cpsequent{Q}{\Delta,\typedid{x}{B}}
+  \justifies
+    \cpsequent{\CPoutput{x}{A}{P}{Q}}{\Gamma,\Delta,\typedid{x}{\tensor{A}{B}}}
+  \using{\otimes \mbox{CO}}
+  \endprooftree
+\end{gather*}

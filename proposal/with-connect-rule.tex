@@ -1,0 +1,21 @@
+\begin{gather*}
+  \prooftree
+    \typedexp{\Phi,\typedid{x}{S}}{M}{\oend}\quad
+    \typedexp{\Psi,\typedid{x}{\Sbar{S}}}{N}{T}
+  \justifies
+    \typedexp{\Phi,\Psi}{\Connect{x}{M}{N}}{T}
+  \using{\mbox{C}}
+  \endprooftree
+  \quad \leadsto \quad
+  \prooftree
+    \begin{array}{l}
+      \forall \typedid{x}{S} \notin L.
+      (\typedexp{\Phi,\typedid{x}{S}}{M}{\oend})\\
+      \forall \typedid{x}{\Sbar{S}} \notin L.
+      (\typedexp{\Psi,\typedid{x}{\Sbar{S}}}{N}{T})
+    \end{array}
+  \justifies
+    \typedexp{\Phi,\Psi}{\Connect{S}{M}{N}}{T}
+  \using{\mbox{CCO}}
+  \endprooftree
+\end{gather*}
