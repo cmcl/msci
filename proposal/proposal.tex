@@ -24,9 +24,21 @@
   }
 }
 
+% Thanks to Stefan Kottwitz on tex.stackexhange.com:
+% http://tex.stackexchange.com/questions/69662/how-to-globally-change-the-spacing-around-equations
+%% \expandafter\def\expandafter\normalsize\expandafter{%
+%%     \normalsize
+%%     \setlength\abovedisplayskip{0pt}
+%%     \setlength\belowdisplayskip{0pt}
+%%     \setlength\abovedisplayshortskip{0pt}
+%%     \setlength\belowdisplayshortskip{0pt}
+%% }
+
 \addbibresource{proposal.bib}
 
 \input{propmacros}
+
+\allowdisplaybreaks
 
 % alternative font if you prefer
 %\usepackage{times}
@@ -36,7 +48,6 @@
 %\usepackage{fancyheadings}
 
 \newcommand{\fpop}{System F${}^\circ$\xspace}
-\newcommand{\1}{\textbf{1}\xspace}
 
 % other potentially useful packages
 %\uspackage{amssymb,amsmath}
@@ -165,12 +176,6 @@ session-typed channels in the environment. The typing rules would be similar
 to that described by \citeauthor{Gay:2010:MST} for typing expressions in an
 object-oriented setting for session types~\cite{Gay:2010:MST}, e.g. the rule
 for lambda abstraction could be:
-
-%% \begin{prooftree}
-%% \AxiomC{$\Gamma , x \colon A \triangleright t \colon T \triangleleft \Gamma ' , x \colon B$}
-%% \UnaryInfC{$\Gamma \triangleright t \colon (A \gg B) \rightarrow T \triangleleft \Gamma '$} 
-%% \end{prooftree}
-
 \begin{gather*}
   \frac{
     \typeds{\Gamma,\typedid{x}{A}}{t}{T}{\Gamma',\typedid{x}{B}}
@@ -222,7 +227,6 @@ environment as is standard~\cite{Sangiorgi:2001}.
 They represent dual intuitionistic linear logic as a sequent calculus
 providing logical connectives which have session-based interpretations in
 $\pi$DILL. Consider their rules for branch and choice in $\pi$DILL:
-
 \input{sill-branch-choice-rules}
 
 Note that branch and choice both have some notion of branching (R rules for
@@ -234,38 +238,78 @@ location in the typing judgement. The channel is on the left of the sequent,
 and \citeauthor{Caires:2010:STI} suggest one consider the context as services
 being provided to the typed process. Thus, the type of channels in the context
 is really the type of the other endpoint of the channel, and the typed process
-behaves according to the dual protocol. For example, considering $\SILLbranchLTwo$, and taking $A^\bot$ to represent the dual of a protocol $A$, the typed process is behaving according to the protocol $\BChoice{A^\bot}{B^\bot}$, selecting from alternatives (in this case, $\inrterm$) and then behaving according to the selected protocol (in this case, protocol $B^\bot$).
+behaves according to the dual protocol. For example, considering
+$\SILLbranchLTwo$, and taking $A^\bot$ to represent the dual of a protocol $A$
+as defined by \citeauthor{Wadler:2014}~\cite{Wadler:2014}, the typed process
+is behaving according to the protocol $\BChoice{A^\bot}{B^\bot}$, selecting
+from alternatives (in this case, $\inrterm$) and then behaving according to
+the selected protocol (in this case, protocol $B^\bot$).
 
-While in the case of branch and choice, which have different semantics this is
-mitigated somewhat but as can be seen, there are two rules for selecting a
-branch, one for branch and another for choice if we consider their server
-example
+As noted by Wadler~\cite{Wadler:2014} there is a certain amount of redundancy
+in the two-sided nature of the rules forcing one to commit to a certain
+convention when typing a communication system. Consider, an equivalent system
+to the buy/quote example given by
+\citeauthor{Caires:2010:STI}~\cite[\S~3]{Caires:2010:STI}:
+\begin{gather*}
+\sdef{ClientProto}{\BChoice{(\tensor{Book}
+                            {(\tensor{Card}{(\lfn{Receipt}{\1})})})}
+                           {(\tensor{Book}{(\lfn{Quote}{\1})})}}
+\end{gather*}
 
-As noted by Wadler...jfp there is a certain amount of redundancy in the
-two-sided nature of the rules forcing one to commit to a certain convention
-when typing a communication system. Consider, an equivalent system to the
-buy/quote example given by caires and pfen. In the following, the types Book,
-Quote and Receipt can be considered synoms for the type \1 as in caires and
-pfenning.
+In the protocol defined above, a client selects between buying a book or
+receiving a price quote for a book. In the buy option case, the client sends
+the name of the book to the server and their card details, then the server
+sends the receipt for the purchase. In the quote option case, the client sends
+the name of the book and receives a price quote from the server. I have
+replaced the types $N$ and $I$ used by \citeauthor{Caires:2010:STI} with more
+meaningful type names $Book$, $Card$, $Quote$ and $Receipt$ where appropriate;
+all are synonyms for the type $\1$ which denotes the terminal session
+type. The client and server process bodies are as follows:
+\begin{gather*}
+\sdef{ClientBody_c}
+     {\CPinr{c}{\SLoutput{1984}{c}{\SLinput{c}{quote}{\0}}}}\\
+\sdef{ServerBody_c}
+     {\CPcase{c}
+             {\SLinput{c}{book}{\SLinput{c}{card}{\SLoutput{receipt}{c}{\0}}}}
+             {\SLinput{c}{book}{\SLoutput{quote}{c}{\0}}}}
+\end{gather*}
 
-... server example here ...
+\begin{samepage}
+The typings for the client and server processes are given by:
+\begin{gather*}
+\tsequent{\cdot}{\cdot}{ClientBody_c}{\typedid{c}{ClientProto}}
+\tag{\mkTrule{ClientBody}} \label{eq:cbtyp}
+\\ \tsequent{\cdot}{\typedid{c}{ClientProto}}{ServerBody_c}{\typedid{-}{\1}}
+\tag{\mkTrule{ServerBody}} \label{eq:sbtyp}
+\end{gather*}
+\end{samepage}
 
-The derivation for ClientBody is T1R, T implies R, T tensor R, T plus
-R2. Except for the final rule, these are exact opposites of the rules used for
-...
+The derivation for \eqref{eq:cbtyp} is $T\1 R$, $\lfn{T}{R}$, $\tensor{T}{R}$,
+$\BChoice{T}{R_2}$ and \eqref{eq:sbtyp} is derivable from
+$\BChoice{T}{L}$. Except for the final rule, these are exact dual rules of the
+rules used in example by \citeauthor{Caires:2010:STI}. Indeed, consider the
+composite process:
+\begin{gather*}
+\sdef{QSimple}{\Spar{c}{ClientBody_c}{ServerBody_c}}\\
+\tsequent{\cdot}{\cdot}{QSimple}{\typedid{-}{\1}}
+\end{gather*}
 
-The final system is near identical to the one produced by the example given
-caires and pfenning. Here the client communicates along the channel $c$ on the
-right and the server utilises the channel $c$ on the left. This typing, while
-correct, violates the intuition given by caires and pfenning of the context
-providing the services used by the process. The example above suggests the
-server utilises some channel provided by the client. On the other hand, one
-could imagine such a channel being setup between two communicating agents; the
-``owner'' of the channel is largely irrelevant. Note that clientproto is in
-fact the dual of serverproto in Wadler's classical process calculus.
-
-most important: duality of sessions is obscured in $\pi$DILL because of the
-nature of the typing judgements
+The final system is near identical to the one produced in the example given by
+\citeauthor{Caires:2010:STI} except the individual processes within the
+parallel composition have been swapped. Here the client communicates along the
+channel $c$ on the right-side of the sequent and the server utilises the
+channel $c$ on the left of the sequent. This typing, while correct, violates
+the intuition given by \citeauthor{Caires:2010:STI} of the context providing
+the services used by the process, since one would usually associate provision
+of services with the server not the client. Instead, the example above
+suggests the server utilises some channel provided by the client. On the other
+hand, one could imagine such a channel being setup between two communicating
+agents; the ``owner'' of the channel is largely irrelevant. Note that
+$ClientProto$ is in fact the dual of the $ServerProto$ definition by
+\citeauthor{Caires:2010:STI} using the definition of dual used in Wadler's
+classical process calculus~\cite{Wadler:2014}. In $pi$DILL, the duality
+between endpoints of the same channel are obscured by the nature of the typing
+judgements.
 
 Process reduction steps are equated with proof reduction via cut
 elimination. The relationship with proof normalisation in DILL provides
