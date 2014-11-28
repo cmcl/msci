@@ -356,14 +356,37 @@ The ``adoption and focus'' system~\cite{Fahndrich:2002} provides a notion of
 aliased access to linear resources. The type system requires special language
 features, e.g. to manage capabilities which can be thought as a form of object
 liveness mechanism, so GV typing judgements would need to be extended such
-that the capabilities can be included in soundness results. A extension to the
+that the capabilities can be included in soundness results. An extension to the
 translation to CP to incorporate the ``adopt'' and ``focus'' constructs would
 also need to be defined. It is not immediately clear how these features would
 assist in the management of session typed channels. The ``focus'' rule (and
 linearity generally) enforces an invariant on the focussed object (channel)
 such that the type is maintained during the focus operation:
+\input{focus-rule}
 
-... copy of focus operation here ...
+The typing judgements include \emph{capabilities} that track aliasing to heap
+objects, e.g. $\AFcap{\rho}{h}$ denotes a mapping from a static name $\rho$ to
+a heap type $h$, and a variable $x$ may be typed as $\typedid{x}{\AFtr{\rho}}$
+indicating that $x$ refers to an object of type $h$. The purpose of the
+capabilities is to enforce restrictions on when an object can be
+referenced. In other words, if $\AFcap{\rho}{h}$ is in the capabilities at
+some program point then $x$ may be used, otherwise such use is prohibited. In
+the [focus] rule, evaluating $e_1$ retrieves the object to be focussed. Note
+the type of $e_1$ is a ``guarded'' type. The guard $G$ is the static name of
+some object which ``adopted''~\footnote{I omit the adopt typing rule for
+  brevity.} an object of heap type $h$. If a program point has
+$\AFcap{G}{h_1}$ in the capabilities for some $h_1$ then all objects guarded
+by $G$ may be used; $\capsequent{\Delta}{C_1}{G}$ denotes containment of a
+such a capability in $C_1$. The guarded type may be thought of as policing
+manipulation of linear components within $h$. Treating $\otimes$ as the
+disjoint union for capability sets, the typing for $e_2$ temporarily removes
+the guard $G$ from the set of capabilities, and adds a new variable $x$, and
+associated capability, with a type permitting access to the object of type $h$
+i.e. a non-guarded type. Removing $G$ will prohibit access to allow objects
+guarded by $G$ for the during of $e_2$. The final capabilities after executing
+$e_2$ are required to be $\tensor{C_3}{\AFcap{\rho}{h}}$, enforcing that the
+type must remain as $h$. The typing of the $\letterm$ expression ensures that
+the guard $G$ (contained in $C_1$) is restored.
 
 Such a rule would appear to only benefit recursive session types. Indeed,
 focussing on a non-recursive channel would be pointless since one would be

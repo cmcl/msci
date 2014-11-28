@@ -8,6 +8,9 @@
 \newcommand{\SILLbranchLOne}{T \& L_1}
 \newcommand{\SILLbranchLTwo}{T \& L_2}
 
+% SILL two-sided sequents
+\newcommand{\tsequent}[4]{{#1};{#2}\vdash{#3}::{#4}}
+
 % SILL/CP terms
 \newcommand{\inlterm}{\mkterm{inl}}
 \newcommand{\inrterm}{\mkterm{inr}}
@@ -29,3 +32,17 @@
 
 % SILL def
 \newcommand{\sdef}[2]{{#1}\triangleq{#2}}
+
+% Adoption and Focus term
+\newcommand{\adoptterm}{\mkterm{adopt}}
+\newcommand{\focusterm}{\mkterm{focus}}
+
+% Adoption and Focus sequent
+\newcommand{\afsequent}[5]{{#1};{#2};{#3}\vdash{#4};{#5}}
+\newcommand{\capsequent}[3]{{#1}\vdash{#2}\leq{#3}}
+\newcommand{\LetFocus}[3]{\letterm~{#1}=\focusterm~{#2}~\interm~{#3}}
+
+% Adoption and Focus guard type
+\newcommand{\Tguard}[2]{{#1}\triangleright{#2}}
+\newcommand{\AFtr}[1]{\mathbf{tr}({#1})}
+\newcommand{\AFcap}[2]{\{{#1} \mapsto {#2}\}}
