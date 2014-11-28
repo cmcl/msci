@@ -319,7 +319,7 @@ an important step in providing a solid logical foundation for a concurrent
 type theory; in the same way ``sequential'' type theory ($\lambda$-calculi)
 profitted from a logical perspective. However, for session types to become a
 more usable tool for programming distributed communication systems (the
-ultimate goal, of course, is to write more correct programs), we cannot be
+ultimate goal, of course, is to write more correct programs), one cannot be
 expected to program directly in the $\pi$-calculus; a more mainstream
 programming paradigm must be built upon these solid logical foundations. With
 that in mind, enter the $\lambda$-calculus!
@@ -433,7 +433,7 @@ alter proofs as a result of changes made to the language.
 \subsubsection{Fusion}
 
 A number of systems incorporate both a functional language surface syntax with
-a translation to a more primitive process calculus. We shall focus on two such
+a translation to a more primitive process calculus. I shall focus on two such
 systems presented recently which have a connection to linear logic.
 
 Lolliproc~\cite{Mazurak:2010:LCC} provides a functional language with
@@ -564,9 +564,9 @@ by the Isabelle/HOL system which creates a dependency between the names chosen
 and the tactic. Thus, one must be careful to use the exact names expected by
 the tactic. In the Coq proof assistant, defining custom tactics can be
 achieved using the Ltac language~\cite{Delahaye:2000:TLS}. Among other things,
-Ltac supports pattern matching on hypotheses and goal forms. Thus, if we
-wished to pattern match on an inductive type describing variables, we could do
-so without mentioning the actual variable name as follows:
+Ltac supports pattern matching on hypotheses and goal forms. Thus, if one
+wished to pattern match on an inductive type describing variables, one could
+do so without mentioning the actual variable name as follows:
 
 \begin{coq}
 Ltac my_tactic :=
@@ -621,7 +621,7 @@ representations. Likewise, I make some simplifying assumptions about variable
 substitution, namely that \textit{closed} terms (terms with no unbound
 indices) are substituted for variables, which avoids having to define lifting
 constructs on the substitute term. The typing rules will not contain a rule
-for an unbound index so this decision is sound. A consequence is that we must
+for an unbound index so this decision is sound. A consequence is that I must
 define a notion of opening language terms involving binders as described
 by~\citeauthor{Aydemir:2008:EFM}. For example, an abstraction with body term
 $t$ which is well-typed if $t$ is well-typed when its unbound index,
@@ -672,7 +672,7 @@ do not aim to formally prove adequacy of the mechanisation.
 
 While the aim is to be faithful to \citeauthor{Wadler:2014}'s description, I
 may need to alter the approach slightly to avoid tricky formulations. For
-instance, instead of providing $n$-ary branch and choice in GV, we provide
+instance, instead of providing $n$-ary branch and choice in GV, I provide
 only binary versions of these operators to simplify the development. This
 change is not restrictive however, since CP itself provides only binary
 versions of plus ($\oplus$) and with ($\with$) constructs. Likewise, on a more
