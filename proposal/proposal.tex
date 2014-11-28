@@ -337,7 +337,7 @@ environment is provided to support possible aliasing of channels by treating
 channel variables as pointers or references into the channel environment. So,
 for a channel $c$ of session type $S$, a variable $x$ referring to this
 channel would be declared to have type $Chan~c$ and $c~:~S$ would be in the
-channel enviornment. The typing judgements and term reduction relation must be
+channel environment. The typing judgements and term reduction relation must be
 augmented to handle these environments. Unfortunately, a side-effect of this
 is that function types must specify the pre and post-states of channel
 environments and therefore, the type of arguments cannot work up to
@@ -452,7 +452,7 @@ as a continuation and the type denotes the communication protocol
 
 \citeauthor{Mazurak:2010:LCC} present proofs for type safety, strong
 normalisation and confluence. Confluence provides the guarantee that no race
-conditions can occur, strong normalisation prohibits nonterminating programs
+conditions can occur, strong normalisation prohibits non-terminating programs
 and type safety assures deadlock-freedom. Deadlock-freedom is implied by the
 acyclic communication graphs (progress of process reduction) which occur
 between parallel processes; follows from permitting only one channel between
@@ -748,7 +748,7 @@ development work which mostly utilises results from the literature.
 
 There is a risk of being unable to perform the side-effecting extension as
 sketched in \S \ref{sec:approach}. I shall review and update the above plan
-throughtout the project as I proceed to the various milestones I have set out,
+throughout the project as I proceed to the various milestones I have set out,
 and if required will alter the above plans if necessary.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
