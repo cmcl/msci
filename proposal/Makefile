@@ -1,7 +1,7 @@
 
 TEX:=proposal.tex
 DEPS:=proposal.bib with-connect-rule.tex focus-rule.tex propmacros.tex\
-macros.tex
+macros.tex session-types.tex
 PDFS:=$(TEX:%.tex=%.pdf)
 
 all: $(PDFS)

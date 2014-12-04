@@ -15,6 +15,9 @@
 \usepackage[style=alphabetic,sorting=nymt,natbib=true,
   maxbibnames=100]{biblatex}
 
+\usepackage{tabularx}
+\usepackage{tabulary}
+
 \DeclareSortingScheme{nymt}{
   \sort{
     \field{author}
@@ -23,6 +26,12 @@
     \field{title}
   }
 }
+
+\newcommand{\Deliverable}[2]
+           {\multicolumn{2}{|c|}{\textbf{D{#1}: {#2}}} \\ \hline}
+\newcommand{\DSubD}[3]{D{#1}.{#2} & #3 \\ \hline}
+\newcommand{\DTask}[6]{D#1T#2 & #3 & #4 & #5 & #6 \\ \hline}
+\newcommand{\IDTsk}[2]{Task D{#1}T{#2}}
 
 % Thanks to Stefan Kottwitz on tex.stackexhange.com:
 % http://tex.stackexchange.com/questions/69662/how-to-globally-change-the-spacing-around-equations
@@ -214,6 +223,30 @@ these two disciplines by verifying a session-based $\pi$-calculus system (\S
 
 \subsection{Session-based Type Systems and Linear Logic}\label{sec:sts}
 
+\subsubsection{Preamble}
+
+The definition of session types will be important for the remainder:
+\input{session-types.tex}
+
+Here, I use a modified version of the definition given by
+\citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} where I have omitted recursive
+session types. The type \lstinline{end} denotes the terminal session type and
+a channel typed as such may not perform any communication. A communication
+channel with session type $\inpt{T}{S}$ expects to receive a term of type $T$
+and then continues with session type $S$. Conversely, a channel with type
+$\outpt{T}{S}$ can send a term of type $T$ and then has type $S$. Thus, input
+and output are considered \emph{dual} session types, in the sense that a
+channel with one endpoint having type $\inpt{T}{S}$ and the other endpoint
+having type $\outpt{T}{\Sbar{S}}$, where $\Sbar{S}$ is the dual of $S$,
+permits communication between two agents, allowing one to send a term of type
+$T$ and the other to receive it with continuing endpoint types $\Sbar{S}$ and
+$S$, respectively. Similarly, the remaining types $\Branch{l_i}{S_i}{i\in I}$
+and $\Choice{l_i}{S_i}{i\in I}$ are duals of each other. A channel of type
+$\Branch{l_i}{S_i}{i\in I}$ can receive a label $l_i$ which will select the
+corresponding session type $S_i$ as the continuing type of the channel. While
+a channel with type $\Choice{l_i}{S_i}{i\in I}$ can send a label $l_i$ and
+continues as $S_i$.
+
 \subsubsection{In the \texorpdfstring{$\pi$}{pi}-calculus}\label{sec:pis}
 
 \citeauthor{Caires:2010:STI} \cite{Caires:2010:STI} present a connection
@@ -256,15 +289,17 @@ to the buy/quote example given by
                            {(\tensor{Book}{(\lfn{Quote}{\1})})}}
 \end{gather*}
 
-In the protocol defined above, a client selects between buying a book or
-receiving a price quote for a book. In the buy option case, the client sends
-the name of the book to the server and their card details, then the server
-sends the receipt for the purchase. In the quote option case, the client sends
-the name of the book and receives a price quote from the server. I have
-replaced the types $N$ and $I$ used by \citeauthor{Caires:2010:STI} with more
-meaningful type names $Book$, $Card$, $Quote$ and $Receipt$ where appropriate;
-all are synonyms for the type $\1$ which denotes the terminal session
-type. The client and server process bodies are as follows:
+Note, I am using $\tensor{}{}$ for session output and $\lfn{}{}$ for session
+input following the presentation by \citeauthor{Caires:2010:STI}. In the
+protocol defined above, a client selects between buying a book or receiving a
+price quote for a book. In the buy option case, the client sends the name of
+the book to the server and their card details, then the server sends the
+receipt for the purchase. In the quote option case, the client sends the name
+of the book and receives a price quote from the server. I have replaced the
+types $N$ and $I$ used by \citeauthor{Caires:2010:STI} with more meaningful
+type names $Book$, $Card$, $Quote$ and $Receipt$ where appropriate; all are
+synonyms for the type $\1$ which denotes the terminal session type. The client
+and server process bodies are as follows:
 \begin{gather*}
 \sdef{ClientBody_c}
      {\CPinr{c}{\SLoutput{1984}{c}{\SLinput{c}{quote}{\0}}}}\\
@@ -356,12 +391,12 @@ The ``adoption and focus'' system~\cite{Fahndrich:2002} provides a notion of
 aliased access to linear resources. The type system requires special language
 features, e.g. to manage capabilities which can be thought as a form of object
 liveness mechanism, so GV typing judgements would need to be extended such
-that the capabilities can be included in soundness results. An extension to the
-translation to CP to incorporate the ``adopt'' and ``focus'' constructs would
-also need to be defined. It is not immediately clear how these features would
-assist in the management of session typed channels. The ``focus'' rule (and
-linearity generally) enforces an invariant on the focussed object (channel)
-such that the type is maintained during the focus operation:
+that the capabilities can be included in soundness results. An extension to
+the translation to CP to incorporate the ``adopt'' and ``focus'' constructs
+would also need to be defined. It is not immediately clear how these features
+would assist in the management of session typed channels. The ``focus'' rule
+(and linearity generally) enforces an invariant on the focussed object
+(channel) such that the type is maintained during the focus operation:
 \input{focus-rule}
 
 The typing judgements include \emph{capabilities} that track aliasing to heap
@@ -655,7 +690,7 @@ rule in GV~\cite{Wadler:2014} (C) and its corresponding cofinite
 quantification version (CCO):
 \input{with-connect-rule}
 
-The conclusion binds a variable in (C) but a type in (CCO). Thus, in the
+The conclusion specifies a variable in (C) but a type in (CCO). Thus, in the
 premise for (CCO) one can choose a suitably fresh $x$ in each premise. Note
 that, $L$ can be chosen such that $\Psi \cup \Phi \cup \fv(M) \cup \fv(N)
 \subseteq L$, where $\fv(M)$ are the set of free variables in term $M$, and
@@ -714,37 +749,89 @@ extended without concern for these binding constructs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Work Plan}
 
-I aim to have completed the GV and CP definitions including reduction and
-commuting conversion rules for CP by the end of December. This will require
-definition of infrastructure for handling binders for both GV, CP channels and
-CP propositional variables, and inductive definitions for well-typed terms,
-commuting conversions and CP principal cut reductions. So far I have completed
-some of the definitions for well-typed terms and CP process rules; the
-remaining rules require the infrastructure for substitution and opening of
-binders.
+The deliverables can be split into three main areas as indicated in the
+following table:
 
-After December, it remains to define the translation between GV and CP which I
-envisage will be the bulk of the work, requiring several rules on typing
-derivations; I plan to define these as inductive datatype constructors but I
-shall take care to reuse any suitable libraries that are available, e.g. a
-library for handling CPS translations. For this step of the work, I allocated
-one month but this is a cautious estimate accounting some slack time for any
-delays in preceding stages of the development; I suspect this stage will not
-require a full month.
+\begin{tabularx}{\linewidth}{|c|X|}\hline
+Deliverable \# &  Description \\ \hline
+\Deliverable{1}{Mechanisation of Wadler's system}
+\DSubD{1}{*}{Mechanisation of Wadler's system}
+\Deliverable{2}{Closure side-effecting extension}
+\DSubD{2}{1}{Implementation of the GV operational semantics}
+\DSubD{2}{2}{Implementation of the closure side-effecting extension}
+\Deliverable{3}{Report write-up}
+\DSubD{3}{1}{Description of approach, Wadler mechanisation and related work}
+\end{tabularx}
+
+The current proposal will form part of D3.1 (related work, etc.). The
+remaining parts of D3 will be written up as the project progresses, conducted
+in tandem with D1 and D2. The estimated work plan is given in the following
+table and sub-divides the above deliverable stages into tasks. The tasks
+marking the completion of a deliverable are noted. The tasks appear in
+chronological order.
+
+\begin{center}
+\begin{tabular}{|*{5}{c|}}\hline
+\multicolumn{5}{|c|}{\textbf{Estimated Work Plan}}\\ \hline
+Task & Start Date & Duration (days) & End Date & Deliverables \\ \hline
+\DTask{1}{1}{8th December}{15}{23rd December}{-}
+\DTask{3}{1}{20th December}{3}{23rd December}{-}
+\DTask{1}{2}{24th December}{17}{10th January}{D1}
+\DTask{3}{2}{7th January}{11}{18th January}{D3.1}
+\DTask{2}{1}{11th January}{7}{18th January}{-}
+\DTask{2}{2}{19th January}{18}{6th Feburary}{D2.1}
+%\DTask{3}{3}{
+\end{tabular}
+\end{center}
+
+\IDTsk{1}{1} involves completing the GV and CP definitions including reduction
+and commuting conversion rules for CP which I aim to complete during
+December. This will require definition of infrastructure for handling binders
+for both GV, CP channels and CP propositional variables, and inductive
+definitions for well-typed terms, commuting conversions and CP principal cut
+reductions. So far I have completed some of the definitions for well-typed
+terms and CP process rules; the remaining rules require the infrastructure for
+substitution and opening of binders. \IDTsk{3}{1} will consist of an initial
+structuring and write up of the mechanisation effort of Wadler's system. It
+will include a detailed description of the approach taken (which can, in part,
+be formed from the current proposal) and the related work (again, partly
+formed from the current document). Additionally, it will describe any issues
+which have arisen, including changes made to any of the definitions as
+presented by Wadler, including the changes already detailed here.
+
+For D1, it remains to define the translation between GV and CP which I
+envisage will require several rules on typing derivations; I plan to define
+these as inductive datatype constructors but I shall take care to reuse any
+suitable libraries that are available, e.g. a library for handling CPS
+translations. For this step of the work (\IDTsk{1}{2}), I made a cautious
+estimate on duration, accounting some slack time for any delays in preceding
+stages of the development. \IDTsk{3}{2} will document the translation phase
+and will also be used to document the initial approach for the extension (see
+table for overlapping task allocation). \IDTsk{3}{2} represents delivery of
+the first draft (D3.1) of the report describing the mechanisation of Wadler's
+system but omitting the theoretical treatment for the proposed extension.
 
 For the remainder, I shall look to extend the definitions of GV and CP using
 the definitions I have provided. As discussed previously, it would be
 interesting to study a system for supporting side-effecting functions (aka
 closures) for session channels. In order to achieve this, operational
-semantics for GV would need to be defined, and the recent draft by
+semantics for GV would need to be defined and the recent draft by
 \citeauthor{Lindley:2014:SPS} may provide some useful insights on how best to
-do this~\cite{Lindley:2014:SPS}. I allocated the remaining time (approx. two
-months) to perform this extension because I believe it requires the most
-development: extending existing definitions to handle side-effecting
-functions, defining operational semantics, proving subject reduction and
-related properties. Additionally, it will also require a theoretical treatment
-prior to undertaking the development task, in contrast to the preceding
-development work which mostly utilises results from the literature.
+do this~\cite{Lindley:2014:SPS}. The task allocation time indicated in the
+work plan table. \IDTsk{2}{1} is a theoretical investigation into the
+operational semantics, deciding whether the system by
+\citeauthor{Lindley:2014:SPS} offers a suitable basis for the extension, and
+investigating the details of the side-effecting closure extension (assuming an
+appropriate base operational semantics for GV). \IDTsk{2}{2} is then the
+implementation of the suitable operational semantics (without side-effecting
+closure), culminating in the first part of the second deliverable
+(D2.1). Lastly, \IDTsk{2}{3} is an allocation of time to the task of
+implementing the extension permitting closures with side-effects. In my work
+plan, I have assumed \IDTsk{2}{2} implemented an operational semantics that
+eases this particular extension which justifies the task allocation time. Both
+\IDTsk{2}{2} and \IDTsk{2}{3} may also include revisions to the theoretical
+treatment started in \IDTsk{2}{1} as a consequence of initial design
+oversights.
 
 There is a risk of being unable to perform the side-effecting extension as
 sketched in \S \ref{sec:approach}. I shall review and update the above plan
