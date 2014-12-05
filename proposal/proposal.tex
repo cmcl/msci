@@ -223,7 +223,7 @@ these two disciplines by verifying a session-based $\pi$-calculus system (\S
 
 \subsection{Session-based Type Systems and Linear Logic}\label{sec:sts}
 
-\subsubsection{Preamble}
+\subsubsection{Preamble}\label{sec:pre}
 
 The definition of session types will be important for the remainder:
 \input{session-types.tex}
@@ -259,24 +259,27 @@ environment as is standard~\cite{Sangiorgi:2001}.
 
 They represent dual intuitionistic linear logic as a sequent calculus
 providing logical connectives which have session-based interpretations in
-$\pi$DILL. Consider their rules for branch and choice in $\pi$DILL:
+$\pi$DILL. Consider their rules for branch and choice in $\pi$DILL, which have
+only two alternatives (cf. multiple alternatives in the standard definition in
+\S~\ref{sec:pre}):
 \input{sill-branch-choice-rules}
 
 Note that branch and choice both have some notion of branching (R rules for
 $\oplus$/L rules for $\with$) and at least for \& this is counter-intuitive in
 a session-based setting, since the intutition for \& is that of
-\emph{offering} a choice between alternatives rather than \emph{making} the
-choice. Here, however, the intuition should be extended to account for its
-location in the typing judgement. The channel is on the left of the sequent,
-and \citeauthor{Caires:2010:STI} suggest one consider the context as services
-being provided to the typed process. Thus, the type of channels in the context
-is really the type of the other endpoint of the channel, and the typed process
-behaves according to the dual protocol. For example, considering
-$\SILLbranchLTwo$, and taking $A^\bot$ to represent the dual of a protocol $A$
-as defined by \citeauthor{Wadler:2014}~\cite{Wadler:2014}, the typed process
-is behaving according to the protocol $\BChoice{A^\bot}{B^\bot}$, selecting
-from alternatives (in this case, $\inrterm$) and then behaving according to
-the selected protocol (in this case, protocol $B^\bot$).
+\emph{offering} (receiving) a choice between alternatives rather than
+\emph{making} (sending) the choice. Here, however, the intuition should be
+extended to account for its location in the typing judgement. The channel is
+on the left of the sequent, and \citeauthor{Caires:2010:STI} suggest one
+consider the context as services being provided to the typed process. Thus,
+the type of channels in the context is really the type of the other endpoint
+of the channel, and the typed process behaves according to the dual
+protocol. For example, considering $\SILLbranchLTwo$, and taking $A^\bot$ to
+represent the dual of a protocol $A$ as defined by
+\citeauthor{Wadler:2014}~\cite{Wadler:2014}, the typed process is behaving
+according to the protocol $\BChoice{A^\bot}{B^\bot}$, selecting from
+alternatives (in this case, $\inrterm$) and then behaving according to the
+selected protocol (in this case, protocol $B^\bot$).
 
 As noted by Wadler~\cite{Wadler:2014} there is a certain amount of redundancy
 in the two-sided nature of the rules forcing one to commit to a certain
@@ -298,8 +301,8 @@ receipt for the purchase. In the quote option case, the client sends the name
 of the book and receives a price quote from the server. I have replaced the
 types $N$ and $I$ used by \citeauthor{Caires:2010:STI} with more meaningful
 type names $Book$, $Card$, $Quote$ and $Receipt$ where appropriate; all are
-synonyms for the type $\1$ which denotes the terminal session type. The client
-and server process bodies are as follows:
+synonyms for the type $\1$ which denotes the terminal session type in this
+system. The client and server process bodies are as follows:
 \begin{gather*}
 \sdef{ClientBody_c}
      {\CPinr{c}{\SLoutput{1984}{c}{\SLinput{c}{quote}{\0}}}}\\
@@ -501,29 +504,28 @@ primitive send and receives; instead, these are encoded as linear functions.
 \citeauthor{Wadler:2014}'s recent work~\cite{Wadler:2014} brings together a
 process calculus, CP, based on the earlier work by
 \citeauthor{Caires:2010:STI} with a functional language, GV, based on LAST by
-\citeauthor{Gay:2010:LAST}. The work describes a continuation-passing style
-(CPS) translation from GV to CP treating session types as propositions in a
-classical linear logic. The process calculus is slightly different to that
-described by $\pi$DILL~\cite{Caires:2010:STI}, apart from being classical in
-nature, the constructs for server replication are modified; CP provides a
-weakening and contraction rules whereas these are encoded in one rule for
-process reduction by \citeauthor{Caires:2010:STI}. Additionally, rather than a
-two-sided sequent calculus, \citeauthor{Wadler:2014} uses one-sided sequents
-for defining the process calculus, which provides a more intuitive
-presentation of session type duality and clearer correspondence to a
-$\lambda$-calculi surface syntax. As presented, GV does not support all
-features of CP and thus the translation is one way (GV to
-CP). \citeauthor{Lindley:2014:SAP}~\cite{Lindley:2014:SAP} extend GV to
-provide support for polymorphism and replication, following a similar CPS
-translation scheme. Lastly,
+\citeauthor{Gay:2010:LAST}. GV presents session types using the standard
+presentation as described in \S~\ref{sec:pre}. CP presents linear logical
+connectives with session type interpretations inspired by
+\citeauthor{Caires:2010:STI}~\cite{Caires:2010:STI}. \citeauthor{Wadler:2014}
+describes a continuation-passing style (CPS) translation from GV session types
+to CP classical linear logic propositions. The process calculus CP is slightly
+different to $\pi$DILL by \citeauthor{Caires:2010:STI}, apart from being
+classical in nature, the constructs for server replication are modified; CP
+provides a weakening and contraction rules whereas these are encoded in one
+rule for process reduction by \citeauthor{Caires:2010:STI}. Additionally,
+rather than a two-sided sequent calculus, \citeauthor{Wadler:2014} uses
+one-sided sequents for defining the process calculus, which provides a more
+intuitive presentation of session type duality and clearer correspondence to a
+$\lambda$-calculi surface syntax, simplifying the translation presentation. As
+presented, GV does not support all features of CP and thus the translation is
+one way (GV to CP). \citeauthor{Lindley:2014:SAP}~\cite{Lindley:2014:SAP}
+extend GV to provide support for polymorphism and replication, following a
+similar CPS translation scheme. Lastly,
 \citeauthor{Lindley:2014:SPS}~\cite{Lindley:2014:SPS} describe operational
 semantics for GV and their system has greater similarities with LAST than
 prior GV works, for example, by treating send and receive as linear functions
 rather than language primitives.
-
-%% Wadler also dispenses with the structural rules; subsumed by the Assoc and
-%% Swap typing derivations and the cut reduction (double check why he does
-%% this)
 
 \subsection{Mechanising Programming Language Metatheory}
 
@@ -720,7 +722,6 @@ mutually inductive definitions in Coq can be quite involved; requiring one to
 either rely on the Coq system to provide a stronger mutual induction principle
 or defining one manually. Such a definition is possible, but it complicates
 elimination via the induction principle.
-% ( since the standard induction tactic will not work?)
 
 Another aspect of the encoding is how to define terms. The intrinsic encoding
 described by~\citeauthor{Benton:2012:STT}~\cite{Benton:2012:STT} is one
@@ -755,12 +756,15 @@ following table:
 \begin{tabularx}{\linewidth}{|c|X|}\hline
 Deliverable \# &  Description \\ \hline
 \Deliverable{1}{Mechanisation of Wadler's system}
-\DSubD{1}{*}{Mechanisation of Wadler's system}
+D1 & Mechanisation of Wadler's system \\ \hline
 \Deliverable{2}{Closure side-effecting extension}
 \DSubD{2}{1}{Implementation of the GV operational semantics}
-\DSubD{2}{2}{Implementation of the closure side-effecting extension}
+\DSubD{2}{2}{Implementation of the side-effecting closure extension}
 \Deliverable{3}{Report write-up}
 \DSubD{3}{1}{Description of approach, Wadler mechanisation and related work}
+\DSubD{3}{2}
+      {Description of GV operational semantics (w/o side-effecting closure)}
+\DSubD{3}{3}{Description of side-effecting closure and final version}
 \end{tabularx}
 
 The current proposal will form part of D3.1 (related work, etc.). The
@@ -778,9 +782,12 @@ Task & Start Date & Duration (days) & End Date & Deliverables \\ \hline
 \DTask{3}{1}{20th December}{3}{23rd December}{-}
 \DTask{1}{2}{24th December}{17}{10th January}{D1}
 \DTask{3}{2}{7th January}{11}{18th January}{D3.1}
-\DTask{2}{1}{11th January}{7}{18th January}{-}
-\DTask{2}{2}{19th January}{18}{6th Feburary}{D2.1}
-%\DTask{3}{3}{
+\DTask{2}{1}{11th January}{14}{25th January}{-}
+\DTask{2}{2}{23th January}{21}{16th Feburary}{D2.1}
+\DTask{3}{3}{13th Feburary}{10}{23rd Feburary}{D3.2}
+\DTask{2}{3}{17th Feburary}{14}{3rd March}{D2.2}
+\DTask{3}{4}{1st March}{14}{15th March}{D3.3}
+\DTask{*}{*}{16th March}{39}{24th April}{-}
 \end{tabular}
 \end{center}
 
@@ -817,26 +824,35 @@ interesting to study a system for supporting side-effecting functions (aka
 closures) for session channels. In order to achieve this, operational
 semantics for GV would need to be defined and the recent draft by
 \citeauthor{Lindley:2014:SPS} may provide some useful insights on how best to
-do this~\cite{Lindley:2014:SPS}. The task allocation time indicated in the
-work plan table. \IDTsk{2}{1} is a theoretical investigation into the
-operational semantics, deciding whether the system by
+do this~\cite{Lindley:2014:SPS}. \IDTsk{2}{1} is a theoretical investigation
+into the operational semantics, deciding whether the system by
 \citeauthor{Lindley:2014:SPS} offers a suitable basis for the extension, and
 investigating the details of the side-effecting closure extension (assuming an
 appropriate base operational semantics for GV). \IDTsk{2}{2} is then the
 implementation of the suitable operational semantics (without side-effecting
 closure), culminating in the first part of the second deliverable
-(D2.1). Lastly, \IDTsk{2}{3} is an allocation of time to the task of
-implementing the extension permitting closures with side-effects. In my work
-plan, I have assumed \IDTsk{2}{2} implemented an operational semantics that
-eases this particular extension which justifies the task allocation time. Both
-\IDTsk{2}{2} and \IDTsk{2}{3} may also include revisions to the theoretical
-treatment started in \IDTsk{2}{1} as a consequence of initial design
-oversights.
+(D2.1). Following this implementation work, I plan to write up the operational
+semantics in the report (\IDTsk{3}{3}) which constitutes the second draft of
+the report deliverable (D3.2). Lastly, \IDTsk{2}{3} is an allocation of time
+to the task of implementing the extension permitting closures with
+side-effects which includes necessary changes to the typing judgements and
+translation between GV and CP. In my work plan, I have assumed \IDTsk{2}{2}
+implemented an operational semantics that eases this particular extension
+which justifies the task allocation time. Both \IDTsk{2}{2} and \IDTsk{2}{3}
+may also include revisions to the theoretical treatment started in
+\IDTsk{2}{1} as a consequence of initial design oversights. \IDTsk{3}{4}
+constitutes the final version of the report, including discussion of the
+side-effecting closure extension.
 
 There is a risk of being unable to perform the side-effecting extension as
-sketched in \S \ref{sec:approach}. I shall review and update the above plan
-throughout the project as I proceed to the various milestones I have set out,
-and if required will alter the above plans if necessary.
+sketched in \S \ref{sec:approach}. Additionally, there is considerable slack
+time identified in the work plan, indicated by \IDTsk{*}{*}. I believe these
+task allocation time estimates to be an accurate reflection of the work
+involved. However, the feasibility study is necessarily limited in scope, so I
+shall review and update the above plan throughout the project as I proceed to
+the various milestones I have set out, and if required will alter the above
+plans if necessary.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
