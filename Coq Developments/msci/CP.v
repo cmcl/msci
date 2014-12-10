@@ -248,3 +248,17 @@ Inductive cp_rules : proc -> penv -> Prop :=
   | cp_empcho : forall Γ x (UN: uniq (Γ ++ (x ~ pp_top))),
                   x CASE 0 ⊢cp Γ ++ (x ~ pp_top)
 where "P '⊢cp' Γ" := (cp_rules P Γ) : cp_scope.
+
+(** Example presented in journal version of ``Propositions as Sessions''.
+
+    We have a buyer/seller example where the client (buyer) sends a product
+    name and payment details to a seller and the seller will send a receipt.
+
+TODO: Will only work once I've abstracted away binders in the cp_rules:
+
+Definition buyer :=
+  [Name] 0 →
+        (1 .. output name 
+        | [Credit] 0 → (output credit ... | ⟨ Receipt ⟩ 0 → ⟨⟩ 0 → ...))
+
+*)

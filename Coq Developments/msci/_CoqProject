@@ -1,6 +1,7 @@
 -R . MSciProject
 ./GV.v
 ./CP.v
+./Tactics.v
 ./Metatheory/AssocList.v
 ./Metatheory/AssumeList.v
 ./Metatheory/CoqEqDec.v

@@ -12,7 +12,7 @@
     DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
 *)
-Require Import Metatheory Coq.Program.Tactics.
+Require Import Metatheory Tactics List Eqdep_dec Coq.Program.Tactics.
 Require Import ssreflect.
 Set Implicit Arguments.
 
@@ -34,6 +34,11 @@ Inductive kind : Set :=
   | lin : kind (* linear *)
   | un : kind (* unlimited *).
 
+Lemma eq_kind_dec: forall (x y : kind), {x = y} + {x <> y}.
+Proof. decide equality. Qed.
+
+Hint Immediate eq_kind_dec.
+
 (** [typ] is ranged over by T, U and V. It differs slightly from the
     definition given in Wadler's paper in the following ways:
 
@@ -52,7 +57,8 @@ Inductive typ : kind -> Set :=
   | typ_sinput : forall k, typ k -> typ lin -> typ lin
   | typ_schoice : typ lin -> typ lin -> typ lin
   | typ_sbranch : typ lin -> typ lin -> typ lin
-  | typ_szero : typ lin (* end is a keyword; use zero as in pi-calculus *)
+  | typ_oend : typ lin (* output end *)
+  | typ_iend : typ lin (* input end *)
 (* Other non-session GV types *)
   | typ_tensor : forall kt ku, typ kt -> typ ku -> typ lin
   | typ_labs : forall kt ku, typ kt -> typ ku -> typ lin
@@ -70,6 +76,12 @@ Notation "S1 '<+>' S2" := (typ_schoice S1 S2) (at level 68,
                                               : gv_scope.
 Notation "S1 <&> S2" := (typ_sbranch S1 S2) (at level 68,
                                              right associativity) : gv_scope.
+Notation "T ⊸ U" := (typ_labs T U) (at level 68, right associativity)
+                                   : gv_scope.
+Notation "T → U" := (typ_abs T U) (at level 68, right associativity)
+                                  : gv_scope.
+Notation "T ⨂ U" := (typ_tensor T U) (at level 68, right associativity)
+                                     : gv_scope
 Delimit Scope gv_scope with gv.
 Open Scope gv_scope.
 
@@ -92,7 +104,8 @@ Inductive is_session : forall k, typ k -> Prop :=
                   is_session (S1 <+> S2)
   | is_branch : forall S1 S2 (IS1: is_session S1) (IS2: is_session S2),
                   is_session (S1 <&> S2)
-  | is_end : is_session typ_szero.
+  | is_oend : is_session typ_oend
+  | is_iend : is_session typ_iend.
 
 (** It's a pity we obscure the definition of session duals here by defining it
     as a proof term. This was recommended by Jonathan (jonikelee@gmail.com) on
@@ -118,7 +131,8 @@ Definition session_duals (S: { T : typ lin | is_session T}) :
     specialize (IHT1 IS1); clear IS1; inversion_clear IHT1 as [S1 IS1].
     specialize (IHT2 IS2); clear IS2; inversion_clear IHT2 as [S2 IS2].
     eapply exist; apply is_choice; [exact IS1 | exact IS2].
-  - eapply exist; apply is_end.
+  - eapply exist; apply is_oend.
+  - eapply exist; apply is_iend.
 Defined.
 
 Notation "'¬' S" := (session_duals (exist _ S _)) (at level 69,
@@ -273,18 +287,53 @@ Definition un_env (G : tenv) : Prop := forall x (T : typ un)
     However, I'm going to adopt the ∈ notation below since it will be easier
     to differentiate between the environment notation.
 *)
-Reserved Notation "Φ ⊢ t ∈ T" (at level 30).
+Reserved Notation "Φ ⊢ t ∈ T" (at level 69).
+
+(** Elaborating a type to the correct position in the environment mapping.
+
+    This is the annoyance resulting from indexing types with kinds but at the
+    moment, I prefer this approach to defining another predicate over
+    "well-kinded" types.
+*)
+Definition elabty {k} (T: typ k) : typ lin + typ un.
+  refine (
+    match k as k0 return k = k0 -> typ lin + typ un with
+    | lin => fun lin => _
+    | un => fun un => _
+    end _ ); subst; firstorder.
+Defined.
+
+Notation "'⟪' T '⟫' " := (elabty T) (at level 68, no associativity)
+                                    : gv_scope.
 
 Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
-  | wt_tm_unid : forall x T, (x ~ inr T) ⊢ x ∈ T
-  | wt_tm_lid : forall x T, (x ~ inl T) ⊢ x ∈ T
+  | wt_tm_id : forall k x (T: typ k), (x ~ ⟪T⟫) ⊢ x ∈ T
   | wt_tm_unit : nil ⊢ tm_unit ∈ typ_unit
-  | wt_tm_weaken : forall Φ x N k (U: typ k) T (WT: Φ ⊢ N ∈ U),
+  | wt_tm_weaken : forall Φ x N k (U: typ k) T (UN: uniq (Φ ++ (x ~ inr T)))
+                          (WT: Φ ⊢ N ∈ U),
                      (Φ ++ (x ~ inr T)) ⊢ N ∈ U
   | wt_tm_contract : forall Φ x x' (T: typ un) N k (U:typ k)
                             (WT: (Φ ++ (x ~ inr T) ++ (x' ~ inr T)) ⊢ N ∈ U),
                        (Φ ++ (x ~ inr T)) ⊢ (subst x' x N) ∈ U
-(*  | wt_tm_labs : *)
+  | wt_tm_labs : forall Φ (L: atoms) kt ku (T: typ kt) (U: typ ku) M
+                        (WT: forall (x:atom),
+                               x `notin` L ->
+                               Φ ++ (x ~ ⟪T⟫) ⊢ (open M x) ∈ U),
+                   Φ ⊢ tm_abs T M ∈ T ⊸ U
+  | wt_tm_lapp : forall Φ Ψ kt ku (T: typ kt) (U: typ ku) M N
+                        (UN: uniq (Φ ++ Ψ))
+                        (WTM: Φ ⊢ M ∈ T ⊸ U) (WTN: Ψ ⊢ N ∈ T),
+                   Φ ++ Ψ ⊢ (tm_app M N) ∈ U
+  | wt_tm_abs : forall Φ kt ku (T: typ kt) (U: typ ku) M
+                       (WT: Φ ⊢ M ∈ T ⊸ U) (UL: un_env Φ),
+                  Φ ⊢ M ∈ T → U
+  | wt_tm_app : forall Φ kt ku (T: typ kt) (U: typ ku) M
+                       (WT: Φ ⊢ M ∈ T → U),
+                  Φ ⊢ M ∈ T ⊸ U
+  | wt_tm_pair : forall Φ Ψ kt ku (T: typ kt) (U: typ ku) M N
+                        (UN: uniq (Φ ++ Ψ))
+                        (WTM: Φ ⊢ M ∈ T) (WTN: Ψ ⊢ N ∈ U),
+                   Φ ++ Ψ ⊢ (tm_pair M N) ∈ T ⨂ U
   | wt_tm_send : forall k Φ Ψ M (T: typ k) N S
                         (IS: is_session S)
                         (WTM: Φ ⊢ M ∈ T) (WTN: Ψ ⊢ N ∈ ! T # S),
@@ -300,6 +349,8 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
                             (IS: is_session (S1 <+> S2))
                             (WT: Φ ⊢ M ∈ (S1 <+> S2)),
                        Φ ⊢ tm_select lb_inr M ∈ S2
-  | wt_tm_end : forall k Φ M (T: typ k) (WT: Φ ⊢ M ∈ typ_tensor T typ_szero),
+  | wt_tm_end : forall k Φ M (T: typ k) (WT: Φ ⊢ M ∈ typ_tensor T typ_iend),
                   Φ ⊢ tm_end M ∈ T
 where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
+
+Hint Constructors wt_tm.
