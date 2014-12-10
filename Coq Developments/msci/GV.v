@@ -81,7 +81,7 @@ Notation "T ⊸ U" := (typ_labs T U) (at level 68, right associativity)
 Notation "T → U" := (typ_abs T U) (at level 68, right associativity)
                                   : gv_scope.
 Notation "T ⨂ U" := (typ_tensor T U) (at level 68, right associativity)
-                                     : gv_scope
+                                     : gv_scope.
 Delimit Scope gv_scope with gv.
 Open Scope gv_scope.
 
