@@ -135,7 +135,12 @@ Definition session_duals (S: { T : typ lin | is_session T}) :
   - eapply exist; apply is_iend.
 Defined.
 
-Notation "'¬' S" := (session_duals (exist _ S _)) (at level 69,
+Definition dual_session (S : {T : typ lin | is_session T}) :=
+  match session_duals S with
+    | exist dual pf => dual
+  end.
+
+Notation "'¬' S" := (dual_session (exist _ S _)) (at level 69,
                                                    right associativity)
                                                   : gv_scope.
 (** FIXME: Unfortunately the definition does not prevent placing non-session
@@ -148,6 +153,27 @@ Notation "'¬' S" := (session_duals (exist _ S _)) (at level 69,
     (assume anything from absurdity).
 
 *)
+
+(** Define a duality relation on session types to specify that two session
+    types are dual to each other.
+
+    The computational view of duality cannot be used in the well-typed term
+    relation because the proof of duality cannot be inferred for an arbitrary
+    session type argument.
+*)
+Inductive are_dual : typ lin -> typ lin -> Prop :=
+  | output_dual : forall k (T: typ k) S S' (DU: are_dual S S'),
+                    are_dual (! T # S) (? T # S')
+  | input_dual : forall k (T: typ k) S S' (DU: are_dual S S'),
+                   are_dual (? T # S) (! T # S')
+  | choice_dual : forall S1 S2 S1' S2'
+                         (DU1: are_dual S1 S1') (DU2: are_dual S2 S2'),
+                    are_dual (S1 <+> S2) (S1' <&> S2')
+  | branch_dual : forall S1 S2 S1' S2'
+                         (DU1: are_dual S1 S1') (DU2: are_dual S2 S2'),
+                    are_dual (S1 <&> S2) (S1' <+> S2')
+  | oend_dual : are_dual typ_oend typ_iend
+  | iend_dual : are_dual typ_iend typ_oend.
 
 (** Define a label type for binary branch and choice. *)
 Inductive label : Set :=
@@ -249,11 +275,11 @@ Inductive lc : term -> Prop :=
                lc (tm_abs T M)
   | lc_app : forall M N (MLC: lc M) (NLC: lc N), lc (tm_app M N)
   | lc_pair : forall M N (MLC: lc M) (NLC: lc N), lc (tm_pair M N)
-  | lc_let : forall kt ku (L:atoms) (T:typ kt) (U:typ ku) M N
+  | lc_let : forall kt ku (L L':atoms) (T:typ kt) (U:typ ku) M N
                     (MLC: lc M)
                     (NCO: forall (x y:atom)
-                                 (XL: x `notin` L `union` singleton y)
-                                 (YL: y `notin` L),
+                                 (XL: x `notin` L)
+                                 (YL: y `notin` L'),
                             lc ({1 ~> x} (open N y))),
                lc (tm_let T U M N)
   | lc_send : forall M N (MLC: lc M) (NLC: lc N), lc (tm_send M N)
@@ -271,6 +297,12 @@ Inductive lc : term -> Prop :=
 
 (** Typing environments are lists of (atom,typ) pairs. *)
 Definition tenv := list (atom * (typ lin + typ un)).
+
+Definition tenv_app (Φ Ψ : tenv) := Φ ++ Ψ.
+
+Notation "Φ ',' Ψ" := (tenv_app Φ Ψ) (at level 68, right associativity)
+                                     : gv_scope.
+
 Definition un_env (G : tenv) : Prop := forall x (T : typ un)
                                               (IN: x `in` dom G),
                                          binds x (inr T) G.
@@ -309,47 +341,77 @@ Notation "'⟪' T '⟫' " := (elabty T) (at level 68, no associativity)
 Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
   | wt_tm_id : forall k x (T: typ k), (x ~ ⟪T⟫) ⊢ x ∈ T
   | wt_tm_unit : nil ⊢ tm_unit ∈ typ_unit
-  | wt_tm_weaken : forall Φ x N k (U: typ k) T (UN: uniq (Φ ++ (x ~ inr T)))
+  | wt_tm_weaken : forall Φ x N k (U: typ k) T (UN: uniq (Φ,(x ~ inr T)))
                           (WT: Φ ⊢ N ∈ U),
-                     (Φ ++ (x ~ inr T)) ⊢ N ∈ U
+                     (Φ,(x ~ inr T)) ⊢ N ∈ U
   | wt_tm_contract : forall Φ x x' (T: typ un) N k (U:typ k)
-                            (WT: (Φ ++ (x ~ inr T) ++ (x' ~ inr T)) ⊢ N ∈ U),
-                       (Φ ++ (x ~ inr T)) ⊢ (subst x' x N) ∈ U
+                            (UN: uniq (Φ,(x ~ inr T),(x' ~ inr T)))
+                            (WT: (Φ,(x ~ inr T),(x' ~ inr T)) ⊢ N ∈ U),
+                       (Φ,(x ~ inr T)) ⊢ (subst x' x N) ∈ U
   | wt_tm_labs : forall Φ (L: atoms) kt ku (T: typ kt) (U: typ ku) M
+                        (UN: uniq Φ)
                         (WT: forall (x:atom),
                                x `notin` L ->
-                               Φ ++ (x ~ ⟪T⟫) ⊢ (open M x) ∈ U),
+                               Φ,(x ~ ⟪T⟫) ⊢ (open M x) ∈ U),
                    Φ ⊢ tm_abs T M ∈ T ⊸ U
   | wt_tm_lapp : forall Φ Ψ kt ku (T: typ kt) (U: typ ku) M N
-                        (UN: uniq (Φ ++ Ψ))
+                        (UN: uniq (Φ,Ψ))
                         (WTM: Φ ⊢ M ∈ T ⊸ U) (WTN: Ψ ⊢ N ∈ T),
-                   Φ ++ Ψ ⊢ (tm_app M N) ∈ U
-  | wt_tm_abs : forall Φ kt ku (T: typ kt) (U: typ ku) M
+                   Φ,Ψ ⊢ (tm_app M N) ∈ U
+  | wt_tm_abs : forall Φ kt ku (T: typ kt) (U: typ ku) M (UN: uniq Φ)
                        (WT: Φ ⊢ M ∈ T ⊸ U) (UL: un_env Φ),
                   Φ ⊢ M ∈ T → U
-  | wt_tm_app : forall Φ kt ku (T: typ kt) (U: typ ku) M
+  | wt_tm_app : forall Φ kt ku (T: typ kt) (U: typ ku) M (UN: uniq Φ)
                        (WT: Φ ⊢ M ∈ T → U),
                   Φ ⊢ M ∈ T ⊸ U
   | wt_tm_pair : forall Φ Ψ kt ku (T: typ kt) (U: typ ku) M N
-                        (UN: uniq (Φ ++ Ψ))
+                        (UN: uniq (Φ,Ψ))
                         (WTM: Φ ⊢ M ∈ T) (WTN: Ψ ⊢ N ∈ U),
-                   Φ ++ Ψ ⊢ (tm_pair M N) ∈ T ⨂ U
+                   Φ,Ψ ⊢ (tm_pair M N) ∈ T ⨂ U
+  | wt_tm_let :
+      forall Φ Ψ (L L':atoms) kt ku kv
+             (T:typ kt) (U:typ ku) (V: typ kv) M N
+             (UN: uniq (Φ,Ψ))
+             (WTM: Φ ⊢ M ∈ T ⨂ U)
+             (WTN: forall (x y:atom)
+                          (XL: x `notin` L)
+                          (YL: y `notin` L'),
+                     Ψ,(x ~ ⟪T⟫),(y ~ ⟪U⟫) ⊢ ({1 ~> x} (open N y)) ∈ V),
+        Φ,Ψ ⊢ (tm_let T U M N) ∈ V
   | wt_tm_send : forall k Φ Ψ M (T: typ k) N S
-                        (IS: is_session S)
+                        (IS: is_session S) (UN: uniq (Φ,Ψ))
                         (WTM: Φ ⊢ M ∈ T) (WTN: Ψ ⊢ N ∈ ! T # S),
-                   (Φ ++ Ψ) ⊢ tm_send M N ∈ S
-  | wt_tm_recv : forall k Φ M (T: typ k) S
+                   Φ,Ψ ⊢ tm_send M N ∈ S
+  | wt_tm_recv : forall k Φ M (T: typ k) S (UN: uniq Φ)
                         (WT: Φ ⊢ M ∈ ? T # S) (IS: is_session S),
                    Φ ⊢ tm_recv M ∈ typ_tensor T S
-  | wt_tm_l_select : forall Φ M S1 S2
+  | wt_tm_l_select : forall Φ M S1 S2 (UN: uniq Φ)
                             (IS: is_session (S1 <+> S2))
                             (WT: Φ ⊢ M ∈ (S1 <+> S2)),
                        Φ ⊢ tm_select lb_inl M ∈ S1
-  | wt_tm_r_select : forall Φ M S1 S2
+  | wt_tm_r_select : forall Φ M S1 S2 (UN: uniq Φ)
                             (IS: is_session (S1 <+> S2))
                             (WT: Φ ⊢ M ∈ (S1 <+> S2)),
                        Φ ⊢ tm_select lb_inr M ∈ S2
-  | wt_tm_end : forall k Φ M (T: typ k) (WT: Φ ⊢ M ∈ typ_tensor T typ_iend),
+  | wt_tm_case : forall Φ Ψ (L:atoms) M NL NR S1 S2 kt (T: typ kt)
+                        (UN: uniq (Φ,Ψ))
+                        (IS: is_session (S1 <+> S2))
+                        (WTM: Φ ⊢ M ∈ (S1 <+> S2))
+                        (WTNL: forall (x:atom),
+                                 x `notin` L -> Ψ,(x ~ inl S1) ⊢ NL ∈ T)
+                        (WTNR: forall (x:atom),
+                                 x `notin` L -> Ψ,(x ~ inl S2) ⊢ NR ∈ T),
+                   Φ,Ψ ⊢ (tm_case M lb_inl NL lb_inr NR) ∈ T
+  | wt_tm_connect : forall Φ Ψ (L:atoms) M N S S' kt (T: typ kt)
+                           (UN: uniq (Φ,Ψ))
+                           (DU: are_dual S S')
+                           (WTM: forall (x:atom) (NL: x `notin` L),
+                                   Φ,(x ~ inl S) ⊢ (open M x) ∈ typ_oend)
+                           (WTN: forall (x:atom) (NL: x `notin` L),
+                                   Ψ,(x ~ inl S') ⊢ (open N x) ∈ T),
+                      Φ,Ψ ⊢ (tm_connect S M N) ∈ T
+  | wt_tm_end : forall k Φ M (T: typ k) (UN: uniq Φ)
+                       (WT: Φ ⊢ M ∈ typ_tensor T typ_iend),
                   Φ ⊢ tm_end M ∈ T
 where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
 
