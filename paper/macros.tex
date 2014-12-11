@@ -1,0 +1,396 @@
+% $Id: macros.tex,v 1.31 2007/05/21 11:52:37 stfm Exp $
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\hfuzz1pc % Don't bother to report overfull boxes if overage is < 1pc
+
+% Listings
+\usepackage{listings}
+\lstset{language=Haskell,
+  extendedchars=true,
+%  showstringspaces=false,
+  basicstyle=\sffamily\small\upshape,
+  morekeywords={accept, request, send, on, receive, select, end, fork},
+  literate=
+    {lambda}{$\lambda$}1
+    {->}{$\rightarrow$}1
+    {-<}{$\leftarrow$}1
+    {-o}{$\multimap$}1
+    {=>}{$\Rightarrow$}1
+    {<}{$\langle$}1
+    {>}{$\rangle$}1
+    {>^a}{{$\rangle^{\msf a}$}}1
+    {>^r}{{$\rangle^{\msf r}$}}1
+    {++}{$\oplus$}1
+    {vdash}{$\vdash$}1
+    {||}{$\parallel$}1
+}
+
+\DeclareMathAlphabet{\mathsb}{OT1}{cmss}{bx}{n}
+\newcommand{\msf}{\mathsf}
+\newcommand{\msb}{\mathsb}
+% Data types
+\newcommand{\mktype}[1]{\mathsf{#1}}
+\newcommand{\Int}{\mktype{Int}}
+\newcommand{\Real}{\mktype{Real}}
+\newcommand{\Bool}{\mktype{Bool}}
+\newcommand{\Unit}{\mktype{Unit}}
+\newcommand{\String}{\mktype{String}}
+\newcommand{\carry}[1]{[{#1}]} % Derived!
+\newcommand{\tensor}[2]{{#1}\otimes{#2}}
+\newcommand{\fn}[2]{{#1}\rightarrow{#2}}
+\newcommand{\lfnrel}{\multimap}
+\newcommand{\lfn}[2]{{#1}\lfnrel{#2}}
+\newcommand{\access}[2]{\langle{#1},{#2}\rangle}
+\newcommand{\accessproj}[2][*]{\langle{#2}\rangle^{#1}}
+\newcommand{\reqaccess}[1]{\accessproj[\mkterm r]{#1}}
+\newcommand{\accaccess}[1]{\accessproj[\mkterm a]{#1}}
+% Session types
+\newcommand{\End}{\mktype{end}}
+\newcommand{\Arbitrary}{\mktype{Arbitrary}}
+\newcommand{\inpt}[2]{?{#1}.{#2}}
+\newcommand{\outpt}[2]{!{#1}.{#2}}
+\newcommand{\Branch}[3]{\&\langle{#1}\colon{#2}\rangle_{#3}}
+\newcommand{\Choice}[3]{\oplus\langle{#1}\colon{#2}\rangle_{#3}}
+%\newcommand{\rectype}[2]{\mu{#1}\cdot{#2}}
+\newcommand{\rectype}[2]{\mu{#1}.{#2}}
+\newcommand{\dual}[1]{\overline{#1}}
+\newcommand{\dualr}{\perp}
+\newcommand{\funtype}[2]{{#1}\rightarrow{#2}}
+\newcommand{\prodtype}[2]{{#1}\times{#2}}
+\newcommand{\lin}[1]{\mathsf{lin}{#1}}
+\newcommand{\variant}[1]{\langle{#1}\rangle}
+\newcommand{\tredrel}{\mapsto}
+\newcommand{\tred}[2]{{#1}\tredrel{#2}}
+\newcommand{\tredst}[2]{{#1}\tredrel^{*}{#2}}
+%\newcommand{\SType}{\mathit{SType}}
+\newcommand{\SType}{\mathcal{S}}
+%\newcommand{\Type}{\mathit{Type}}
+\newcommand{\Type}{\mathcal{T}}
+% Components of session types
+\newcommand{\seqt}{\mathbin{.}}
+\newcommand{\brt}{\mathsf{\&}}
+\newcommand{\cht}{\mathsf{\oplus}}
+\newcommand{\inptpref}{\mathsf{?}}
+\newcommand{\outptpref}{\mathsf{!}}
+\newcommand{\Bottom}{\bot}
+\newcommand{\Pitype}[3]{\Pi{#1}\colon{#2}.{#3}}
+% Channel pointer
+%\newcommand{\Chan}[1]{\mktype{Chan}~{#1}}
+%Reference type
+%\newcommand{\Ref}[1]{\mktype{Ref}~{#1}}
+% Term types
+\newcommand{\arrowtype}[2]{{#1}\rightarrow{#2}}
+\newcommand{\tenstype}[2]{{#1}\otimes{#2}}
+\newcommand{\comp}{\bullet}
+% Syntax of terms
+% keywords
+\newcommand{\mkterm}[1]{\mathsf{#1}}
+\newcommand{\true}{\mkterm{true}}
+\newcommand{\false}{\mkterm{false}}
+\newcommand{\unit}{\mkterm{unit}}
+\newcommand{\ifterm}{\mkterm{if}}
+\newcommand{\thenterm}{\mkterm{then}}
+\newcommand{\forkterm}{\mkterm{fork}}
+\newcommand{\sendterm}{\mkterm{send}}
+\newcommand{\receiveterm}{\mkterm{receive}}
+\newcommand{\unfoldterm}{\mkterm{unfold}}
+\newcommand{\acceptterm}{\mkterm{accept}}
+\newcommand{\requestterm}{\mkterm{request}}
+\newcommand{\newterm}{\nu}
+\newcommand{\letterm}{\mkterm{let}}
+\newcommand{\interm}{\mkterm{in}}
+\newcommand{\breakterm}{\mkterm{break}}
+\newcommand{\caseterm}{\mkterm{case}}
+\newcommand{\selectterm}{\mkterm{select}}
+\newcommand{\ofterm}{\mkterm{of}}
+\newcommand{\onterm}{\mkterm{on}}
+\newcommand{\recterm}{\mkterm{rec}}
+\newcommand{\fixterm}{\mkterm{fix}}
+% constructors
+\newcommand{\new}[2]{\newterm{#1}{#2}}
+\newcommand{\cond}[3]{\mkterm{if}~{#1}~\mkterm{then}~{#2}~\mkterm{else}~{#3}}
+\newcommand{\send}[2]{\sendterm~{#1}~{#2}}
+\newcommand{\receive}[1]{\receiveterm~{#1}}
+\newcommand{\receivechan}[1]{\mkterm{receiveChan}~{#1}}
+\newcommand{\deref}[1]{\mkterm{!}{#1}}
+\newcommand{\assign}[2]{{#1}~\mkterm{:=}~{#2}}
+\newcommand{\Let}[3]{\letterm~{#1}={#2}~\interm~{#3}}
+%\newcommand{\Letpair}[4]{\letterm~\pair{#1}{#2}={#3}~\interm~{#4}}
+\newcommand{\Letpair}[4]{\letterm~{#1},{#2}={#3}~\interm~{#4}}
+\newcommand{\fork}[1]{\forkterm~{#1}}
+\newcommand{\request}[2]{\requestterm~{#1}~{#2}}
+\newcommand{\accept}[2]{\acceptterm~{#1}~{#2}}
+\newcommand{\cse}[2]{\caseterm~{#1}~\ofterm~{#2}}
+\newcommand{\select}[2]{\selectterm~{#1}~{#2}}
+\newcommand{\thread}[1]{\langle{#1}\rangle}
+\newcommand{\letthread}[1]{\langle{\Let x{#1}t}\rangle}
+\newcommand{\letthreadone}[1]{\langle{\Let x{#1}{t_1}}\rangle}
+\newcommand{\letthreadtwo}[1]{\langle{\Let y{#1}{t_2}}\rangle}
+\newcommand{\letthreadthree}[1]{\langle{\Let z{#1}{t_3}}\rangle}
+\newcommand{\arrow}{\rightarrow}
+\newcommand{\lbl}[1]{\mathit{#1}}
+\newcommand{\casebrs}[3]{\{{#1}\colon {#2}\}_{#3}}
+\newcommand{\Casebrs}[3]{\{{#1}\arrow{#2}\}_{#3}} % a la TCS
+\newcommand{\unfold}[1]{\unfoldterm(#1)}
+\newcommand{\sigmabind}[2]{\{#1\}.{#2}}
+\newcommand{\pair}[2]{\mathsf{(}{#1},{#2}\mathsf{)}}
+\newcommand{\triple}[3]{\mathsf{(}{#1},{#2},{#3}\mathsf{)}}
+\newcommand{\rec}[2]{\recterm~{#1}.{#2}}		% untyped
+\newcommand{\Rec}[3]{\recterm~({#1}\colon{#2}).{#3}}	% typed
+\newcommand{\fix}[1]{\fixterm~{#1}}
+\newcommand{\linabs}[3]{\lambda_{l}{#1}\!:\!{#2}.{#3}}			% typed
+\newcommand{\abs}[2]{\lambda{#1}.{#2}}
+\newcommand{\Abs}[4]{\lambda({#1};{#2}\colon{#3}).{#4}}	% typed
+\newcommand{\conc}{\mid}
+\newcommand{\Nu}[2]{(\nu{#1}{#2})}
+\newcommand{\faultyconf}{\Nu{\vec n\colon\carry{\vec S}}
+  \Nu{\vec c}\Nu{\vec d} (C_1\conc C_2)}
+\newcommand{\fv}{\mathit{fv}}
+\newcommand{\fc}{\mathit{fc}}
+% Evaluation contexts
+\newcommand{\ctxt}[2]{{#1}[#2]}
+\newcommand{\len}[1]{|{#1}|}
+% Typing judgements
+\newcommand{\linear}{\mathsf{lin}}
+\newcommand{\unlim}{\mathsf{un}}
+\newcommand{\typedbuff}[3]{{#1}\vdash{#2}\colon{#3}}
+%\newcommand{\typedc}[4]{{#1}\vdash_{#2}{#3}\colon{#4}}
+%\newcommand{\typedc}[4]{{#1}\vdash_{#2}{#3}\triangleright{#4}}
+\newcommand{\typedconf}[3]{{#1}\vdash{#2}\triangleright{#3}}
+\newcommand{\typedvalue}[3]{{#1}\vdash{#2}\colon{#3}}
+\newcommand{\typed}[5]{{#1}\vdash{#2}\triangleright{#3}\colon{#4}\triangleleft{#5}}
+\newcommand{\typedid}[2]{{#1}\colon{#2}}
+\newcommand{\typedconst}[2]{{#1}\colon{#2}}
+\newcommand{\typedexp}[3]{{#1}\vdash{#2}\colon{#3}}
+\newcommand{\typedbuf}[3]{{#1}\vdash{#2}\colon{#3}}
+\newcommand{\typedentry}[3]{{#1}\vdash{#2}\mapsto{#3}}
+\newcommand{\typeof}[1]{\mathit{typeof(}{#1}\mathit{)}}
+\newcommand{\typeds}[4]{{#1}\triangleright{#2}\colon{#3}\triangleleft{#4}}
+%\newcommand{\compat}[2]{{#1}\asymp{#2}}
+\newcommand{\compat}{\asymp}
+% Typing judgements for type checking
+\newcommand{\yields}{\mapsto}
+% \newcommand{\checkconf}[3]{{#1};{#2}\yields{#3}}
+% \newcommand{\checkvalue}[3]{{#1};{#2}\yields{#3}}
+% \newcommand{\checkexp}[4]{{#1};{#2}\yields{#3};{#4}}
+% \newcommand{\types}{\vdash}
+% Typing judgements with constraints
+% \newcommand{\ctypedconf}[4]{{#1}\vdash{#2}\triangleright{#3}\,|\,{#4}}
+% \newcommand{\ctypedvalue}[4]{{#1}\vdash{#2}\colon{#3}\,|\,{#4}}
+% \newcommand{\ctyped}[6]{{#1}\vdash{#2}\triangleright{#3}\colon{#4}\triangleleft{#5}\,|\,{#6}}
+%Subtyping
+\newcommand{\subt}{\mathrel{\mathsf{<:}}}
+%Matching (between buffer types and session types)
+%\newcommand{\matches}[3]{{#1}\vdash{#2}\matchesterm{#3}}
+\newcommand{\matches}[2]{{#1}\matchesterm{#2}}
+\newcommand{\after}[2]{{#1}/{#2}}
+%BNF definition
+\newcommand{\bnf}{::=}
+\newcommand{\alt}{~|~}
+%Reduction
+\newcommand{\vredrel}{\longrightarrow_{\mathsf{v}}}
+\newcommand{\vred}[2]{{#1}\vredrel{#2}}
+\newcommand{\ared}[2]{{#1}\longrightarrow{#2}}
+\newcommand{\credl}[5]{{#1},{#2}\stackrel{#3}{\longrightarrow}{#4},{#5}}
+\newcommand{\sred}[2]{{#1}\longrightarrow{#2}}
+
+\newcommand{\tableentry}[4]{{#1}\mapsto({#2},{#3},{#4})}
+\newcommand{\emptyseq}{\varepsilon}
+% Functions and predicates
+\newcommand{\dom}{\operatorname{dom}}
+\newcommand{\cdom}{\operatorname{cdom}}
+\newcommand{\peer}[1]{\operatorname{peer}_{#1}}
+\newcommand{\data}[1]{\operatorname{data}_{#1}}
+\newcommand{\type}[1]{\operatorname{type}_{#1}}
+\newcommand{\matchesterm}{\operatorname{matches}}
+\newcommand{\bound}{\operatorname{bound}}
+% Note: max is predefined
+
+\newcommand{\parts}[1]{{\cal P}({#1})}
+% Substitution and map
+\newcommand{\subs}[2]{\{{#1}/{#2}\}}
+\newcommand{\subst}[3]{{#1}\subs{#2}{#3}}
+\newcommand{\map}[1]{[\![{#1}]\!]}
+\newcommand{\D}{\mathcal{D}}
+% Rule names
+\newcommand{\mkRrule}[1]{\textsc{R-#1}}
+\newcommand{\mkSrule}[1]{\textsc{E-#1}}
+\newcommand{\mkTrule}[1]{\textsc{T-#1}}
+\newcommand{\mkCrule}[1]{\textsc{C-#1}}
+\newcommand{\mkSTrule}[1]{\textsc{S-#1}}
+%
+\newcommand{\Rlet}{\mkRrule{Let}}
+\newcommand{\RletPair}{\mkRrule{LetPair}}
+\newcommand{\Rsplit}{\mkRrule{Split}}
+\newcommand{\Rnew}{\mkRrule{New}}
+\newcommand{\Rbranch}{\mkRrule{Branch}}
+\newcommand{\Rapp}{\mkRrule{App}}
+\newcommand{\RappU}{\mkRrule{AppU}}
+\newcommand{\RappL}{\mkRrule{AppL}}
+\newcommand{\Rcom}{\mkRrule{Com}}
+\newcommand{\Rinit}{\mkRrule{Init}}
+\newcommand{\Rchan}{\mkRrule{New}}
+\newcommand{\Rrequest}{\mkRrule{Request}}
+\newcommand{\Raccept}{\mkRrule{Accept}}
+\newcommand{\Rift}{\mkRrule{IfT}}
+\newcommand{\Riff}{\mkRrule{IfF}}
+\newcommand{\Rseq}{\mkRrule{Seq}}
+\newcommand{\Rsend}{\mkRrule{Send}}
+\newcommand{\Rreceive}{\mkRrule{Receive}}
+\newcommand{\RsendChan}{\mkRrule{SendS}}
+\newcommand{\RreceiveChan}{\mkRrule{ReceiveS}}
+\newcommand{\Rcase}{\mkRrule{Case}}
+\newcommand{\Rselect}{\mkRrule{Select}}
+\newcommand{\Runfold}{\mkRrule{Unfold}}
+\newcommand{\Rprotocol}{\mkRrule{Protocol}}
+\newcommand{\Rcontext}{\mkRrule{Context}}
+\newcommand{\Rbeta}{\mkRrule{Beta}}
+\newcommand{\Rfix}{\mkRrule{Fix}}
+\newcommand{\Rrec}{\mkRrule{Rec}}
+\newcommand{\Rconf}{\mkRrule{Conf}}
+\newcommand{\Rfork}{\mkRrule{Fork}}
+\newcommand{\Rpar}{\mkRrule{Par}}
+\newcommand{\RnewC}{\mkRrule{NewC}}
+\newcommand{\RnewN}{\mkRrule{NewN}}
+\newcommand{\Rcong}{\mkRrule{Cong}}
+\newcommand{\Rstruct}{\mkRrule{Struct}}
+\newcommand{\Rconnect}{\mkRrule{Connect}}
+\newcommand{\Rsync}{\mkRrule{Sync}}
+\newcommand{\Rthread}{\mkRrule{Thread}}
+%
+\newcommand{\Scomm}{\mkSrule{Comm}}
+\newcommand{\Sassoc}{\mkSrule{Assoc}}
+\newcommand{\Smon}{\mkSrule{Monoid}}
+\newcommand{\Sscope}{\mkSrule{Scope}}
+\newcommand{\SscopeC}{\mkSrule{ScopeC}}
+\newcommand{\SscopeN}{\mkSrule{ScopeN}}
+%
+\newcommand{\Tthread}{\mkTrule{Thread}}
+\newcommand{\Tpar}{\mkTrule{Par}}
+\newcommand{\Trequest}{\mkTrule{Request}}
+\newcommand{\Taccept}{\mkTrule{Accept}}
+\newcommand{\Tfork}{\mkTrule{Fork}}
+\newcommand{\Tval}{\mkTrule{Val}}
+\newcommand{\Telim}{\mkTrule{$\forall$E}}
+\newcommand{\Tconst}{\mkTrule{Const}}
+\newcommand{\Tid}{\mkTrule{Id}} % Var ou Channel
+\newcommand{\Tvar}{\mkTrule{Var}}
+\newcommand{\TvarL}{\mkTrule{VarL}}
+\newcommand{\TvarU}{\mkTrule{VarU}}
+\newcommand{\Tnam}{\mkTrule{Name}}
+\newcommand{\Tnew}{\mkTrule{New}}
+\newcommand{\Tres}{\mkTrule{Res}}
+\newcommand{\Ttrue}{\mkTrule{True}}
+\newcommand{\Tfalse}{\mkTrule{False}}
+\newcommand{\Trec}{\mkTrule{Rec}}
+\newcommand{\Tif}{\mkTrule{If}}
+\newcommand{\Tlet}{\mkTrule{Let}}
+\newcommand{\TletPair}{\mkTrule{LetPair}}
+\newcommand{\Tpolylet}{\mkTrule{PolyLet}}
+\newcommand{\Tintro}{\mkTrule{$\forall$I}}
+\newcommand{\Tseq}{\mkTrule{Seq}}
+\newcommand{\Tchanid}{\mkTrule{Chan}}
+\newcommand{\Tchan}{\mkTrule{Chan}}
+\newcommand{\Tsend}{\mkTrule{Send}}
+\newcommand{\Treceive}{\mkTrule{Receive}}
+\newcommand{\TsendChan}{\mkTrule{SendS}}
+\newcommand{\TreceiveChan}{\mkTrule{ReceiveS}}
+\newcommand{\TreceiveOrTreceiveChan}{\mkTrule{Receive}}
+\newcommand{\Tselect}{\mkTrule{Select}}
+\newcommand{\Tcase}{\mkTrule{Case}}
+\newcommand{\Tfold}{\mkTrule{Fold}}
+\newcommand{\Tunfold}{\mkTrule{Unfold}}
+\newcommand{\TabsU}{\mkTrule{AbsU}}
+\newcommand{\TabsL}{\mkTrule{AbsL}}
+\newcommand{\Tabs}{\mkTrule{Abs}}
+\newcommand{\TappU}{\mkTrule{AppU}}
+\newcommand{\TappL}{\mkTrule{AppL}}
+\newcommand{\Tapp}{\mkTrule{App}}
+\newcommand{\Tweak}{\mkTrule{Weak}}
+\newcommand{\Tloop}{\mkTrule{Loop}}
+\newcommand{\TnewN}{\mkTrule{NewN}}
+\newcommand{\TnewC}{\mkTrule{NewC}}
+\newcommand{\TnewB}{\mkTrule{NewB}}   % c : Bottom
+\newcommand{\Tpair}{\mkTrule{Pair}}
+\newcommand{\Tfix}{\mkTrule{Fix}}
+\newcommand{\Tbuffer}{\mkTrule{Buffer}}
+\newcommand{\Tentry}{\mkTrule{Entry}}
+\newcommand{\Tjoin}{\mkTrule{Join}}
+\newcommand{\Ttable}{\mkTrule{Table}}
+\newcommand{\Tconf}{\mkTrule{Conf}}
+\newcommand{\Tempty}{\mkTrule{Empty}}
+\newcommand{\TaddBuffers}{\mkTrule{AddBuffers}}
+\newcommand{\Tlookup}{\mkTrule{Lookup}}
+\newcommand{\Tsplit}{\mkTrule{Split}}
+\newcommand{\Tsub}{\mkTrule{Sub}}
+\newcommand{\Tlabel}{\mkTrule{Label}}
+\newcommand{\TseqV}{\mkTrule{SeqV}}
+\newcommand{\TseqL}{\mkTrule{SeqL}}
+\newcommand{\TtopLevel}{\mkTrule{TopLevel}}
+%
+\newcommand{\Cabs}{\mkCrule{Abs}}
+\newcommand{\Crec}{\mkCrule{Rec}}
+\newcommand{\Creceive}{\mkCrule{ReceiveD}}
+\newcommand{\CreceiveChan}{\mkCrule{ReceiveS}}
+\newcommand{\Csend}{\mkCrule{SendD}}
+\newcommand{\CsendChan}{\mkCrule{SendS}}
+\newcommand{\Cselect}{\mkCrule{Select}}
+\newcommand{\Cfork}{\mkCrule{Fork}}
+\newcommand{\Cnew}{\mkCrule{New}}
+\newcommand{\Capp}{\mkCrule{App}}
+\newcommand{\Cval}{\mkCrule{Val}}
+\newcommand{\Cif}{\mkCrule{If}}
+\newcommand{\Clet}{\mkCrule{Let}}
+\newcommand{\Caccept}{\mkCrule{Accept}}
+\newcommand{\Crequest}{\mkCrule{Request}}
+\newcommand{\Cthread}{\mkCrule{Thread}}
+\newcommand{\Cpar}{\mkCrule{Par}}
+\newcommand{\CnewN}{\mkCrule{NewN}}
+\newcommand{\CnewB}{\mkCrule{NewB}}
+\newcommand{\CnewC}{\mkCrule{NewC}}
+\newcommand{\Cconst}{\mkCrule{Const}}
+\newcommand{\Cchanid}{\mkCrule{Chan}}
+\newcommand{\Cnam}{\mkCrule{Name}}
+\newcommand{\Cvar}{\mkCrule{Var}}
+\newcommand{\Ccase}{\mkCrule{Case}}
+%
+\newcommand{\STrefl}{\mkSTrule{Refl}}
+\newcommand{\STtrans}{\mkSTrule{Trans}}
+\newcommand{\STfun}{\mkSTrule{Fun}}
+\newcommand{\STfunl}{\mkSTrule{FunL}}
+\newcommand{\STfunfun}{\mkSTrule{FunFun}}
+\newcommand{\STin}{\mkSTrule{In}}
+\newcommand{\STout}{\mkSTrule{Out}}
+\newcommand{\STbranch}{\mkSTrule{Branch}}
+\newcommand{\STchoice}{\mkSTrule{Choice}}
+
+
+%Session type macros from ESOP paper
+\newcommand{\lbldt}[2]{{#1}\colon{#2}}
+\newcommand{\lbldc}[2]{{#1}\mathrel{.}{#2}}
+\newcommand{\nil}{\mathsf{nil}}
+\newcommand{\inp}[3]{{#1}\mathsf{?}{#2}\mathbin{.}{#3}}
+\newcommand{\outp}[3]{{#1}\mathsf{!}{#2}\mathbin{.}{#3}}
+\newcommand{\rep}{!}
+\newcommand{\offer}{\mathbin{\triangleright}}
+\renewcommand{\choose}{\mathbin{\triangleleft}}
+\newcommand{\cname}[1]{\mathsf{#1}}
+\newcommand{\lname}[1]{\mathsf{#1}}
+\newcommand{\pname}[1]{\mathsf{#1}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\Ninf}{\mathbb{N}^\infty}
+
+% TODO
+\newcommand{\todo}[1]{\textbf{[TODO: {#1}]}}
+
+% Layout
+\newenvironment{myfigure}{\begin{figure}[t]}{\end{figure}}
+%\newcommand{\mycaption}[1]{\vspace{-5ex}\caption{#1}}
+\newcommand{\mycaption}[1]{\caption{#1}}
+\newcommand{\mysubsection}[1]{\paragraph*{#1.}}
+\newcommand{\typingRuleSkip}{0ex}
+

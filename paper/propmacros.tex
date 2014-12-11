@@ -1,0 +1,61 @@
+\input{macros}
+
+% SILL typing judgements: use with prooftree no need for math mode $'s.
+\newcommand{\SILLchoiceL}{T \oplus L}
+\newcommand{\SILLchoiceROne}{T \oplus R_1}
+\newcommand{\SILLchoiceRTwo}{T \oplus R_2}
+\newcommand{\SILLbranch}{T \& R}
+\newcommand{\SILLbranchLOne}{T \& L_1}
+\newcommand{\SILLbranchLTwo}{T \& L_2}
+
+% SILL two-sided sequents
+\newcommand{\tsequent}[4]{{#1};{#2}\vdash{#3}::{#4}}
+\newcommand{\cpsequent}[2]{{#1}\vdash{#2}}
+
+% SILL/CP terms
+\newcommand{\inlterm}{\mkterm{inl}}
+\newcommand{\inrterm}{\mkterm{inr}}
+
+% GV types
+\newcommand{\Sbar}[1]{\overline{{#1}}}
+
+% GV keywords
+\newcommand{\withterm}{\mkterm{with}}
+\newcommand{\connectterm}{\mkterm{connect}}
+\newcommand{\toterm}{\mkterm{to}}
+
+% GV terms
+\newcommand{\Connect}[3]{\withterm~{#1}~\connectterm~{#2}~\toterm~{#3}}
+
+% SILL/CP syntax
+\newcommand{\CPcase}[3]{{#1}.\caseterm({#2},{#3})}
+\newcommand{\CPinl}[2]{{#1}.\inlterm;{#2}}
+\newcommand{\CPinr}[2]{{#1}.\inrterm;{#2}}
+\newcommand{\SLoutput}[3]{(\nu{#1}){#2}\langle{#1}\rangle.{#3}}
+\newcommand{\SLinput}[3]{{#1}({#2}).{#3}}
+\newcommand{\Spar}[3]{(\nu{#1}).({#2}~|~{#3})}
+\newcommand{\CPoutput}[4]{{#1}[{#2}].({#3}~|~{#4})}
+
+% SILL/CP types
+\newcommand{\BChoice}[2]{{#1}\oplus{#2}}
+\newcommand{\BBranch}[2]{{#1}\with{#2}}
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\0}{\mathbf{0}}
+\newcommand{\oend}{\mathsf{end_!}}
+
+% SILL def
+\newcommand{\sdef}[2]{{#1}\triangleq{#2}}
+
+% Adoption and Focus term
+\newcommand{\adoptterm}{\mkterm{adopt}}
+\newcommand{\focusterm}{\mkterm{focus}}
+
+% Adoption and Focus sequent
+\newcommand{\afsequent}[5]{{#1};{#2};{#3}\vdash{#4};{#5}}
+\newcommand{\capsequent}[3]{{#1}\vdash{#2}\leq{#3}}
+\newcommand{\LetFocus}[3]{\letterm~{#1}=\focusterm~{#2}~\interm~{#3}}
+
+% Adoption and Focus guard type
+\newcommand{\Tguard}[2]{{#1}\triangleright{#2}}
+\newcommand{\AFtr}[1]{\mathbf{tr}({#1})}
+\newcommand{\AFcap}[2]{\{{#1} \mapsto {#2}\}}
