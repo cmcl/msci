@@ -7,11 +7,24 @@
 
 *)
 Require Import Metatheory.Metatheory.
+Require Import ssreflect.
 
-(** Propositional variables are represented as natural numbers. *)
-Definition pvar := nat.
+Set Implicit Arguments.
 
-(** Propositions ranged over by A, B and C. *)
+(** Propositional variables are represented as natural numbers (bound) or
+    atoms (free).
+*)
+Inductive pvar :=
+  | pvar_bvar : nat -> pvar
+  | pvar_fvar : atom -> pvar.
+
+Coercion pvar_bvar : nat >-> pvar.
+Coercion pvar_fvar : atom >-> pvar.
+
+(** Propositions ranged over by A, B and C.
+
+    Note binding is de Bruijn indices with forall/exists being binders.
+*)
 Inductive prop : Type :=
   | pp_var : pvar -> prop
   | pp_dvar : pvar -> prop (* dual of a pvar *)
@@ -21,8 +34,8 @@ Inductive prop : Type :=
   | pp_with : prop -> prop -> prop
   | pp_accept : prop -> prop (* !A *)
   | pp_request : prop -> prop (* ?A *)
-  | pp_forall : pvar -> prop -> prop
-  | pp_exists : pvar -> prop -> prop
+  | pp_forall : prop -> prop
+  | pp_exists : prop -> prop
   | pp_one : prop (* unit for times *)
   | pp_bot : prop (* unit for par *)
   | pp_zero : prop (* unit for plus *)
@@ -60,8 +73,8 @@ Fixpoint prop_dual (pp : prop) : prop :=
   | A & B => ¬A ⨁ ¬B
   | ! A => ? ¬A
   | ? A => ! ¬A
-  | pp_forall X A => pp_exists X (¬A)
-  | pp_exists X A => pp_forall X (¬A)
+  | pp_forall A => pp_exists (¬A)
+  | pp_exists A => pp_forall (¬A)
   | pp_one => pp_bot
   | pp_bot => pp_one
   | pp_zero => pp_top
@@ -79,32 +92,68 @@ Qed.
     {{ A // X }} B -- double syntax used to get Coq to accept it. *)
 Reserved Notation "'{{' A '//' X '}}' B" (at level 46, left associativity).
 
-(** Substitution structural recurses over the definition of a proposition.
-    Note that there is an assumption (TODO: Enforce this?) that binders are
-    unique. That is, forall and exist will not capture the propositional
-    variable. Essentially, we only perform this substitution on open
-    propositions.
+(** The following definition of substitution for a free propositional variable
+    assumes the term to be substituted is locally closed.
 *)
-Fixpoint prop_subst (B A : prop) (X : pvar) : prop :=
-  match B with
-  | pp_var Y => if X == Y then A else pp_var Y
-  | pp_dvar Y => if X == Y then ¬A else pp_dvar Y
-  | A' ⨂ B' => {{A // X}}A' ⨂ {{A // X}} B'
-  | A' ⅋ B' => {{A // X}}A' ⅋ {{A // X}} B'
-  | A' ⨁ B' => {{A // X}}A' ⨁ {{A // X}} B'
-  | A' & B' => {{A // X}}A' & {{A // X}} B'
-  | ! A' => ! {{A // X}}A'
-  | ? A' => ? {{A // X}}A'
-  | pp_forall Y A' => pp_forall Y ({{A // X}}A')
-  | pp_exists Y A' => pp_exists Y ({{A // X}}A')
-  | _ => B
+Fixpoint prop_subst (x: atom) (u: prop) (pp: prop) : prop :=
+  match pp with
+  | pp_var v
+    => match v with
+       | pvar_fvar y => if x == y is left _ then u else pp
+       | _ => pp
+       end
+  | pp_dvar v
+    => match v with
+       | pvar_fvar y => if x == y is left _ then ¬u else pp
+       | _ => pp
+       end
+  | A ⨂ B => {{ u // x }} A ⨂ {{ u // x }} B
+  | A ⅋ B => {{ u // x }} A ⅋ {{ u // x }} B
+  | A ⨁ B => {{ u // x }} A ⨁ {{ u // x }} B
+  | A & B => {{ u // x }} A & {{ u // x }} B
+  | ! A => ! {{ u // x }} A
+  | ? A => ? {{ u // x }} A
+  | pp_forall A => pp_forall ({{ u // x }} A)
+  | pp_exists A => pp_exists ({{ u // x }} A)
+  | _ => pp
   end
-where "'{{' A '//' X '}}' B" := (prop_subst B A X) : cp_scope.
+where "'{{' A '//' X '}}' B" := (prop_subst X A B) : cp_scope.
+
+Notation "[ x ~> u ] t" := (prop_subst x u t) (at level 68) : cp_scope.
+
+(** Opening a prop pp is replacing an unbound prop variable with index k with
+    prop u. Assume u is locally closed and is only substituted once if it
+    contains free variables.
+*)
+Fixpoint prop_open_rec (k: nat) (u: prop) (pp: prop) :=
+  match pp with
+  | pp_var v
+    => match v with
+       | pvar_bvar n => if k == n is left _ then u else pp
+       | _ => pp
+       end
+  | pp_dvar v
+    => match v with
+       | pvar_bvar n => if k == n is left _ then ¬u else pp
+       | _ => pp
+       end
+  | A ⨂ B => (prop_open_rec k u A) ⨂ (prop_open_rec k u B)
+  | A ⅋ B => (prop_open_rec k u A) ⅋ (prop_open_rec k u B)
+  | A ⨁ B => (prop_open_rec k u A) ⨁ (prop_open_rec k u B)
+  | A & B => (prop_open_rec k u A) & (prop_open_rec k u B)
+  | ! A => ! (prop_open_rec k u A)
+  | ? A => ? (prop_open_rec k u A)
+  | pp_forall A => pp_forall (prop_open_rec (S k) u A)
+  | pp_exists A => pp_exists (prop_open_rec (S k) u A)
+  | _ => pp
+  end.
+
+Notation "{ k ~> u } t" := (prop_open_rec k u t) (at level 68) : cp_scope.
 
 Lemma prop_dual_preserves_subst: forall A B X,
   ¬({{A // X}}B) = {{A // X}}(¬B).
 Proof.
-  intros; induction B; simpl; f_equal; auto
+  intros; induction B; simpl; f_equal; auto; destruct p; auto
   ; match goal with
     | |- context[?X == ?Y] => destruct (X == Y)
     end; auto using prop_dual_involutive.
@@ -112,28 +161,34 @@ Qed.
 
 (** Definition of a processes ranged over by P, Q and R. *)
 Inductive proc : Set :=
+(* Constructors for locally nameless representation. *)
+  | p_bvar : nat -> proc
+  | p_fvar : atom -> proc
+(* Process terms *)
   | p_link : atom -> atom -> proc
-  | p_par : atom -> prop -> proc -> proc -> proc
-  | p_output : atom -> atom -> proc -> proc -> proc
-  | p_input : atom -> atom -> proc -> proc
+  | p_par : prop -> proc -> proc -> proc
+  | p_output : atom -> prop -> proc -> proc -> proc
+  | p_input : atom -> prop -> proc -> proc
   | p_left : atom -> proc -> proc
   | p_right : atom -> proc -> proc
   | p_choice : atom -> proc -> proc -> proc
-  | p_accept : atom -> atom -> proc -> proc
-  | p_request : atom -> atom -> proc -> proc
+  | p_accept : atom -> prop -> proc -> proc
+  | p_request : atom -> prop -> proc -> proc
   | p_send : atom -> prop -> proc -> proc
   | p_recv : atom -> pvar -> proc -> proc
   | p_empout : atom -> proc
   | p_empin : atom -> proc -> proc
   | p_empcho : atom -> proc.
 
+Coercion p_bvar : nat >-> proc.
+Coercion p_fvar : atom >-> proc.
 Hint Constructors proc.
 
 (** Some helpful notations. *)
 Notation "x ⟷ y" := (p_link x y) (at level 68) : cp_scope.
-Notation "'ν' x ':' A '→' P '|' Q" := (p_par x A P Q) (at level 68, x ident,
-                                                       right associativity)
-                                                      : cp_scope.
+Notation "'ν' A '→' P '|' Q" := (p_par A P Q) (at level 68, x ident,
+                                               right associativity)
+                                              : cp_scope.
 (** Example of using parallel composition :
 
     Parameter y : atom.
@@ -143,12 +198,12 @@ Notation "'ν' x ':' A '→' P '|' Q" := (p_par x A P Q) (at level 68, x ident,
 *)
 (** Change of notation from the paper; Coq doesn't seem to like the x coming
     first. *)
-Notation "'[' y ']' x '→' P '|' Q" := (p_output x y P Q) (at level 68,
-                                                          y ident, x ident,
+Notation "'[' A ']' x '→' P '|' Q" := (p_output x A P Q) (at level 68,
+                                                          x ident,
                                                          right associativity)
                                                          : cp_scope.
 (** We use ⟨⟩ instead of () in the input cases. *)
-Notation "'⟨' y '⟩' x '→' P" := (p_input x y P) (at level 68, y ident,
+Notation "'⟨' A '⟩' x '→' P" := (p_input x A P) (at level 68,
                                                 right associativity)
                                                 : cp_scope.
 
@@ -159,12 +214,10 @@ Notation "x '[inr]' → P" := (p_right x P) (at level 68,
 Notation "x 'CASE' P 'OR' Q" := (p_choice x P Q) (at level 68,
                                                   right associativity)
                                                  : cp_scope.
-Notation "'!' x '⟨' y '⟩' → P" := (p_accept x y P) (at level 68, x ident,
-                                                    y ident,
+Notation "'!' x '⟨' A '⟩' → P" := (p_accept x A P) (at level 68, x ident,
                                                     right associativity)
                                                    : cp_scope.
-Notation "'?' x '[' y ']' → P" := (p_request x y P) (at level 68, x ident,
-                                                     y ident,
+Notation "'?' x '[' A ']' → P" := (p_request x A P) (at level 68, x ident,
                                                      right associativity)
                                                     : cp_scope.
 Notation "x '→' 0" := (p_empout x) (at level 68) : cp_scope.
@@ -196,7 +249,7 @@ Reserved Notation "P '⊢cp' Γ" (at level 69).
 (** The uniqueness assumption is necessary to ensure environments are only
     combined if they contain distinct names.
     Note in some cases we utilise cofinite quantification to provide a
-    suitably fresh name for some channels. Some cases could be written has
+    suitably fresh name for some channels. Some cases could be written as
     x `notin` Γ for some x, Γ but I elected to maintain uniq assumptions
     wherever possible to keep the development symmetrical (in theory, this
     could help proofs since all rules follow a similar structure).
@@ -207,17 +260,17 @@ Inductive cp_rules : proc -> penv -> Prop :=
                     (UN: uniq (Γ ++ Δ ++ (x ~ A)))
                     (CPP: P ⊢cp Γ ++ (x ~ A))
                     (CPQ: Q ⊢cp Δ ++ (x ~ ¬A)),
-               ν x : A → P | Q ⊢cp Γ ++ Δ
+               ν A → P | Q ⊢cp Γ ++ Δ
   | cp_output : forall P Q Γ Δ x y A B
                        (NING: y `notin` dom Γ)
                        (UN: uniq (Γ ++ Δ ++ (x ~ A ⨂ B)))
                        (CPP: P ⊢cp Γ ++ (y ~ A))
                        (CPQ: Q ⊢cp Δ ++ (x ~ B)),
-                  [y]x → P | Q ⊢cp Γ ++ Δ ++ (x ~ A ⨂ B)
+                  [A]x → P | Q ⊢cp Γ ++ Δ ++ (x ~ A ⨂ B)
   | cp_input : forall P Γ x y A B
                       (UN: uniq (Γ ++ (y ~ A) ++ (x ~ A ⅋ B)))
                       (CPP: P ⊢cp Γ ++ (y ~ A) ++ (x ~ B)),
-                 ⟨y⟩x → P ⊢cp Γ ++ (x ~ A ⅋ B)
+                 ⟨A⟩x → P ⊢cp Γ ++ (x ~ A ⅋ B)
   | cp_left : forall P Γ x A B
                      (UN: uniq (Γ ++ (x ~ A ⨁ B)))
                      (CPP: P ⊢cp Γ ++ (x ~ A)),
@@ -241,7 +294,7 @@ Inductive cp_rules : proc -> penv -> Prop :=
                         (NING: y `notin` dom Γ)
                         (UN: uniq (Γ ++ (x ~ ? A)))
                         (CPP: P ⊢cp Γ ++ (y ~ A)),
-                   ? x[y] → P ⊢cp Γ ++ (x ~ ? A)
+                   ? x[A] → P ⊢cp Γ ++ (x ~ ? A)
   | cp_empout : forall x, x → 0 ⊢cp (x ~ pp_one)
   | cp_empin : forall P Γ x (UN: uniq (Γ ++ (x ~ pp_bot))) (CPP: P ⊢cp Γ),
                  ⟨⟩ x → P ⊢cp Γ ++ (x ~ pp_bot)
