@@ -119,22 +119,19 @@ Fixpoint prop_subst (x: atom) (u: prop) (pp: prop) : prop :=
   end
 where "'{{' A '//' X '}}' B" := (prop_subst X A B) : cp_scope.
 
-Notation "[ x ~> u ] t" := (prop_subst x u t) (at level 68) : cp_scope.
-
 (** Opening a prop pp is replacing an unbound prop variable with index k with
-    prop u. Assume u is locally closed and is only substituted once if it
-    contains free variables.
+    free propositional variable u.
 *)
-Fixpoint prop_open_rec (k: nat) (u: prop) (pp: prop) :=
+Fixpoint prop_open_rec (k: nat) (u: atom) (pp: prop) :=
   match pp with
   | pp_var v
     => match v with
-       | pvar_bvar n => if k == n is left _ then u else pp
+       | pvar_bvar n => if k == n is left _ then pp_var u else pp
        | _ => pp
        end
   | pp_dvar v
     => match v with
-       | pvar_bvar n => if k == n is left _ then ¬u else pp
+       | pvar_bvar n => if k == n is left _ then pp_dvar u else pp
        | _ => pp
        end
   | A ⨂ B => (prop_open_rec k u A) ⨂ (prop_open_rec k u B)
@@ -148,7 +145,7 @@ Fixpoint prop_open_rec (k: nat) (u: prop) (pp: prop) :=
   | _ => pp
   end.
 
-Notation "{ k ~> u } t" := (prop_open_rec k u t) (at level 68) : cp_scope.
+Definition open_prop t u := prop_open_rec 0 u t.
 
 Lemma prop_dual_preserves_subst: forall A B X,
   ¬({{A // X}}B) = {{A // X}}(¬B).
@@ -159,34 +156,36 @@ Proof.
     end; auto using prop_dual_involutive.
 Qed.
 
+(** Names within processes; represent channel identifiers. *)
+Inductive pname : Set :=
+  | p_bn : nat -> pname
+  | p_fn : atom -> pname.
+
+Coercion p_bn : nat >-> pname.
+Coercion p_fn : atom >-> pname.
+
 (** Definition of a processes ranged over by P, Q and R. *)
 Inductive proc : Set :=
-(* Constructors for locally nameless representation. *)
-  | p_bvar : nat -> proc
-  | p_fvar : atom -> proc
-(* Process terms *)
-  | p_link : atom -> atom -> proc
+  | p_link : pname -> pname -> proc
   | p_par : prop -> proc -> proc -> proc
-  | p_output : atom -> prop -> proc -> proc -> proc
-  | p_input : atom -> prop -> proc -> proc
-  | p_left : atom -> proc -> proc
-  | p_right : atom -> proc -> proc
-  | p_choice : atom -> proc -> proc -> proc
-  | p_accept : atom -> prop -> proc -> proc
-  | p_request : atom -> prop -> proc -> proc
-  | p_send : atom -> prop -> proc -> proc
-  | p_recv : atom -> pvar -> proc -> proc
-  | p_empout : atom -> proc
-  | p_empin : atom -> proc -> proc
-  | p_empcho : atom -> proc.
+  | p_output : pname -> prop -> proc -> proc -> proc
+  | p_input : pname -> prop -> proc -> proc
+  | p_left : pname -> proc -> proc
+  | p_right : pname -> proc -> proc
+  | p_choice : pname -> proc -> proc -> proc
+  | p_accept : pname -> prop -> proc -> proc
+  | p_request : pname -> prop -> proc -> proc
+  | p_send : pname -> prop -> proc -> proc
+  | p_recv : pname -> proc -> proc
+  | p_empout : pname -> proc
+  | p_empin : pname -> proc -> proc
+  | p_empcho : pname -> proc.
 
-Coercion p_bvar : nat >-> proc.
-Coercion p_fvar : atom >-> proc.
 Hint Constructors proc.
 
 (** Some helpful notations. *)
 Notation "x ⟷ y" := (p_link x y) (at level 68) : cp_scope.
-Notation "'ν' A '→' P '|' Q" := (p_par A P Q) (at level 68, x ident,
+Notation "'ν' A '→' P '‖' Q" := (p_par A P Q) (at level 68, x ident,
                                                right associativity)
                                               : cp_scope.
 (** Example of using parallel composition :
@@ -198,9 +197,8 @@ Notation "'ν' A '→' P '|' Q" := (p_par A P Q) (at level 68, x ident,
 *)
 (** Change of notation from the paper; Coq doesn't seem to like the x coming
     first. *)
-Notation "'[' A ']' x '→' P '|' Q" := (p_output x A P Q) (at level 68,
-                                                          x ident,
-                                                         right associativity)
+Notation "'[' A ']' x '→' P '‖' Q" := (p_output x A P Q) (at level 68,
+                                                          right associativity)
                                                          : cp_scope.
 (** We use ⟨⟩ instead of () in the input cases. *)
 Notation "'⟨' A '⟩' x '→' P" := (p_input x A P) (at level 68,
@@ -214,14 +212,14 @@ Notation "x '[inr]' → P" := (p_right x P) (at level 68,
 Notation "x 'CASE' P 'OR' Q" := (p_choice x P Q) (at level 68,
                                                   right associativity)
                                                  : cp_scope.
-Notation "'!' x '⟨' A '⟩' → P" := (p_accept x A P) (at level 68, x ident,
+Notation "'!' '⟨' A '⟩' x → P" := (p_accept x A P) (at level 68,
                                                     right associativity)
                                                    : cp_scope.
-Notation "'?' x '[' A ']' → P" := (p_request x A P) (at level 68, x ident,
+Notation "'?' '[' A ']' x → P" := (p_request x A P) (at level 68,
                                                      right associativity)
                                                     : cp_scope.
 Notation "x '→' 0" := (p_empout x) (at level 68) : cp_scope.
-Notation "⟨⟩ x → P" := (p_empin x P) (at level 68, x ident,
+Notation "⟨⟩ x → P" := (p_empin x P) (at level 68,
                                       right associativity) : cp_scope.
 Notation "x 'CASE' 0" := (p_empcho x) (at level 68) : cp_scope.
 
@@ -232,6 +230,69 @@ Parameter x y: atom.
 Check ν x : (pp_var 0) ⨁ (pp_var 1) → x ⟷ y | x → 0.
 
 *)
+
+(** The following definition of substitution for a free name
+    assumes the term to be substituted is locally closed.
+*)
+Fixpoint proc_subst (x y: atom) (p: proc) : proc :=
+  let
+    sub := fun u => match u with
+                    | p_fn z => if z == x is left _ then y else u
+                    | _ => u
+                    end
+  in
+    match p with
+    | w ⟷ z => sub w ⟷ sub z
+    | ν A → P ‖ Q => ν A → (proc_subst x y P) ‖ (proc_subst x y Q)
+    | [A] z → P ‖ Q => [A] (sub z) → (proc_subst x y P) ‖ (proc_subst x y Q)
+    | ⟨A⟩ z → P => ⟨A⟩ (sub z) → (proc_subst x y P)
+    | z [inl] → P => (sub z) [inl] → (proc_subst x y P)
+    | z [inr] → P => (sub z) [inr] → (proc_subst x y P)
+    | z CASE P OR Q => (sub z) CASE (proc_subst x y P) OR (proc_subst x y Q)
+    | ! ⟨A⟩ z → P => ! ⟨A⟩ (sub z) → (proc_subst x y P)
+    | ? [A] z → P => ? [A] (sub z) → (proc_subst x y P)
+    | p_send z A P => p_send (sub z) A (proc_subst x y P)
+    | p_recv z P => p_recv (sub z) (proc_subst x y P)
+    | z → 0 => (sub z) → 0
+    | ⟨⟩ z → P => ⟨⟩ (sub z) → (proc_subst x y P)
+    | z CASE 0 => (sub z) CASE 0
+    end.
+
+Notation "[ x ~> y ] P" := (proc_subst x y P) (at level 68) : cp_scope.
+
+(** Opening a proc p is replacing an unbound name with index k with
+    free name x.
+*)
+Fixpoint proc_open_rec (k: nat) (x: atom) (p: proc) :=
+  let
+    sub := fun u => match u with
+                    | p_bn n => if n == k is left _ then p_fn x else u
+                    | _ => u
+                    end
+  in
+    match p with
+    | w ⟷ z => sub w ⟷ sub z
+    | ν A → P ‖ Q
+      => ν A → (proc_open_rec (S k) x P) ‖ (proc_open_rec (S k) x Q)
+    | [A] z → P ‖ Q
+      => [A] (sub z) → (proc_open_rec (S k) x P) ‖ (proc_open_rec (S k) x Q)
+    | ⟨A⟩ z → P => ⟨A⟩ (sub z) → (proc_open_rec (S k) x P)
+    | z [inl] → P => (sub z) [inl] → (proc_open_rec k x P)
+    | z [inr] → P => (sub z) [inr] → (proc_open_rec k x P)
+    | z CASE P OR Q
+      => (sub z) CASE (proc_open_rec k x P) OR (proc_open_rec k x Q)
+    | ! ⟨A⟩ z → P => ! ⟨A⟩ (sub z) → (proc_open_rec (S k) x P)
+    | ? [A] z → P => ? [A] (sub z) → (proc_open_rec (S k) x P)
+    | p_send z A P => p_send (sub z) A (proc_open_rec k x P)
+    | p_recv z P => p_recv (sub z) (proc_open_rec k x P)
+    | z → 0 => sub z → 0
+    | ⟨⟩ z → P => ⟨⟩ (sub z) → (proc_open_rec k x P)
+    | z CASE 0 => (sub z) CASE 0
+    end.
+
+Notation "{ k ~> u } t" := (proc_open_rec k u t) (at level 68) : cp_scope.
+
+Definition open_proc P x := proc_open_rec 0 x P.
 
 (** Environments for the process calculus are mappings of atoms to
     propositions. *)
@@ -244,6 +305,47 @@ Inductive all_requests : penv -> Prop :=
   | all_requests_cons : forall Γ x A (REQS: all_requests Γ),
                           all_requests (Γ ++ (x ~ ? A)).
 
+(** Locally closed processes. *)
+Inductive lc_proc : proc -> Prop :=
+  | lc_p_fwd : forall (w x:atom), lc_proc (w ⟷ x)
+  | lc_p_cut : forall (L:atoms) P Q A
+                    (COP: forall (x:atom) (NL: x `notin` L),
+                            lc_proc (open_proc P x))
+                    (COQ: forall (x:atom) (NL: x `notin` L),
+                            lc_proc (open_proc Q x)),
+               lc_proc (ν A → P ‖ Q)
+  | lc_p_output : forall (L:atoms) P Q (x:atom) A
+                         (COP: forall (y:atom) (NL: y `notin` L),
+                                 lc_proc (open_proc P y))
+                         (COQ: forall (y:atom) (NL: y `notin` L),
+                                 lc_proc (open_proc Q y)),
+                    lc_proc ([A]x → P ‖ Q)
+  | lc_p_input : forall (L:atoms) P (x:atom) A
+                        (COP: forall (y:atom) (NL: y `notin` L),
+                                lc_proc (open_proc P y)),
+                   lc_proc (⟨A⟩x → P)
+  | lc_p_left : forall P (x:atom) (COP: lc_proc P),
+                  lc_proc (x[inl] → P)
+  | lc_p_right : forall P (x:atom) (COP: lc_proc P),
+                   lc_proc (x[inr] → P)
+  | lc_p_choice : forall P Q (x:atom) (COP: lc_proc P) (COQ: lc_proc Q),
+                    lc_proc (x CASE P OR Q)
+  | lc_p_accept : forall (L:atoms) P (x:atom) A
+                         (COP: forall (y:atom) (NL: y `notin` L),
+                                 lc_proc (open_proc P y)),
+                    lc_proc (! ⟨A⟩ x → P)
+  | lc_p_request : forall (L:atoms) P (x:atom) A
+                          (COP: forall (y:atom) (NL: y `notin` L),
+                                  lc_proc (open_proc P y)),
+                     lc_proc (? [A] x → P)
+  | lc_p_send : forall P (x:atom) A (COP: lc_proc P), lc_proc (p_send x A P)
+  | lc_p_recv : forall P (x:atom) (COP: lc_proc P), lc_proc (p_recv x P)
+  | lc_p_empout : forall (x:atom), lc_proc (x → 0)
+  | lc_p_empin : forall P (x:atom) (COP: lc_proc P), lc_proc (⟨⟩ x → P)
+  | lc_p_empcho : forall (x:atom), lc_proc (x CASE 0).
+
+Hint Constructors lc_proc.
+
 Reserved Notation "P '⊢cp' Γ" (at level 69).
 
 (** The uniqueness assumption is necessary to ensure environments are only
@@ -255,21 +357,25 @@ Reserved Notation "P '⊢cp' Γ" (at level 69).
     could help proofs since all rules follow a similar structure).
 *)
 Inductive cp_rules : proc -> penv -> Prop :=
-  | cp_fwd : forall x w A (NEQ: x <> w), w ⟷ x ⊢cp ((w ~ ¬ A) ++ (x ~ A))
-  | cp_cut : forall P Q x A Γ Δ
-                    (UN: uniq (Γ ++ Δ ++ (x ~ A)))
-                    (CPP: P ⊢cp Γ ++ (x ~ A))
-                    (CPQ: Q ⊢cp Δ ++ (x ~ ¬A)),
-               ν A → P | Q ⊢cp Γ ++ Δ
-  | cp_output : forall P Q Γ Δ x y A B
-                       (NING: y `notin` dom Γ)
+  | cp_fwd : forall (x w: atom) A (NEQ: x <> w),
+               w ⟷ x ⊢cp ((w ~ ¬ A) ++ (x ~ A))
+  | cp_cut : forall (L:atoms) P Q A Γ Δ
+                    (UN: uniq (Γ ++ Δ))
+                    (CPP: forall (x:atom) (NL: x `notin` L),
+                            P ⊢cp Γ ++ (x ~ A))
+                    (CPQ: forall (x:atom) (NL: x `notin` L),
+                            Q ⊢cp Δ ++ (x ~ ¬A)),
+               ν A → P ‖ Q ⊢cp Γ ++ Δ
+  | cp_output : forall (L:atoms) P Q Γ Δ x A B
                        (UN: uniq (Γ ++ Δ ++ (x ~ A ⨂ B)))
-                       (CPP: P ⊢cp Γ ++ (y ~ A))
+                       (CPP: forall (y:atom) (NL: y `notin` L),
+                               P ⊢cp Γ ++ (y ~ A))
                        (CPQ: Q ⊢cp Δ ++ (x ~ B)),
-                  [A]x → P | Q ⊢cp Γ ++ Δ ++ (x ~ A ⨂ B)
-  | cp_input : forall P Γ x y A B
-                      (UN: uniq (Γ ++ (y ~ A) ++ (x ~ A ⅋ B)))
-                      (CPP: P ⊢cp Γ ++ (y ~ A) ++ (x ~ B)),
+                  [A]x → P ‖ Q ⊢cp Γ ++ Δ ++ (x ~ A ⨂ B)
+  | cp_input : forall (L:atoms) P Γ x A B
+                      (UN: uniq (Γ ++ (x ~ A ⅋ B)))
+                      (CPP: forall (y:atom) (NL: y `notin` L),
+                              P ⊢cp Γ ++ (y ~ A) ++ (x ~ B)),
                  ⟨A⟩x → P ⊢cp Γ ++ (x ~ A ⅋ B)
   | cp_left : forall P Γ x A B
                      (UN: uniq (Γ ++ (x ~ A ⨁ B)))
@@ -284,18 +390,28 @@ Inductive cp_rules : proc -> penv -> Prop :=
                        (CPP: P ⊢cp Γ ++ (x ~ A))
                        (CPQ: Q ⊢cp Γ ++ (x ~ B)),
                   x CASE P OR Q ⊢cp Γ ++ (x ~ A & B)
-  | cp_accept : forall P Γ x y A
-                       (NING: y `notin` dom Γ)
+  | cp_accept : forall (L:atoms) P Γ x A
                        (REQS: all_requests Γ)
                        (UN: uniq (Γ ++ (x ~ ! A)))
-                       (CPP: P ⊢cp Γ ++ (y ~ A)),
-                  !x⟨y⟩ → P ⊢cp Γ ++ (x ~ ! A)
-  | cp_request : forall P Γ x y A
-                        (NING: y `notin` dom Γ)
+                       (CPP: forall (y:atom) (NL: y `notin` L),
+                               P ⊢cp Γ ++ (y ~ A)),
+                  ! ⟨A⟩ x → P ⊢cp Γ ++ (x ~ ! A)
+  | cp_request : forall (L:atoms) P Γ x A
                         (UN: uniq (Γ ++ (x ~ ? A)))
-                        (CPP: P ⊢cp Γ ++ (y ~ A)),
-                   ? x[A] → P ⊢cp Γ ++ (x ~ ? A)
-  | cp_empout : forall x, x → 0 ⊢cp (x ~ pp_one)
+                        (CPP: forall (y:atom) (NL: y `notin` L),
+                                P ⊢cp Γ ++ (y ~ A)),
+                   ? [A] x → P ⊢cp Γ ++ (x ~ ? A)
+  | cp_send : forall (L:atoms) Γ P x A B
+                     (UN: uniq (Γ ++ x ~ pp_exists B))
+                     (CPP: forall (y:atom) (NL: y `notin` L),
+                             P ⊢cp Γ ++ x ~ {{ A // y }} (open_prop B y)),
+                p_send x A P ⊢cp Γ ++ x ~ pp_exists B
+  | cp_recv : forall (L:atoms) Γ P x B
+                     (UN: uniq (Γ ++ x ~ pp_forall B))
+                     (CPP: forall (y:atom) (NL: y `notin` L),
+                             P ⊢cp Γ ++ x ~ (open_prop B y)),
+                p_recv x P ⊢cp Γ ++ x ~ pp_forall B
+  | cp_empout : forall (x: atom), x → 0 ⊢cp (x ~ pp_one)
   | cp_empin : forall P Γ x (UN: uniq (Γ ++ (x ~ pp_bot))) (CPP: P ⊢cp Γ),
                  ⟨⟩ x → P ⊢cp Γ ++ (x ~ pp_bot)
   | cp_empcho : forall Γ x (UN: uniq (Γ ++ (x ~ pp_top))),
