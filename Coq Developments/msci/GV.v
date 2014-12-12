@@ -48,8 +48,6 @@ Hint Immediate eq_kind_dec.
       * Choice and branch are binary; this matches the intuition of tensor
         product which is defined as binary and also maps better to the CP
         with and plus constructs which are also binary
-      * There is only one end construct (TODO: Check if the proofs will need
-        two end terminators).
 *)
 Inductive typ : kind -> Set :=
 (* Session types section *)
