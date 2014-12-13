@@ -12,7 +12,7 @@
     DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
 *)
-Require Import Metatheory Tactics List Eqdep_dec Coq.Program.Tactics.
+Require Import Metatheory Tactics List Coq.Program.Tactics.
 Require Import ssreflect.
 Set Implicit Arguments.
 
@@ -219,7 +219,7 @@ Fixpoint subst (x: atom) (u: term) (t: term) : term :=
   | tm_app m n => tm_app (subst x u m) (subst x u n)
   | tm_pair p q => tm_pair (subst x u p) (subst x u q)
   | tm_let kt ku T U m n => tm_let T U (subst x u m) (subst x u n)
-  | tm_send m n => tm_send (subst x u m) (subst x u m)
+  | tm_send m n => tm_send (subst x u m) (subst x u n)
   | tm_recv m => tm_recv (subst x u m)
   | tm_select l m => tm_select l (subst x u m)
   | tm_case m ll nl lr nr
@@ -243,7 +243,7 @@ Fixpoint open_rec (k: nat) (u: term) (t: term) :=
   | tm_pair p q => tm_pair (open_rec k u p) (open_rec k u q)
   | tm_let kt ku T U m n
     => tm_let T U (open_rec k u m) (open_rec (S (S k)) u n)
-  | tm_send m n => tm_send (open_rec k u m) (open_rec k u m)
+  | tm_send m n => tm_send (open_rec k u m) (open_rec k u n)
   | tm_recv m => tm_recv (open_rec k u m)
   | tm_select l m => tm_select l (open_rec k u m)
   | tm_case m ll nl lr nr
@@ -261,19 +261,21 @@ Notation "{ k ~> u } t" := (open_rec k u t) (at level 68) : gv_scope.
     u. Assume u is locally closed and is only substituted once if it contains
     free variables.
 *)
-Fixpoint open t u := open_rec 0 u t.
+Definition open t u := open_rec 0 u t.
+
+Hint Unfold open.
 
 (** A locally closed term has no unbounded variables. Note also using
     cofinite quantification with binding constructs. *)
 Inductive lc : term -> Prop :=
   | lc_id : forall (x:atom), lc (tm_id x)
   | lc_unit : lc tm_unit
-  | lc_abs : forall k (L:atoms) (T:typ k) M
+  | lc_abs : forall (L:atoms) k (T:typ k) M
                     (CO: forall (x:atom), x `notin` L -> lc (open M x)),
                lc (tm_abs T M)
   | lc_app : forall M N (MLC: lc M) (NLC: lc N), lc (tm_app M N)
   | lc_pair : forall M N (MLC: lc M) (NLC: lc N), lc (tm_pair M N)
-  | lc_let : forall kt ku (L L':atoms) (T:typ kt) (U:typ ku) M N
+  | lc_let : forall (L L':atoms) kt ku (T:typ kt) (U:typ ku) M N
                     (MLC: lc M)
                     (NCO: forall (x y:atom)
                                  (XL: x `notin` L)
@@ -292,6 +294,8 @@ Inductive lc : term -> Prop :=
                         (NCO: forall (x:atom), x `notin` L -> lc (open N x)),
                    lc (tm_connect T M N)
   | lc_end : forall M (MLC: lc M), lc (tm_end M).
+
+Hint Constructors lc.
 
 (** Typing environments are lists of (atom,typ) pairs. *)
 Definition tenv := list (atom * (typ lin + typ un)).
@@ -341,7 +345,7 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
                             (UN: uniq (Φ ++ x ~ inr T ++ x' ~ inr T))
                             (WT: Φ ++ x ~ inr T ++ x' ~ inr T ⊢ N ∈ U),
                        Φ ++ x ~ inr T ⊢ (subst x' x N) ∈ U
-  | wt_tm_labs : forall Φ (L: atoms) kt ku (T: typ kt) (U: typ ku) M
+  | wt_tm_labs : forall (L: atoms) Φ kt ku (T: typ kt) (U: typ ku) M
                         (UN: uniq Φ)
                         (WT: forall (x:atom),
                                x `notin` L ->
@@ -362,7 +366,7 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
                         (WTM: Φ ⊢ M ∈ T) (WTN: Ψ ⊢ N ∈ U),
                    Φ ++ Ψ ⊢ (tm_pair M N) ∈ T ⨂ U
   | wt_tm_let :
-      forall Φ Ψ (L L':atoms) kt ku kv
+      forall (L L':atoms) Φ Ψ kt ku kv
              (T:typ kt) (U:typ ku) (V: typ kv) M N
              (UN: uniq (Φ ++ Ψ))
              (WTM: Φ ⊢ M ∈ T ⨂ U)
@@ -386,16 +390,16 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
                             (IS: is_session (S1 <+> S2))
                             (WT: Φ ⊢ M ∈ (S1 <+> S2)),
                        Φ ⊢ tm_select lb_inr M ∈ S2
-  | wt_tm_case : forall Φ Ψ (L:atoms) M NL NR S1 S2 kt (T: typ kt)
+  | wt_tm_case : forall (L:atoms) Φ Ψ M NL NR S1 S2 kt (T: typ kt)
                         (UN: uniq (Φ ++ Ψ))
                         (IS: is_session (S1 <+> S2))
                         (WTM: Φ ⊢ M ∈ (S1 <+> S2))
-                        (WTNL: forall (x:atom),
-                                 x `notin` L -> Ψ ++ x ~ inl S1 ⊢ NL ∈ T)
-                        (WTNR: forall (x:atom),
-                                 x `notin` L -> Ψ ++ x ~ inl S2 ⊢ NR ∈ T),
+                        (WTNL: forall (x:atom) (NLH: x `notin` L),
+                                 Ψ ++ x ~ inl S1 ⊢ (open NL x) ∈ T)
+                        (WTNR: forall (x:atom) (NL: x `notin` L),
+                                 Ψ ++ x ~ inl S2 ⊢ (open NR x) ∈ T),
                    Φ ++ Ψ ⊢ (tm_case M lb_inl NL lb_inr NR) ∈ T
-  | wt_tm_connect : forall Φ Ψ (L:atoms) M N S S' kt (T: typ kt)
+  | wt_tm_connect : forall (L:atoms) Φ Ψ M N S S' kt (T: typ kt)
                            (UN: uniq (Φ ++ Ψ))
                            (DU: are_dual S S')
                            (WTM: forall (x:atom) (NL: x `notin` L),
@@ -409,3 +413,54 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
 where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
 
 Hint Constructors wt_tm.
+
+Lemma lc_no_bvar: forall t u k
+    (LC: lc t),
+  {k ~> u}t = t.
+Proof.
+ (* Need some more auxillary properties about opening. *)  
+Admitted.
+
+Lemma lc_open_subst: forall t u (x y: atom) k
+    (NEQ: x <> y)
+    (LCU: lc u),
+  {k ~> y} ([x ~> u]t) = [x ~> u]({k ~> y} t).
+Proof.
+  ii; unfold open; generalize dependent k.
+  induction t; ii; f_equal; auto.
+  Case "bound var".
+    destruct (k == n); ss; destruct (x == y); easy.
+  Case "free var".
+    destruct (x == a); auto using lc_no_bvar.
+Qed.
+
+Lemma subst_lc : forall t u x
+    (LCT: lc t)
+    (LC: lc u),
+  lc ([ x ~> u ] t).
+Proof.
+  ii; induction LCT; simpl; auto.
+  Case "lc_id".
+    ss; destruct (x == x0); subst; eauto.
+  Case "lc_abs".
+    pick fresh y and apply lc_abs.
+    unfold open in *; rewrite lc_open_subst; auto.
+  Case "let".
+    (* TODO: tactic for introducing list of fresh variables. *)
+    apply lc_let with (L' := L `union` L' `union` singleton x)
+                        (L := L `union` L' `union` singleton x); ii; auto.
+    unfold open in *; rewrite !lc_open_subst; auto.
+  Case "case".
+    pick fresh y and apply lc_case; auto
+    ; by unfold open in *; rewrite lc_open_subst; auto.
+  Case "connect".
+    pick fresh y and apply lc_connect; unfold open in *
+    ; rewrite lc_open_subst; auto.
+Qed.
+
+Lemma wt_tm_is_lc : forall Φ t k (T: typ k)
+    (WT: Φ ⊢ t ∈ T),
+  lc t.
+Proof.
+  ii; induction WT; eauto using subst_lc.
+Qed.

@@ -2,7 +2,7 @@
     their insipration.
  *)
 
-Require Import Prelude.
+Require Import Prelude Eqdep_dec.
 
 Hint Unfold not.
 
@@ -49,6 +49,7 @@ Ltac simpl_existT :=
 
 Tactic Notation "dup" hyp(H) := let H' := fresh H in assert (H' := H).
 
+Ltac s := simpl.
 Ltac ss := repeat (unfold not in *; simpl in *).
 Ltac i := intros.
 Ltac ii := intros; ss.
