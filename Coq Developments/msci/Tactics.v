@@ -2,7 +2,7 @@
     their insipration.
  *)
 
-Require Import Prelude Eqdep_dec.
+Require Import Metatheory Prelude Eqdep_dec.
 
 Hint Unfold not.
 
@@ -37,6 +37,8 @@ Ltac des :=
           let HP := fresh H in
           let HQ := fresh H in
           destruct H as [HP|HQ]
+      | |- context[?X == ?Y] => des_goal (X == Y)
+      | [H: context[?X == ?Y] |- _] => desT (X == Y)
       | _ => idtac
     end.
 

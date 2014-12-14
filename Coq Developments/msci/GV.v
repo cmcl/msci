@@ -284,7 +284,7 @@ Inductive lc : term -> Prop :=
                lc (tm_let T U M N)
   | lc_send : forall M N (MLC: lc M) (NLC: lc N), lc (tm_send M N)
   | lc_recv : forall M (MLC: lc M), lc (tm_recv M)
-  | lc_select : forall lbl M, lc (tm_select lbl M)
+  | lc_select : forall lbl M (LCM: lc M), lc (tm_select lbl M)
   | lc_case : forall (L:atoms) M NL NR (MLC: lc M)
                      (NLCO: forall (x:atom), x `notin` L -> lc (open NL x))
                      (NRCO: forall (x:atom), x `notin` L -> lc (open NR x)),
@@ -414,12 +414,33 @@ where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
 
 Hint Constructors wt_tm.
 
+(** Following ``Engineering Formal Metatheory'', we need some properties
+    regarding opening and substitution w.r.t locally closed terms.
+*)
+Lemma open_rec_same : forall t j v i u
+    (NEQ: i <> j)
+    (EQ: {i ~> u}({j ~> v} t) = {j ~> v} t),
+  {i ~> u} t = t.
+Proof.
+  induction t; ii; ss; auto
+  ; try (by f_equal; inversion EQ; firstorder)
+  ; des; auto.
+  - subst n; exfalso; auto.
+  - subst n; ss; destruct (i == i); auto; []; exfalso; auto.
+Qed.
+
 Lemma lc_no_bvar: forall t u k
     (LC: lc t),
   {k ~> u}t = t.
 Proof.
- (* Need some more auxillary properties about opening. *)  
-Admitted.
+  ii; generalize dependent k; induction LC; s; ii; f_equal; auto
+  ; try (by unfold open in *; pick fresh x for L
+         ; apply open_rec_same with (j := 0)(v := x); auto).
+  Case "let".
+    unfold open in *; pick fresh x for L; pick fresh y for L'.
+    apply open_rec_same with (j := 0)(v := y); auto.
+    apply open_rec_same with (j := 1)(v := x); auto.
+Qed.
 
 Lemma lc_open_subst: forall t u (x y: atom) k
     (NEQ: x <> y)
@@ -432,6 +453,45 @@ Proof.
     destruct (k == n); ss; destruct (x == y); easy.
   Case "free var".
     destruct (x == a); auto using lc_no_bvar.
+Qed.
+
+Lemma subst_eq_var: forall (x : atom) u,
+  [x ~> u]x = u.
+Proof.
+  ii; des; auto.
+Qed.
+
+Lemma subst_neq_var : forall (x y : atom) u,
+  y <> x -> [x ~> u]y = y.
+Proof.
+  ii; des; auto; []; exfalso; auto.
+Qed.
+
+Lemma subst_open_rec : forall t1 t2 u (x : atom) k,
+  lc u ->
+  [x ~> u] ({k ~> t2} t1) = {k ~> [x ~> u] t2} ([x ~> u] t1).
+Proof.
+  induction t1; ii; try (by f_equal; eauto); des; s; auto.
+  symmetry; auto using lc_no_bvar.
+Qed.
+
+Lemma subst_open_var : forall (x y : atom) u t
+    (NEQ: y <> x)
+    (LC: lc u),
+  open ([x ~> u] t) y = [x ~> u] (open t y).
+Proof.
+  ii; unfold open; auto using lc_open_subst.
+Qed.
+
+Lemma subst_intro : forall (x : atom) u t,
+    (NIN: x `notin` (fv e))
+  open t u = [x ~> u](open t x).
+Proof.
+  intros; unfold open; generalize 0.
+  induction e; intros k; simpl in *; try (solve [f_equal; eauto]).
+  - destruct (k == n); auto using subst_eq_var.
+  - apply notin_singleton_1 in H; destruct (a == x); auto; []
+    ; now (contradict H).
 Qed.
 
 Lemma subst_lc : forall t u x
