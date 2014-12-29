@@ -6,8 +6,7 @@
     http://doi.acm.org/10.1145/2364527.2364568
 
 *)
-Require Import Metatheory.Metatheory.
-Require Import ssreflect.
+Require Import Metatheory.Metatheory Tactics.
 
 Set Implicit Arguments.
 
@@ -20,6 +19,13 @@ Inductive pvar :=
 
 Coercion pvar_bvar : nat >-> pvar.
 Coercion pvar_fvar : atom >-> pvar.
+
+Hint Resolve eq_nat_dec.
+
+Lemma eq_pvar_dec : forall (x y : pvar), {x = y} + {x <> y}.
+Proof. decide equality. Qed.
+
+Hint Resolve eq_pvar_dec.
 
 (** Propositions ranged over by A, B and C.
 
@@ -82,10 +88,64 @@ Fixpoint prop_dual (pp : prop) : prop :=
   end
 where "'¬' A" := (prop_dual A) : cp_scope.
 
+Inductive dual_props : prop -> prop -> Prop :=
+  | dual_var : forall X, dual_props (pp_var X) (pp_dvar X)
+  | dual_mul : forall A B dA dB (DUA: dual_props A dA) (DUB: dual_props B dB),
+                 dual_props (A ⨂ B) (dA ⅋ dB)
+  | dual_add : forall A B dA dB (DUA: dual_props A dA) (DUB: dual_props B dB),
+                  dual_props (A ⨁ B) (dA & dB)
+  | dual_exp : forall A dA (DUA: dual_props A dA), dual_props (! A) (? dA)
+  | dual_quant : forall A dA (DUA: dual_props A dA),
+                   dual_props (pp_forall A) (pp_exists dA)
+  | dual_umul : dual_props pp_one pp_bot
+  | dual_uadd : dual_props pp_zero pp_top
+  | dual_sym : forall P dP (DP: dual_props P dP),
+                 dual_props dP P.
+
+Hint Constructors dual_props.
+
+Lemma eq_prop_dec: forall (x y : prop), {x = y} + {x <> y}.
+Proof. decide equality. Qed.
+
+Hint Resolve eq_prop_dec.
+
+Instance EqDec_prop : @EqDec_eq prop.
+Proof. exact eq_prop_dec. Defined.
+
 Lemma prop_dual_involutive: forall A,
   A = ¬(¬A).
 Proof.
   induction A; simpl; f_equal; auto.
+Qed.
+
+Lemma prop_dual_self: forall A,
+  dual_props A (¬A).
+Proof. induction A; ss; eauto. Qed.
+
+Lemma prop_dual_equiv_dual_props : forall A dA
+    (DUA: dual_props A dA),
+  dA = ¬A.
+Proof. ii; induction DUA; subst; auto using prop_dual_involutive. Qed.
+
+Lemma dual_props_equiv_prop_dual : forall A dA
+    (DUA: dA = ¬A),
+  dual_props A dA.
+Proof. ii. induction A; ss; rewrite DUA; eauto using prop_dual_self. Qed.
+
+Lemma prop_dual_iff: forall A dA,
+  dA = ¬A <-> dual_props A dA.
+Proof.
+  ii; split; auto using prop_dual_equiv_dual_props,
+                        dual_props_equiv_prop_dual.
+Qed.
+
+Lemma prop_dual_eq: forall A B
+    (EQ: ¬A = ¬B),
+  A = B.
+Proof.
+  ii; induction A; by rewrite ->prop_dual_iff in EQ; apply dual_sym in EQ
+  ; rewrite <-prop_dual_iff in EQ; rewrite <-!prop_dual_involutive in EQ
+  ; subst; reflexivity.
 Qed.
 
 (** Substitution of proposition [A] for [X] in [B] is denoted by
@@ -99,12 +159,12 @@ Fixpoint prop_subst (x: atom) (u: prop) (pp: prop) : prop :=
   match pp with
   | pp_var v
     => match v with
-       | pvar_fvar y => if x == y is left _ then u else pp
+       | pvar_fvar y => if x == y then u else pp
        | _ => pp
        end
   | pp_dvar v
     => match v with
-       | pvar_fvar y => if x == y is left _ then ¬u else pp
+       | pvar_fvar y => if x == y then ¬u else pp
        | _ => pp
        end
   | A ⨂ B => {{ u // x }} A ⨂ {{ u // x }} B
@@ -126,12 +186,12 @@ Fixpoint prop_open_rec (k: nat) (u: atom) (pp: prop) :=
   match pp with
   | pp_var v
     => match v with
-       | pvar_bvar n => if k == n is left _ then pp_var u else pp
+       | pvar_bvar n => if k == n then pp_var u else pp
        | _ => pp
        end
   | pp_dvar v
     => match v with
-       | pvar_bvar n => if k == n is left _ then pp_dvar u else pp
+       | pvar_bvar n => if k == n then pp_dvar u else pp
        | _ => pp
        end
   | A ⨂ B => (prop_open_rec k u A) ⨂ (prop_open_rec k u B)
@@ -237,7 +297,7 @@ Check ν x : (pp_var 0) ⨁ (pp_var 1) → x ⟷ y | x → 0.
 Fixpoint proc_subst (x y: atom) (p: proc) : proc :=
   let
     sub := fun u => match u with
-                    | p_fn z => if z == x is left _ then y else u
+                    | p_fn z => if z == x then y else u
                     | _ => u
                     end
   in
@@ -266,7 +326,7 @@ Notation "[ x ~> y ] P" := (proc_subst x y P) (at level 68) : cp_scope.
 Fixpoint proc_open_rec (k: nat) (x: atom) (p: proc) :=
   let
     sub := fun u => match u with
-                    | p_bn n => if n == k is left _ then p_fn x else u
+                    | p_bn n => if n == k then p_fn x else u
                     | _ => u
                     end
   in
@@ -293,6 +353,9 @@ Fixpoint proc_open_rec (k: nat) (x: atom) (p: proc) :=
 Notation "{ k ~> u } t" := (proc_open_rec k u t) (at level 68) : cp_scope.
 
 Definition open_proc P x := proc_open_rec 0 x P.
+Notation "P ^^ x" := (open_proc P x) (at level 68) : cp_scope.
+
+Hint Unfold open_proc.
 
 (** Environments for the process calculus are mappings of atoms to
     propositions. *)
@@ -356,67 +419,62 @@ Reserved Notation "P '⊢cp' Γ" (at level 69).
     wherever possible to keep the development symmetrical (in theory, this
     could help proofs since all rules follow a similar structure).
 *)
-Inductive cp_rules : proc -> penv -> Prop :=
+Inductive cp_rule : proc -> penv -> Prop :=
   | cp_fwd : forall (x w: atom) A (NEQ: x <> w),
                w ⟷ x ⊢cp ((w ~ ¬ A) ++ (x ~ A))
   | cp_cut : forall (L:atoms) P Q A Γ Δ
                     (UN: uniq (Γ ++ Δ))
                     (CPP: forall (x:atom) (NL: x `notin` L),
-                            P ⊢cp Γ ++ (x ~ A))
+                            (open_proc P x) ⊢cp Γ ++ (x ~ A))
                     (CPQ: forall (x:atom) (NL: x `notin` L),
-                            Q ⊢cp Δ ++ (x ~ ¬A)),
+                            (open_proc Q x) ⊢cp Δ ++ (x ~ ¬A)),
                ν A → P ‖ Q ⊢cp Γ ++ Δ
   | cp_output : forall (L:atoms) P Q Γ Δ x A B
                        (UN: uniq (Γ ++ Δ ++ (x ~ A ⨂ B)))
                        (CPP: forall (y:atom) (NL: y `notin` L),
-                               P ⊢cp Γ ++ (y ~ A))
+                               (open_proc P y) ⊢cp Γ ++ (y ~ A))
                        (CPQ: Q ⊢cp Δ ++ (x ~ B)),
                   [A]x → P ‖ Q ⊢cp Γ ++ Δ ++ (x ~ A ⨂ B)
   | cp_input : forall (L:atoms) P Γ x A B
-                      (UN: uniq (Γ ++ (x ~ A ⅋ B)))
                       (CPP: forall (y:atom) (NL: y `notin` L),
-                              P ⊢cp Γ ++ (y ~ A) ++ (x ~ B)),
+                              (open_proc P y) ⊢cp Γ ++ (y ~ A) ++ (x ~ B)),
                  ⟨A⟩x → P ⊢cp Γ ++ (x ~ A ⅋ B)
   | cp_left : forall P Γ x A B
-                     (UN: uniq (Γ ++ (x ~ A ⨁ B)))
                      (CPP: P ⊢cp Γ ++ (x ~ A)),
                 x[inl] → P ⊢cp Γ ++ (x ~ A ⨁ B)
   | cp_right : forall P Γ x A B
-                     (UN: uniq (Γ ++ (x ~ A ⨁ B)))
                      (CPP: P ⊢cp Γ ++ (x ~ B)),
                 x[inr] → P ⊢cp Γ ++ (x ~ A ⨁ B)
   | cp_choice : forall P Q Γ x A B
-                       (UN: uniq (Γ ++ (x ~ A & B)))
                        (CPP: P ⊢cp Γ ++ (x ~ A))
                        (CPQ: Q ⊢cp Γ ++ (x ~ B)),
                   x CASE P OR Q ⊢cp Γ ++ (x ~ A & B)
-  | cp_accept : forall (L:atoms) P Γ x A
+  | cp_accept : forall (L:atoms) P Γ (x:atom) A
                        (REQS: all_requests Γ)
                        (UN: uniq (Γ ++ (x ~ ! A)))
                        (CPP: forall (y:atom) (NL: y `notin` L),
-                               P ⊢cp Γ ++ (y ~ A)),
+                               (open_proc P y) ⊢cp Γ ++ (y ~ A)),
                   ! ⟨A⟩ x → P ⊢cp Γ ++ (x ~ ! A)
-  | cp_request : forall (L:atoms) P Γ x A
+  | cp_request : forall (L:atoms) P Γ (x:atom) A
                         (UN: uniq (Γ ++ (x ~ ? A)))
                         (CPP: forall (y:atom) (NL: y `notin` L),
-                                P ⊢cp Γ ++ (y ~ A)),
+                                (open_proc P y) ⊢cp Γ ++ (y ~ A)),
                    ? [A] x → P ⊢cp Γ ++ (x ~ ? A)
   | cp_send : forall (L:atoms) Γ P x A B
-                     (UN: uniq (Γ ++ x ~ pp_exists B))
                      (CPP: forall (y:atom) (NL: y `notin` L),
                              P ⊢cp Γ ++ x ~ {{ A // y }} (open_prop B y)),
                 p_send x A P ⊢cp Γ ++ x ~ pp_exists B
   | cp_recv : forall (L:atoms) Γ P x B
-                     (UN: uniq (Γ ++ x ~ pp_forall B))
                      (CPP: forall (y:atom) (NL: y `notin` L),
                              P ⊢cp Γ ++ x ~ (open_prop B y)),
                 p_recv x P ⊢cp Γ ++ x ~ pp_forall B
   | cp_empout : forall (x: atom), x → 0 ⊢cp (x ~ pp_one)
-  | cp_empin : forall P Γ x (UN: uniq (Γ ++ (x ~ pp_bot))) (CPP: P ⊢cp Γ),
+  | cp_empin : forall P Γ (x:atom) (CPP: P ⊢cp Γ)
+                      (UN: uniq (Γ ++ (x ~ pp_bot))),
                  ⟨⟩ x → P ⊢cp Γ ++ (x ~ pp_bot)
-  | cp_empcho : forall Γ x (UN: uniq (Γ ++ (x ~ pp_top))),
+  | cp_empcho : forall Γ (x:atom) (UN: uniq (Γ ++ (x ~ pp_top))),
                   x CASE 0 ⊢cp Γ ++ (x ~ pp_top)
-where "P '⊢cp' Γ" := (cp_rules P Γ) : cp_scope.
+where "P '⊢cp' Γ" := (cp_rule P Γ) : cp_scope.
 
 (** Example presented in journal version of ``Propositions as Sessions''.
 
@@ -431,3 +489,67 @@ Definition buyer :=
         | [Credit] 0 → (output credit ... | ⟨ Receipt ⟩ 0 → ⟨⟩ 0 → ...))
 
 *)
+
+Lemma cp_implies_uniq: forall Γ P
+    (CP: P ⊢cp Γ),
+  uniq Γ.
+Proof.
+  ii; induction CP; auto; try solve_uniq
+  ; by pick fresh y; destruct_notin; specialize (H _ Fr); solve_uniq.
+Qed.
+
+Reserved Notation "P '==>cp' Q" (at level 69, right associativity).
+
+Inductive fresh_enough : atom -> proc -> Prop :=
+  | fr_enough : forall (L:atoms) (w:atom) (P:proc) (FR: w `notin` L),
+                  fresh_enough w P.
+
+Inductive proc_red : proc -> proc -> Prop :=
+  | redp_axcut : forall P A dA (w x:atom) (DUA: dual_props A dA),
+                   ν A → w ⟷ 0 ‖ P ==>cp (open_proc P w)
+where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
+
+Lemma axiom_env: forall Γ (w x:atom)
+    (NEQ: w <> x)
+    (WT: w ⟷ x ⊢cp Γ),
+  exists A, Γ = ((w ~ ¬ A) ++ (x ~ A)).
+Proof.
+  ii; inversion WT; subst; eexists; simpl_env; eauto.
+(*
+subst; destruct_binds_hyp BW; [|exfalso; auto using NEQ0].
+  destruct_binds_hyp BX; [exfalso; auto using NEQ0|]; clear.
+  simpl_env; reflexivity.*)
+Qed.
+
+Lemma env_not_match: forall {A B} (Γ:list(A*B)) Δ y A dA
+    (EQ: Γ ++ (y ~ A) = Δ ++ y ~ dA)
+    (NEQ: A <> dA),
+  False.
+Proof.
+  ii; apply app_inj_tail in EQ; des; inversion EQ1; auto.
+Qed.
+
+Lemma ignore_env_order: forall Γ Δ P
+    (INB: forall x A, binds x A Γ <-> binds x A Δ)
+    (WT: P ⊢cp Γ),
+  P ⊢cp Δ.
+Proof.
+Admitted.
+
+Theorem proc_sub_red: forall Γ P Q
+    (WT: P ⊢cp Γ)
+    (RED: P ==>cp Q),
+  Q ⊢cp Γ.
+Proof.
+  ii; induction RED; subst; inversion WT; subst.
+  pick fresh y; destruct_notin; specialize (CPP _ Fr).
+
+  unfold open_proc in CPP; ss; apply axiom_env in CPP; auto.
+  inversion CPP as [A' Fr'].
+  destruct (A == A'); [|exfalso; apply env_not_match in Fr'; auto].
+
+  subst; apply app_inv_tail in Fr'; subst.
+  assert (NL: w `notin` L) by admit.
+  apply CPQ in NL; apply ignore_env_order with (Γ := Δ ++ w ~ ¬A'); auto.
+  split; ii; destruct_binds_hyp H; auto.
+Qed.

@@ -3,6 +3,9 @@
  *)
 
 Require Import Metatheory Prelude Eqdep_dec.
+Declare ML Module "ssreflect".
+
+Global Set Bullet Behavior "Strict Subproofs".
 
 Hint Unfold not.
 
@@ -54,6 +57,6 @@ Tactic Notation "dup" hyp(H) := let H' := fresh H in assert (H' := H).
 Ltac s := simpl.
 Ltac ss := repeat (unfold not in *; simpl in *).
 Ltac i := intros.
-Ltac ii := intros; ss.
+Ltac ii := repeat (intros; ss).
 Ltac inv H := inversion H; ss; subst.
 
