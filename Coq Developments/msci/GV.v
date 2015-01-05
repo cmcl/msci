@@ -13,7 +13,6 @@
 
 *)
 Require Import Metatheory Tactics List Coq.Program.Tactics.
-Require Import ssreflect.
 Set Implicit Arguments.
 
 (** The notion of kind is borrowed from
@@ -214,7 +213,7 @@ Coercion tm_id : atom >-> term.
 *)
 Fixpoint subst (x: atom) (u: term) (t: term) : term :=
   match t with
-  | tm_id y => if x == y is left _ then u else (tm_id y)
+  | tm_id y => if x == y then u else (tm_id y)
   | tm_abs k T b => tm_abs T (subst x u b)
   | tm_app m n => tm_app (subst x u m) (subst x u n)
   | tm_pair p q => tm_pair (subst x u p) (subst x u q)
@@ -237,7 +236,7 @@ Notation "[ x ~> u ] t" := (subst x u t) (at level 68) : gv_scope.
 *)
 Fixpoint open_rec (k: nat) (u: term) (t: term) :=
   match t with
-  | tm_bvar n => if k == n is left _ then u else (tm_bvar n)
+  | tm_bvar n => if k == n then u else (tm_bvar n)
   | tm_abs k' T b => tm_abs T (open_rec (S k) u b)
   | tm_app m n => tm_app (open_rec k u m) (open_rec k u n)
   | tm_pair p q => tm_pair (open_rec k u p) (open_rec k u q)
@@ -264,6 +263,22 @@ Notation "{ k ~> u } t" := (open_rec k u t) (at level 68) : gv_scope.
 Definition open t u := open_rec 0 u t.
 
 Hint Unfold open.
+
+Fixpoint GVFV (t: term) :=
+  match t with
+  | tm_id v => singleton v
+  | tm_abs k' T b => GVFV b
+  | tm_app m n => GVFV m `union` GVFV n
+  | tm_pair p q => GVFV p `union` GVFV q
+  | tm_let kt ku T U m n => GVFV m `union` GVFV n
+  | tm_send m n => GVFV m `union` GVFV n
+  | tm_recv m => GVFV m
+  | tm_select l m => GVFV m
+  | tm_case m ll nl lr nr => GVFV m `union` GVFV nl `union` GVFV nr
+  | tm_connect T m n => GVFV m `union` GVFV n
+  | tm_end m => GVFV m
+  | _ => empty
+  end.
 
 (** A locally closed term has no unbounded variables. Note also using
     cofinite quantification with binding constructs. *)
@@ -483,15 +498,15 @@ Proof.
   ii; unfold open; auto using lc_open_subst.
 Qed.
 
-Lemma subst_intro : forall (x : atom) u t,
-    (NIN: x `notin` (fv e))
-  open t u = [x ~> u](open t x).
+Lemma subst_intro :
+  forall (x : atom) u t
+         (NIN: x `notin` (GVFV t)),
+    open t u = [x ~> u](open t x).
 Proof.
-  intros; unfold open; generalize 0.
-  induction e; intros k; simpl in *; try (solve [f_equal; eauto]).
-  - destruct (k == n); auto using subst_eq_var.
-  - apply notin_singleton_1 in H; destruct (a == x); auto; []
-    ; now (contradict H).
+  ii; unfold open; generalize 0.
+  induction t; intros bv; ss; try (solve [f_equal; eauto]).
+  - destruct (bv == n); auto using subst_eq_var.
+  - apply notin_singleton_1 in NIN; destruct (x == a); auto; []; congruence.
 Qed.
 
 Lemma subst_lc : forall t u x
