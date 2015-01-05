@@ -357,6 +357,30 @@ Notation "P ^^ x" := (open_proc P x) (at level 68) : cp_scope.
 
 Hint Unfold open_proc.
 
+Fixpoint fv_proc (p : proc) : atoms :=
+  let
+    fv := fun u => match u with
+                   | p_fn z => singleton z
+                   | _ => empty
+                   end
+  in
+    match p with
+    | w ⟷ z => fv w `union` fv z
+    | ν A → P ‖ Q => fv_proc P `union` fv_proc Q
+    | [A] z → P ‖ Q => fv z `union` fv_proc P `union` fv_proc Q
+    | ⟨A⟩ z → P => fv z `union` fv_proc P
+    | z [inl] → P => fv z `union` fv_proc P
+    | z [inr] → P => fv z `union` fv_proc P
+    | z CASE P OR Q => fv z `union` fv_proc P `union` fv_proc Q
+    | ! ⟨A⟩ z → P => fv z `union` fv_proc P
+    | ? [A] z → P => fv z `union` fv_proc P
+    | p_send z A P => fv z `union` fv_proc P
+    | p_recv z P => fv z `union` fv_proc P
+    | z → 0 => fv z
+    | ⟨⟩ z → P => fv z `union` fv_proc P
+    | z CASE 0 => fv z
+    end.
+
 (** Environments for the process calculus are mappings of atoms to
     propositions. *)
 Definition penv := list (atom * prop).
@@ -505,9 +529,16 @@ Inductive fresh_enough : atom -> proc -> Prop :=
                   fresh_enough w P.
 
 Inductive proc_red : proc -> proc -> Prop :=
-  | redp_axcut : forall P A dA (w x:atom) (DUA: dual_props A dA),
+  | redp_axcut : forall P A dA (w x:atom) (DUA: dual_props A dA)
+                        (NF: w `notin` fv_proc P),
                    ν A → w ⟷ 0 ‖ P ==>cp (open_proc P w)
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
+
+Lemma fv_env: forall Γ P
+    (WT: P ⊢cp Γ),
+  fv_proc P [=] dom Γ.
+Proof.
+  ii. induction WT. ss. fsetdec.
 
 Lemma axiom_env: forall Γ (w x:atom)
     (NEQ: w <> x)

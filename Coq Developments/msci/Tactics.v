@@ -46,11 +46,10 @@ Ltac des :=
     end.
 
 Ltac simpl_existT :=
-  try (match goal with
-         | [H: existT _ _ _ = existT _ _ _ |- _]
-           => apply inj_pair2_eq_dec in H; auto
-         | _ => idtac
-       end).
+  repeat match goal with
+           | [H: existT _ _ _ = existT _ _ _ |- _]
+             => apply inj_pair2_eq_dec in H; auto
+         end.
 
 Tactic Notation "dup" hyp(H) := let H' := fresh H in assert (H' := H).
 

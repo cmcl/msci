@@ -12,7 +12,8 @@
     DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
 *)
-Require Import Metatheory Tactics List Coq.Program.Tactics.
+Require Import Metatheory List Coq.Program.Tactics Program.Equality.
+Require Import MetatheoryAtom Tactics.
 Set Implicit Arguments.
 
 (** The notion of kind is borrowed from
@@ -36,7 +37,10 @@ Inductive kind : Set :=
 Lemma eq_kind_dec: forall (x y : kind), {x = y} + {x <> y}.
 Proof. decide equality. Qed.
 
-Hint Immediate eq_kind_dec.
+Hint Resolve eq_kind_dec.
+
+Instance EqDec_kind : @EqDec_eq kind.
+Proof. exact eq_kind_dec. Defined.
 
 (** [typ] is ranged over by T, U and V. It differs slightly from the
     definition given in Wadler's paper in the following ways:
@@ -61,6 +65,62 @@ Inductive typ : kind -> Set :=
   | typ_labs : forall kt ku, typ kt -> typ ku -> typ lin
   | typ_abs : forall kt ku, typ kt -> typ ku -> typ un
   | typ_unit : typ un.
+
+(** Uses heterogeneous equality but I believe this to be sound. *)
+Lemma eq_typ_dec: forall {k} (x y : typ k),
+  {x = y} + {x <> y}.
+Proof. 
+  ii; generalize dependent y; dependent induction x
+  ; dependent destruction y; auto; try (by right; ii; discriminate).
+  - destruct (k == k0) as [KEQ|]
+    ; [symmetry in KEQ; subst
+      |right; ii; inversion H; inversion H2; congruence].
+    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
+    ; try (by right; ii; inversion H; simpl_existT; congruence).
+    left; f_equal; subst; reflexivity.
+  - destruct (k == k0) as [KEQ|]
+    ; [symmetry in KEQ; subst
+      |right; ii; inversion H; inversion H2; congruence].
+    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
+    ; try (by right; ii; inversion H; simpl_existT; congruence).
+    left; f_equal; subst; reflexivity.
+  - specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
+    ; try (by right; ii; inversion H; simpl_existT; congruence).
+    left; f_equal; subst; reflexivity.
+  - specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
+    ; try (by right; ii; inversion H; simpl_existT; congruence).
+    left; f_equal; subst; reflexivity.
+  - destruct (kt == kt0) as [KEQ|]
+    ; [symmetry in KEQ; subst
+      |right; ii; inversion H; inversion H2; congruence].
+    destruct (ku == ku0) as [KEQ|]
+    ; [symmetry in KEQ; subst
+      |right; ii; inversion H; inversion H2; congruence].
+    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
+    ; try (by right; ii; inversion H; simpl_existT; congruence).
+    left; f_equal; subst; reflexivity.
+  - destruct (kt == kt0) as [KEQ|]
+    ; [symmetry in KEQ; subst
+      |right; ii; inversion H; inversion H2; congruence].
+    destruct (ku == ku0) as [KEQ|]
+    ; [symmetry in KEQ; subst
+      |right; ii; inversion H; inversion H2; congruence].
+    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
+    ; try (by right; ii; inversion H; simpl_existT; congruence).
+    left; f_equal; subst; reflexivity.
+  - destruct (kt == kt0) as [KEQ|]
+    ; [symmetry in KEQ; subst
+      |right; ii; inversion H; inversion H2; congruence].
+    destruct (ku == ku0) as [KEQ|]
+    ; [symmetry in KEQ; subst
+      |right; ii; inversion H; inversion H2; congruence].
+    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
+    ; try (by right; ii; inversion H; simpl_existT; congruence).
+    left; f_equal; subst; reflexivity.
+Qed.
+
+Instance EqDec_typ {k}: @EqDec_eq (typ k).
+Proof. exact eq_typ_dec. Defined.
 
 (** The notation for sessions has been altered from the standard presentation
     to fit within allowable notations in Coq.
@@ -429,6 +489,13 @@ where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
 
 Hint Constructors wt_tm.
 
+Lemma unlimited_env_typing:
+  forall Φ t (T: typ un)
+         (WT: Φ ⊢ t ∈ T),
+    un_env Φ.
+Proof.
+Admitted.
+
 (** Following ``Engineering Formal Metatheory'', we need some properties
     regarding opening and substitution w.r.t locally closed terms.
 *)
@@ -482,8 +549,9 @@ Section GVBasicSubstOpenProperties.
     ii; des; auto.
   Qed.
 
-  Lemma subst_neq_var : forall (x y : atom) u,
-                          y <> x -> [x ~> u]y = y.
+  Lemma subst_neq_var :
+    forall (x y : atom) u,
+      y <> x -> [x ~> u]y = y.
   Proof.
     ii; des; auto; []; exfalso; auto.
   Qed.
@@ -542,6 +610,15 @@ Section GVBasicSubstOpenProperties.
       ; rewrite lc_open_subst; auto.
   Qed.
 
+  Lemma typing_subst:
+    forall Φ Ψ k (T: typ k) (U: typ un) z t u
+           (WTT: Φ ++ (z ~ inr U) ++ Ψ ⊢ t ∈ T)
+           (WTU: Φ ⊢ u ∈ U),
+      Φ ++ Ψ ⊢ [z ~> u]t ∈ T.
+  Proof.
+    ii; assert (UNENV: un_env Φ) by eauto using unlimited_env_typing.
+    induction WTT.
+    - 
 End GVBasicSubstOpenProperties.
 
 Lemma wt_tm_is_lc : forall Φ t k (T: typ k)
