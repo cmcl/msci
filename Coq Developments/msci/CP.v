@@ -514,6 +514,92 @@ Definition buyer :=
 
 *)
 
+Section CPBasicSubstOpenProperties.
+
+  Lemma open_rec_same :
+    forall t j v i u
+           (NEQ: i <> j)
+           (EQ: {i ~> u}({j ~> v} t) = {j ~> v} t),
+      {i ~> u} t = t.
+  Proof.
+    induction t; ii; des; subst; solve [exfalso; auto
+                                       |f_equal; inversion EQ; firstorder].
+  Qed.
+
+  Lemma lc_no_bvar:
+    forall t u k
+           (LC: lc_proc t),
+      {k ~> u}t = t.
+  Proof.
+    ii; generalize dependent k; induction LC; s; ii; f_equal; auto
+    ; try (by unfold open_proc in *; pick fresh z for L
+           ; apply open_rec_same with (j := 0)(v := z); auto).
+  Qed.
+
+  Lemma lc_open_subst:
+    forall t u (x y: atom) k
+           (NEQ: x <> y),
+      {k ~> y} ([x ~> u]t) = [x ~> u]({k ~> y} t).
+  Proof.
+    ii; unfold open_proc; generalize dependent k.
+    induction t; by ii; destruct_all pname; des; subst; f_equal; auto.
+  Qed.
+
+  Lemma subst_open_var :
+    forall (x y : atom) u t
+           (NEQ: y <> x),
+      open_proc ([x ~> u] t) y = [x ~> u] (open_proc t y).
+  Proof.
+    ii; unfold open_proc; auto using lc_open_subst.
+  Qed.
+
+  Lemma subst_intro :
+    forall (x : atom) u t
+           (NIN: x `notin` (fv_proc t)),
+      open_proc t u = [x ~> u](open_proc t x).
+  Proof.
+    ii; unfold open_proc; generalize 0.
+    induction t; intros bv; ss; try (destruct_all pname; des; subst; f_equal
+                                     ; solve [auto | fsetdec]).
+  Qed.
+
+  Lemma subst_lc :
+    forall t u x
+           (LCT: lc_proc t),
+      lc_proc ([ x ~> u ] t).
+  Proof.
+    ii; induction LCT; s; des; subst; auto.
+    Case "lc_p_cut".
+      pick fresh y and apply lc_p_cut
+      ; by unfold open_proc in *; rewrite lc_open_subst; eauto.
+    Case "lc_p_output (x = bound name)".
+      pick fresh y and apply lc_p_output
+      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+    Case "lc_p_output (x <> bound name)".
+      pick fresh y and apply lc_p_output
+      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+    Case "lc_p_input (x = bound name)".
+      pick fresh y and apply lc_p_input
+      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+    Case "lc_p_input (x <> bound name)".
+      pick fresh y and apply lc_p_input
+      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+    Case "lc_p_accept (x = bound name)".
+      pick fresh y and apply lc_p_accept
+      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+    Case "lc_p_accept (x <> bound name)".
+      pick fresh y and apply lc_p_accept
+      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+    Case "lc_p_request (x = bound name)".
+      pick fresh y and apply lc_p_request
+      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+    Case "lc_p_request (x <> bound name)".
+      pick fresh y and apply lc_p_request
+      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+  Qed.
+
+End CPBasicSubstOpenProperties.
+
 Lemma cp_implies_uniq: forall Γ P
     (CP: P ⊢cp Γ),
   uniq Γ.

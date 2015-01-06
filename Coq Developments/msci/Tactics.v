@@ -42,6 +42,8 @@ Ltac des :=
           destruct H as [HP|HQ]
       | |- context[?X == ?Y] => des_goal (X == Y)
       | [H: context[?X == ?Y] |- _] => desT (X == Y)
+      | |- context[match ?X with _ => _ end] => destruct X; subst
+      | [H: context[match ?X with _ => _ end] |- _] => destruct X; subst
       | _ => idtac
     end.
 
@@ -58,4 +60,17 @@ Ltac ss := repeat (unfold not in *; simpl in *).
 Ltac i := intros.
 Ltac ii := repeat (intros; ss).
 Ltac inv H := inversion H; ss; subst.
+
+
+(** ssreflect doesn't play nice with parentheses (in ii above, for example).
+    So I have stolen done and by definitions from the library. *)
+Ltac done :=
+  unfold not in *; trivial; hnf; intros
+  ; solve [ do ![solve [trivial | apply: sym_equal; trivial]
+                | discriminate | contradiction | split]
+          | match goal with
+                H : _ -> False |- _ => solve [case H; trivial]
+            end ].
+
+Tactic Notation "by" tactic(tac) := tac; done.
 
