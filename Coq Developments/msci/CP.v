@@ -484,6 +484,14 @@ Inductive cp_rule : proc -> penv -> Prop :=
                         (CPP: forall (y:atom) (NL: y `notin` L),
                                 (open_proc P y) ⊢cp Γ ++ (y ~ A)),
                    ? [A] x → P ⊢cp Γ ++ (x ~ ? A)
+  | cp_weaken : forall P Γ (x:atom) A
+                       (UN: uniq (Γ ++ (x ~ ? A)))
+                       (CPP: P ⊢cp Γ),
+                  P ⊢cp Γ ++ (x ~ ? A)
+  | cp_contract : forall P Γ (x x' x'':atom) A
+                         (UN: uniq (Γ ++ (x ~ ? A)))
+                         (CPP: P ⊢cp Γ ++ (x' ~ ? A) ++ (x'' ~ ? A)),
+                    [x' ~> x]([x'' ~> x]P) ⊢cp Γ ++ (x ~ ? A)
   | cp_send : forall (L:atoms) Γ P x A B
                      (CPP: forall (y:atom) (NL: y `notin` L),
                              P ⊢cp Γ ++ x ~ {{ A // y }} (open_prop B y)),
@@ -513,6 +521,21 @@ Definition buyer :=
         | [Credit] 0 → (output credit ... | ⟨ Receipt ⟩ 0 → ⟨⟩ 0 → ...))
 
 *)
+
+Lemma cp_implies_uniq: forall Γ P
+    (CP: P ⊢cp Γ),
+  uniq Γ.
+Proof.
+  ii; induction CP; auto; try solve_uniq
+  ; by pick fresh y; destruct_notin; specialize (H _ Fr); solve_uniq.
+Qed.
+
+Lemma ignore_env_order: forall Γ Δ P
+    (INB: forall x A, binds x A Γ <-> binds x A Δ)
+    (WT: P ⊢cp Γ),
+  P ⊢cp Δ.
+Proof.
+Admitted.
 
 Section CPBasicSubstOpenProperties.
 
@@ -598,44 +621,124 @@ Section CPBasicSubstOpenProperties.
       ; by unfold open_proc in *; rewrite lc_open_subst; auto.
   Qed.
 
+  Lemma open_fv_proc:
+    forall P (x y:atom)
+           (FV: x `notin` fv_proc (P ^^ y)),
+      x `notin` fv_proc P.
+  Proof.
+  Admitted.
+
+  Lemma subst_fv_proc:
+    forall P (x y z:atom)
+           (NEQ: x <> y)
+           (FV: x `notin` fv_proc P),
+      x `notin` fv_proc ([z ~> y]P).
+  Proof.
+  Admitted.
+
+  Lemma freshenv_implies_fv:
+    forall Γ P (x:atom)
+           (FR: x `notin` dom Γ)
+           (WT: P ⊢cp Γ),
+      x `notin` fv_proc P.
+  Proof.
+    intros; induction WT; try (by try rewrite !dom_app in *; ss; fsetdec). 
+    - pick fresh pz; destruct_notin; specialize (H _ Fr); subst.
+      specialize (H0 _ Fr); subst.
+      rewrite dom_app in FR.
+      assert (x `notin` dom (Γ ++ (pz ~ A))) by (rewrite dom_app; ss
+                                                 ; fsetdec).
+      assert (x `notin` dom (Δ ++ (pz ~ ¬A))) by (rewrite dom_app; ss
+                                                  ; fsetdec).
+      apply H in H1; apply H0 in H2.
+      s; apply notin_union; eauto using open_fv_proc.
+    - pick fresh pz; destruct_notin; specialize (H _ Fr); subst.
+      rewrite !dom_app in FR; destruct_notin.
+      assert (x `notin` dom (Γ ++ (pz ~ A))) by (rewrite dom_app; ss
+                                                 ; fsetdec).
+      assert (x `notin` dom (Δ ++ (x0 ~ B))) by (rewrite dom_app; ss
+                                                  ; fsetdec).
+      apply H in H0. apply IHWT in H1.
+      s; do !apply notin_union; eauto using open_fv_proc.
+    - rewrite !dom_app in FR; pick fresh z; destruct_notin.
+      specialize (H _ Fr); subst.
+      assert (x `notin` dom (Γ ++ (z ~ A) ++ (x0 ~ B))) by
+          (rewrite !dom_app; ss; fsetdec).
+      apply H in H0; s; eauto using open_fv_proc.
+    - pick fresh z; destruct_notin; specialize (H _ Fr); subst.
+      assert (x `notin` dom (Γ ++ (z ~ A))) by
+          (rewrite !dom_app in *; ss; fsetdec).
+      apply H in H0; s; do !apply notin_union; eauto using open_fv_proc.
+    - pick fresh z; destruct_notin; specialize (H _ Fr); subst.
+      assert (x `notin` dom (Γ ++ (z ~ A))) by
+          (rewrite !dom_app in *; ss; fsetdec).
+      apply H in H0; s; do !apply notin_union; eauto using open_fv_proc.
+    - rewrite !dom_app in FR; destruct_notin. do !apply subst_fv_proc; auto.
+      apply IHWT.
+    - pick fresh z; destruct_notin; specialize (H _ Fr); subst.
+      rewrite !dom_app in *; ss; fsetdec.
+    - pick fresh z; destruct_notin; specialize (H _ Fr); subst.
+      rewrite !dom_app in *; ss; fsetdec.
+  Qed.
+
+
+  Lemma typing_weaken:
+    forall Γ Δ Ε P
+           (WT: P ⊢cp Γ ++ Ε) (UN: uniq(Γ ++ Δ ++ Ε))
+           (REQS: all_requests Δ),
+      P ⊢cp Γ ++ Δ ++ Ε.
+  Proof.
+  Admitted.
+
+  Lemma typing_subst:
+    forall Γ Δ P (x y:atom) A
+           (NINX: uniq ((y ~ A) ++ Γ ++ Δ))
+           (WT: P ⊢cp Γ ++ (x ~ A) ++ Δ),
+      [x ~> y]P ⊢cp Γ ++ (y ~ A) ++ Δ.
+  Proof.
+  Admitted.
+
+  Lemma typing_rename:
+    forall Γ P (x y : atom) A
+           (NINX: x `notin` dom Γ) (NINY: y `notin` dom Γ)
+           (WTX: P ^^ x ⊢cp Γ ++ (x ~ A)),
+      P ^^ y ⊢cp Γ ++ (y ~ A).
+  Proof.
+    ii; destruct (x == y); subst; auto.
+    assert (UN: uniq ((x ~ A) ++ Γ)) by (eapply uniq_reorder_1
+                                         ; eapply cp_implies_uniq; eauto).
+    assert (UN': uniq Γ) by (inversion UN; auto).
+    assert (NFV: x `notin` fv_proc P) by admit.
+    rewrite (@subst_intro x); auto.
+    rewrite_env (Γ ++ (y ~ A) ++ nil).
+    apply typing_subst with (A := A); auto.
+  Qed.    
+
 End CPBasicSubstOpenProperties.
 
-Lemma cp_implies_uniq: forall Γ P
-    (CP: P ⊢cp Γ),
-  uniq Γ.
-Proof.
-  ii; induction CP; auto; try solve_uniq
-  ; by pick fresh y; destruct_notin; specialize (H _ Fr); solve_uniq.
-Qed.
 
 Reserved Notation "P '==>cp' Q" (at level 69, right associativity).
 
-Inductive fresh_enough : atom -> proc -> Prop :=
-  | fr_enough : forall (L:atoms) (w:atom) (P:proc) (FR: w `notin` L),
-                  fresh_enough w P.
-
 Inductive proc_red : proc -> proc -> Prop :=
-  | redp_axcut : forall P A dA (w x:atom) (DUA: dual_props A dA)
-                        (NF: w `notin` fv_proc P),
-                   ν A → w ⟷ 0 ‖ P ==>cp (open_proc P w)
+  | red_axcut : forall P A dA (w x:atom) (DUA: dual_props A dA)
+                       (NF: w `notin` fv_proc P),
+                  ν A → w ⟷ 0 ‖ P ==>cp (open_proc P w)
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
 
-Lemma fv_env: forall Γ P
-    (WT: P ⊢cp Γ),
-  fv_proc P [=] dom Γ.
-Proof.
-  ii. induction WT. ss. fsetdec.
+(** Minus weakening *)
+Definition mw (Γ:penv) : Prop := forall (x:atom) A, ~ binds x (? A) Γ.
 
 Lemma axiom_env: forall Γ (w x:atom)
     (NEQ: w <> x)
     (WT: w ⟷ x ⊢cp Γ),
   exists A, Γ = ((w ~ ¬ A) ++ (x ~ A)).
 Proof.
-  ii; inversion WT; subst; eexists; simpl_env; eauto.
-(*
-subst; destruct_binds_hyp BW; [|exfalso; auto using NEQ0].
-  destruct_binds_hyp BX; [exfalso; auto using NEQ0|]; clear.
-  simpl_env; reflexivity.*)
+  ii; induction WT.
+
+Focus 10.
+
+  ii; inversion WT; subst; solve [eexists; simpl_env; eauto
+                                 | specialize (MW x0 A); exfalso; auto]. 
 Qed.
 
 Lemma env_not_match: forall {A B} (Γ:list(A*B)) Δ y A dA
@@ -645,13 +748,6 @@ Lemma env_not_match: forall {A B} (Γ:list(A*B)) Δ y A dA
 Proof.
   ii; apply app_inj_tail in EQ; des; inversion EQ1; auto.
 Qed.
-
-Lemma ignore_env_order: forall Γ Δ P
-    (INB: forall x A, binds x A Γ <-> binds x A Δ)
-    (WT: P ⊢cp Γ),
-  P ⊢cp Δ.
-Proof.
-Admitted.
 
 Theorem proc_sub_red: forall Γ P Q
     (WT: P ⊢cp Γ)
@@ -663,9 +759,9 @@ Proof.
 
   unfold open_proc in CPP; ss; apply axiom_env in CPP; auto.
   inversion CPP as [A' Fr'].
-  destruct (A == A'); [|exfalso; apply env_not_match in Fr'; auto].
+  destruct (A == A'); [|exfalso; apply env_not_match in Fr'; auto]; subst.
+  apply app_inv_tail in Fr'; subst.
 
-  subst; apply app_inv_tail in Fr'; subst.
   assert (NL: w `notin` L) by admit.
   apply CPQ in NL; apply ignore_env_order with (Γ := Δ ++ w ~ ¬A'); auto.
   split; ii; destruct_binds_hyp H; auto.
