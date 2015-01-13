@@ -389,8 +389,8 @@ Definition penv := list (atom * prop).
     rule. *)
 Inductive all_requests : penv -> Prop :=
   | all_requests_nil : all_requests nil
-  | all_requests_cons : forall Γ x A (REQS: all_requests Γ),
-                          all_requests (Γ ++ (x ~ ? A)).
+  | all_requests_cons : forall x A Γ (REQS: all_requests Γ),
+                          all_requests ((x ~ ? A) ++ Γ).
 
 (** Locally closed processes. *)
 Inductive lc_proc : proc -> Prop :=
@@ -621,74 +621,20 @@ Section CPBasicSubstOpenProperties.
       ; by unfold open_proc in *; rewrite lc_open_subst; auto.
   Qed.
 
-  Lemma open_fv_proc:
-    forall P (x y:atom)
-           (FV: x `notin` fv_proc (P ^^ y)),
-      x `notin` fv_proc P.
-  Proof.
-  Admitted.
-
-  Lemma subst_fv_proc:
-    forall P (x y z:atom)
-           (NEQ: x <> y)
-           (FV: x `notin` fv_proc P),
-      x `notin` fv_proc ([z ~> y]P).
-  Proof.
-  Admitted.
-
-  Lemma freshenv_implies_fv:
-    forall Γ P (x:atom)
-           (FR: x `notin` dom Γ)
-           (WT: P ⊢cp Γ),
-      x `notin` fv_proc P.
-  Proof.
-    intros; induction WT; try (by try rewrite !dom_app in *; ss; fsetdec). 
-    - pick fresh pz; destruct_notin; specialize (H _ Fr); subst.
-      specialize (H0 _ Fr); subst.
-      rewrite dom_app in FR.
-      assert (x `notin` dom (Γ ++ (pz ~ A))) by (rewrite dom_app; ss
-                                                 ; fsetdec).
-      assert (x `notin` dom (Δ ++ (pz ~ ¬A))) by (rewrite dom_app; ss
-                                                  ; fsetdec).
-      apply H in H1; apply H0 in H2.
-      s; apply notin_union; eauto using open_fv_proc.
-    - pick fresh pz; destruct_notin; specialize (H _ Fr); subst.
-      rewrite !dom_app in FR; destruct_notin.
-      assert (x `notin` dom (Γ ++ (pz ~ A))) by (rewrite dom_app; ss
-                                                 ; fsetdec).
-      assert (x `notin` dom (Δ ++ (x0 ~ B))) by (rewrite dom_app; ss
-                                                  ; fsetdec).
-      apply H in H0. apply IHWT in H1.
-      s; do !apply notin_union; eauto using open_fv_proc.
-    - rewrite !dom_app in FR; pick fresh z; destruct_notin.
-      specialize (H _ Fr); subst.
-      assert (x `notin` dom (Γ ++ (z ~ A) ++ (x0 ~ B))) by
-          (rewrite !dom_app; ss; fsetdec).
-      apply H in H0; s; eauto using open_fv_proc.
-    - pick fresh z; destruct_notin; specialize (H _ Fr); subst.
-      assert (x `notin` dom (Γ ++ (z ~ A))) by
-          (rewrite !dom_app in *; ss; fsetdec).
-      apply H in H0; s; do !apply notin_union; eauto using open_fv_proc.
-    - pick fresh z; destruct_notin; specialize (H _ Fr); subst.
-      assert (x `notin` dom (Γ ++ (z ~ A))) by
-          (rewrite !dom_app in *; ss; fsetdec).
-      apply H in H0; s; do !apply notin_union; eauto using open_fv_proc.
-    - rewrite !dom_app in FR; destruct_notin. do !apply subst_fv_proc; auto.
-      apply IHWT.
-    - pick fresh z; destruct_notin; specialize (H _ Fr); subst.
-      rewrite !dom_app in *; ss; fsetdec.
-    - pick fresh z; destruct_notin; specialize (H _ Fr); subst.
-      rewrite !dom_app in *; ss; fsetdec.
-  Qed.
-
-
   Lemma typing_weaken:
     forall Γ Δ Ε P
            (WT: P ⊢cp Γ ++ Ε) (UN: uniq(Γ ++ Δ ++ Ε))
            (REQS: all_requests Δ),
       P ⊢cp Γ ++ Δ ++ Ε.
   Proof.
-  Admitted.
+    induction Δ; auto.
+    ii; inversion REQS as [|x A Δ']; subst; simpl_env.
+    apply ignore_env_order with (Γ := Γ ++ Δ ++ Ε ++ (x ~ ? A)).
+    split; ii; analyze_binds H.
+    rewrite_env ((Γ ++ Δ ++ Ε) ++ (x ~ ? A)).
+    apply cp_weaken; [solve_uniq|].
+    apply IHΔ; auto; []; solve_uniq.
+  Qed.
 
   Lemma typing_subst:
     forall Γ Δ P (x y:atom) A
@@ -700,7 +646,8 @@ Section CPBasicSubstOpenProperties.
 
   Lemma typing_rename:
     forall Γ P (x y : atom) A
-           (NINX: x `notin` dom Γ) (NINY: y `notin` dom Γ)
+           (NINX: x `notin` dom Γ `union` fv_proc P)
+           (NINY: y `notin` dom Γ `union` fv_proc P)
            (WTX: P ^^ x ⊢cp Γ ++ (x ~ A)),
       P ^^ y ⊢cp Γ ++ (y ~ A).
   Proof.
@@ -708,7 +655,6 @@ Section CPBasicSubstOpenProperties.
     assert (UN: uniq ((x ~ A) ++ Γ)) by (eapply uniq_reorder_1
                                          ; eapply cp_implies_uniq; eauto).
     assert (UN': uniq Γ) by (inversion UN; auto).
-    assert (NFV: x `notin` fv_proc P) by admit.
     rewrite (@subst_intro x); auto.
     rewrite_env (Γ ++ (y ~ A) ++ nil).
     apply typing_subst with (A := A); auto.
