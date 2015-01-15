@@ -9,7 +9,10 @@
 
    With contributions from:
      Edsko de Vries:
-       uniq_reorder_1, uniq_reorder_2, binds_In_inv *)
+       uniq_reorder_1, uniq_reorder_2, binds_In_inv 
+     Craig McLaughlin:
+       added support for permutations
+*)
 
 (** remove printing ~ *)
 
@@ -18,6 +21,7 @@
 Require Import Coq.FSets.FSets.
 Require Import Coq.Lists.List.
 Require Import Coq.Logic.Decidable.
+Require Import Coq.Sorting.Permutation.
 
 Require Import CoqFSetDecide.
 Require Import CoqListFacts.
@@ -60,8 +64,7 @@ Require Import LibTactics.
 (* Implementation note (BEA, XXX): Very little support for
      - Inversion on association lists when [one] is [opaque].
      - No real support for [get].
-     - No real support for [maps].
-     - No support for permutations. *)
+     - No real support for [maps]. *)
 
 Module Make
   (X : UsualDecidableType)
@@ -612,6 +615,36 @@ Section UniqProperties.
 
 End UniqProperties.
 
+Section PermutationProperties.
+  Variables A B   : Type.
+  Variables f     : A -> B.
+  Variables x     : X.t.
+  Variables a b   : A.
+  Variables E F G : list (X.t*A).
+
+  Lemma Perm_in:
+    forall (PER: Permutation E F)
+           (IN: In x (dom E)),
+      In x (dom F).
+  Proof.
+    clear; intros; induction PER; auto.
+    - destruct x0 as [x' A']; rewrite ->dom_cons in *.
+      apply union_1 in IN; destruct IN as [INL|INR]; [| auto using union_3].
+      apply singleton_1 in INL; subst; apply union_2.
+      apply singleton_2; reflexivity.
+    - destruct y as [y' A']; destruct x0 as [x0' A0'].
+      repeat rewrite ->dom_cons in *.
+      apply union_1 in IN; destruct IN as [INL|INR].
+      + apply singleton_1 in INL; subst; apply union_3; apply union_2.
+        apply singleton_2; reflexivity.
+      + apply union_1 in INR; destruct INR as [INL|INR]
+        ; [| auto using union_3].
+        apply singleton_1 in INL; subst; apply union_2.
+        apply singleton_2; reflexivity.
+  Qed.
+
+End PermutationProperties.
+
 
 (* *********************************************************************** *)
 (** * Basic facts about [binds] *)
@@ -973,6 +1006,25 @@ Section UniqDerived.
     ~ In x (dom F).
   Proof. clear. solve_uniq. Qed.
 
+  Lemma uniq_perm:
+    forall (PER: Permutation E F)
+           (UN: uniq E),
+      uniq F.
+  Proof.
+    intros; induction PER; auto.
+    - inversion UN; subst; apply uniq_push; auto.
+      eauto using Perm_in,Permutation_sym.
+    - inversion UN as [|? ? ? UN1 UN2]; clear UN
+      ; inversion UN1; clear UN1; subst.
+      rewrite dom_cons in UN2.
+      repeat apply uniq_push; auto.
+        intros IN; apply UN2; apply union_3; auto.
+        intros IN. rewrite dom_cons in IN. apply union_1 in IN.
+        destruct IN as [INL|INR]; auto.
+        apply singleton_1 in INL; subst; apply UN2.
+        auto using union_2,singleton_2.
+  Qed.
+
 End UniqDerived.
 
 
@@ -1205,7 +1257,9 @@ End BindsDerived.
 
 Hint Resolve @nil_neq_one_mid @one_mid_neq_nil.
 
-Hint Resolve @uniq_insert_mid @uniq_map_app_l.
+Hint Resolve Permutation_trans Permutation_sym Perm_in.
+
+Hint Resolve @uniq_insert_mid @uniq_map_app_l uniq_perm.
 
 Hint Immediate @uniq_remove_mid.
 
