@@ -7,6 +7,7 @@
 
 *)
 Require Import Metatheory.Metatheory Tactics.
+Require Import Coq.Sorting.Permutation.
 
 Set Implicit Arguments.
 
@@ -388,9 +389,11 @@ Definition penv := list (atom * prop).
 (** Encoding an environment as all requests; for the server accept process
     rule. *)
 Inductive all_requests : penv -> Prop :=
-  | all_requests_nil : all_requests nil
-  | all_requests_cons : forall x A Γ (REQS: all_requests Γ),
+  | all_reqs_nil : all_requests nil
+  | all_reqs_cons : forall x A Γ (REQS: all_requests Γ),
                           all_requests ((x ~ ? A) ++ Γ).
+
+Hint Constructors all_requests.
 
 (** Locally closed processes. *)
 Inductive lc_proc : proc -> Prop :=
@@ -444,68 +447,86 @@ Reserved Notation "P '⊢cp' Γ" (at level 69).
     could help proofs since all rules follow a similar structure).
 *)
 Inductive cp_rule : proc -> penv -> Prop :=
-  | cp_fwd : forall (x w: atom) A (NEQ: x <> w),
-               w ⟷ x ⊢cp ((w ~ ¬ A) ++ (x ~ A))
-  | cp_cut : forall (L:atoms) P Q A Γ Δ
-                    (UN: uniq (Γ ++ Δ))
+  | cp_fwd : forall Ω (x w: atom) A
+                    (UN: uniq (w ~ ¬A ++ x ~ A ++ Ω))
+                    (REQS: all_requests Ω),
+               w ⟷ x ⊢cp ((w ~ ¬ A) ++ (x ~ A)) ++ Ω
+  | cp_cut : forall (L:atoms) P Q A Γ Δ Ω
+                    (UN: uniq (Γ ++ Δ ++ Ω))
+                    (REQS: all_requests Ω)
                     (CPP: forall (x:atom) (NL: x `notin` L),
-                            (open_proc P x) ⊢cp Γ ++ (x ~ A))
+                            (open_proc P x) ⊢cp Γ ++ (x ~ A) ++ Ω)
                     (CPQ: forall (x:atom) (NL: x `notin` L),
-                            (open_proc Q x) ⊢cp Δ ++ (x ~ ¬A)),
-               ν A → P ‖ Q ⊢cp Γ ++ Δ
-  | cp_output : forall (L:atoms) P Q Γ Δ x A B
-                       (UN: uniq (Γ ++ Δ ++ (x ~ A ⨂ B)))
+                            (open_proc Q x) ⊢cp Δ ++ (x ~ ¬A) ++ Ω),
+               ν A → P ‖ Q ⊢cp Γ ++ Δ ++ Ω
+  | cp_output : forall (L:atoms) P Q Γ Δ Ω x A B
+                       (UN: uniq (Γ ++ Δ ++ (x ~ A ⨂ B) ++ Ω))
+                       (REQS: all_requests Ω)
                        (CPP: forall (y:atom) (NL: y `notin` L),
-                               (open_proc P y) ⊢cp Γ ++ (y ~ A))
-                       (CPQ: Q ⊢cp Δ ++ (x ~ B)),
-                  [A]x → P ‖ Q ⊢cp Γ ++ Δ ++ (x ~ A ⨂ B)
-  | cp_input : forall (L:atoms) P Γ x A B
+                               (open_proc P y) ⊢cp Γ ++ (y ~ A) ++ Ω)
+                       (CPQ: Q ⊢cp Δ ++ (x ~ B) ++ Ω),
+                  [A]x → P ‖ Q ⊢cp Γ ++ Δ ++ (x ~ A ⨂ B) ++ Ω
+  | cp_input : forall (L:atoms) P Γ Ω x A B
+                      (REQS: all_requests Ω)
                       (CPP: forall (y:atom) (NL: y `notin` L),
-                              (open_proc P y) ⊢cp Γ ++ (y ~ A) ++ (x ~ B)),
-                 ⟨A⟩x → P ⊢cp Γ ++ (x ~ A ⅋ B)
-  | cp_left : forall P Γ x A B
-                     (CPP: P ⊢cp Γ ++ (x ~ A)),
-                x[inl] → P ⊢cp Γ ++ (x ~ A ⨁ B)
-  | cp_right : forall P Γ x A B
-                     (CPP: P ⊢cp Γ ++ (x ~ B)),
-                x[inr] → P ⊢cp Γ ++ (x ~ A ⨁ B)
-  | cp_choice : forall P Q Γ x A B
-                       (CPP: P ⊢cp Γ ++ (x ~ A))
-                       (CPQ: Q ⊢cp Γ ++ (x ~ B)),
-                  x CASE P OR Q ⊢cp Γ ++ (x ~ A & B)
-  | cp_accept : forall (L:atoms) P Γ (x:atom) A
-                       (REQS: all_requests Γ)
-                       (UN: uniq (Γ ++ (x ~ ! A)))
+                            (open_proc P y) ⊢cp Γ ++ (y ~ A) ++ (x ~ B) ++ Ω),
+                 ⟨A⟩x → P ⊢cp Γ ++ (x ~ A ⅋ B) ++ Ω
+  | cp_left : forall P Γ Ω x A B
+                     (REQS: all_requests Ω)
+                     (CPP: P ⊢cp Γ ++ (x ~ A) ++ Ω),
+                x[inl] → P ⊢cp Γ ++ (x ~ A ⨁ B) ++ Ω
+  | cp_right : forall P Γ Ω x A B
+                      (REQS: all_requests Ω)
+                      (CPP: P ⊢cp Γ ++ (x ~ B) ++ Ω),
+                 x[inr] → P ⊢cp Γ ++ (x ~ A ⨁ B) ++ Ω
+  | cp_choice : forall P Q Γ Ω x A B
+                       (REQS: all_requests Ω)
+                       (CPP: P ⊢cp Γ ++ (x ~ A) ++ Ω)
+                       (CPQ: Q ⊢cp Γ ++ (x ~ B) ++ Ω),
+                  x CASE P OR Q ⊢cp Γ ++ (x ~ A & B) ++ Ω
+  | cp_accept : forall (L:atoms) P Γ Ω (x:atom) A
+                       (REQSΓ: all_requests Γ) (REQSΩ: all_requests Ω)
+                       (UN: uniq (Γ ++ (x ~ ! A) ++ Ω))
                        (CPP: forall (y:atom) (NL: y `notin` L),
-                               (open_proc P y) ⊢cp Γ ++ (y ~ A)),
-                  ! ⟨A⟩ x → P ⊢cp Γ ++ (x ~ ! A)
-  | cp_request : forall (L:atoms) P Γ (x:atom) A
-                        (UN: uniq (Γ ++ (x ~ ? A)))
+                               (open_proc P y) ⊢cp Γ ++ (y ~ A) ++ Ω),
+                  ! ⟨A⟩ x → P ⊢cp Γ ++ (x ~ ! A) ++ Ω
+  | cp_request : forall (L:atoms) P Γ Ω (x:atom) A
+                        (REQS: all_requests Ω)
+                        (UN: uniq (Γ ++ (x ~ ? A) ++ Ω))
                         (CPP: forall (y:atom) (NL: y `notin` L),
-                                (open_proc P y) ⊢cp Γ ++ (y ~ A)),
-                   ? [A] x → P ⊢cp Γ ++ (x ~ ? A)
-  | cp_weaken : forall P Γ (x:atom) A
-                       (UN: uniq (Γ ++ (x ~ ? A)))
-                       (CPP: P ⊢cp Γ),
-                  P ⊢cp Γ ++ (x ~ ? A)
-  | cp_contract : forall P Γ (x x' x'':atom) A
-                         (UN: uniq (Γ ++ (x ~ ? A)))
-                         (CPP: P ⊢cp Γ ++ (x' ~ ? A) ++ (x'' ~ ? A)),
-                    [x' ~> x]([x'' ~> x]P) ⊢cp Γ ++ (x ~ ? A)
-  | cp_send : forall (L:atoms) Γ P x A B
+                                (open_proc P y) ⊢cp Γ ++ (y ~ A) ++ Ω),
+                   ? [A] x → P ⊢cp Γ ++ (x ~ ? A) ++ Ω
+  (* | cp_weaken : forall P Γ (x:atom) A *)
+  (*                      (UN: uniq (Γ ++ (x ~ ? A))) *)
+  (*                      (CPP: P ⊢cp Γ), *)
+  (*                 P ⊢cp Γ ++ (x ~ ? A) *)
+  (* | cp_contract : forall P Γ (x x' x'':atom) A *)
+  (*                        (UN: uniq (Γ ++ (x ~ ? A))) *)
+  (*                        (CPP: P ⊢cp Γ ++ (x' ~ ? A) ++ (x'' ~ ? A)), *)
+  (*                   [x' ~> x]([x'' ~> x]P) ⊢cp Γ ++ (x ~ ? A) *)
+  | cp_send : forall (L:atoms) Γ Ω P x A B
+                     (REQS: all_requests Ω)
                      (CPP: forall (y:atom) (NL: y `notin` L),
-                             P ⊢cp Γ ++ x ~ {{ A // y }} (open_prop B y)),
-                p_send x A P ⊢cp Γ ++ x ~ pp_exists B
-  | cp_recv : forall (L:atoms) Γ P x B
+                           P ⊢cp Γ ++ x ~ {{ A // y }} (open_prop B y) ++ Ω),
+                p_send x A P ⊢cp Γ ++ x ~ pp_exists B ++ Ω
+  | cp_recv : forall (L:atoms) Γ Ω P x B
+                     (REQS: all_requests Ω)
                      (CPP: forall (y:atom) (NL: y `notin` L),
-                             P ⊢cp Γ ++ x ~ (open_prop B y)),
-                p_recv x P ⊢cp Γ ++ x ~ pp_forall B
-  | cp_empout : forall (x: atom), x → 0 ⊢cp (x ~ pp_one)
-  | cp_empin : forall P Γ (x:atom) (CPP: P ⊢cp Γ)
-                      (UN: uniq (Γ ++ (x ~ pp_bot))),
-                 ⟨⟩ x → P ⊢cp Γ ++ (x ~ pp_bot)
-  | cp_empcho : forall Γ (x:atom) (UN: uniq (Γ ++ (x ~ pp_top))),
-                  x CASE 0 ⊢cp Γ ++ (x ~ pp_top)
+                             P ⊢cp Γ ++ x ~ (open_prop B y) ++ Ω),
+                p_recv x P ⊢cp Γ ++ x ~ pp_forall B ++ Ω
+  | cp_empout : forall Ω (x: atom)
+                       (UN: uniq (x ~ pp_one ++ Ω))
+                       (REQS: all_requests Ω),
+                  x → 0 ⊢cp (x ~ pp_one) ++ Ω
+  | cp_empin : forall P Γ Ω (x:atom)
+                      (REQS: all_requests Ω)
+                      (CPP: P ⊢cp Γ ++ Ω)
+                      (UN: uniq (Γ ++ (x ~ pp_bot) ++ Ω)),
+                 ⟨⟩ x → P ⊢cp Γ ++ (x ~ pp_bot) ++ Ω
+  | cp_empcho : forall Γ Ω (x:atom)
+                       (REQS: all_requests Ω)
+                       (UN: uniq (Γ ++ (x ~ pp_top) ++ Ω)),
+                  x CASE 0 ⊢cp Γ ++ (x ~ pp_top) ++ Ω
 where "P '⊢cp' Γ" := (cp_rule P Γ) : cp_scope.
 
 (** Example presented in journal version of ``Propositions as Sessions''.
@@ -522,6 +543,13 @@ Definition buyer :=
 
 *)
 
+Ltac gather_atoms ::=
+  let A := gather_atoms_with (fun x : atoms => x) in
+  let B := gather_atoms_with (fun x : atom => singleton x) in
+  let C := gather_atoms_with (fun x : list (atom * prop) => dom x) in
+  let D := gather_atoms_with (fun x : proc => fv_proc x) in
+  constr:(A `union` B `union` C `union` D).
+
 Lemma cp_implies_uniq: forall Γ P
     (CP: P ⊢cp Γ),
   uniq Γ.
@@ -530,8 +558,19 @@ Proof.
   ; by pick fresh y; destruct_notin; specialize (H _ Fr); solve_uniq.
 Qed.
 
+Lemma requests_app: forall xs ys
+    (REQXS: all_requests xs)
+    (REQYS: all_requests ys),
+  all_requests (xs ++ ys).
+Proof.
+  induction xs as [|x xs']; auto.
+  intros ys REQXS REQYS; inversion REQXS; subst; simpl_env; auto.
+Qed.
+
+Hint Resolve requests_app.
+
 Lemma ignore_env_order: forall Γ Δ P
-    (INB: forall x A, binds x A Γ <-> binds x A Δ)
+    (INB: Permutation Γ Δ)
     (WT: P ⊢cp Γ),
   P ⊢cp Δ.
 Proof.
@@ -621,20 +660,33 @@ Section CPBasicSubstOpenProperties.
       ; by unfold open_proc in *; rewrite lc_open_subst; auto.
   Qed.
 
-  Lemma typing_weaken:
-    forall Γ Δ Ε P
-           (WT: P ⊢cp Γ ++ Ε) (UN: uniq(Γ ++ Δ ++ Ε))
-           (REQS: all_requests Δ),
-      P ⊢cp Γ ++ Δ ++ Ε.
+  Lemma Permutation_three:
+    forall {A} (xs ys zs:list A),
+      Permutation (zs ++ xs ++ ys) (xs ++ ys ++ zs).
   Proof.
-    induction Δ; auto.
-    ii; inversion REQS as [|x A Δ']; subst; simpl_env.
-    apply ignore_env_order with (Γ := Γ ++ Δ ++ Ε ++ (x ~ ? A)).
-    split; ii; analyze_binds H.
-    rewrite_env ((Γ ++ Δ ++ Ε) ++ (x ~ ? A)).
-    apply cp_weaken; [solve_uniq|].
-    apply IHΔ; auto; []; solve_uniq.
+    ii; eapply Permutation_trans; [apply Permutation_app_comm|].
+    simpl_env; auto.
   Qed.
+
+  (* Lemma typing_weaken: *)
+  (*   forall Γ Δ Ε P *)
+  (*          (WT: P ⊢cp Γ ++ Ε) (UN: uniq(Γ ++ Δ ++ Ε)) *)
+  (*          (REQS: all_requests Δ), *)
+  (*     P ⊢cp Γ ++ Δ ++ Ε. *)
+  (* Proof. *)
+  (*   ii; remember (Γ ++ Ε) as Γ'. *)
+  (*   generalize dependent Γ. *)
+  (*   induction WT; intros ΓG EQ UNG; subst *)
+  (*   ; apply ignore_env_order with (Γ:=ΓG++Ε++Δ) *)
+  (*   ; try (by apply Permutation_app; [|apply Permutation_app_comm]; auto). *)
+  (*   - rewrite_env ((ΓG ++ Ε) ++ Δ); rewrite <-EQ; simpl_env. *)
+  (*     apply uniq_reorder_2 in UNG; rewrite <-EQ in UNG. *)
+  (*     apply cp_fwd with (Ω:=Ω++Δ); auto. *)
+  (*     solve_uniq. *)
+  (*   - rewrite_env ((ΓG ++ Ε) ++ Δ); rewrite <-EQ; simpl_env. *)
+  (*     apply uniq_reorder_2 in UNG; rewrite <-EQ in UNG. *)
+  (*     pick fresh z and apply cp_cut; auto; try solve_uniq. *)
+  (* Qed. *)
 
   Lemma typing_subst:
     forall Γ Δ P (x y:atom) A
@@ -677,22 +729,10 @@ Definition mw (Γ:penv) : Prop := forall (x:atom) A, ~ binds x (? A) Γ.
 Lemma axiom_env: forall Γ (w x:atom)
     (NEQ: w <> x)
     (WT: w ⟷ x ⊢cp Γ),
-  exists A, Γ = ((w ~ ¬ A) ++ (x ~ A)).
+  exists A, binds w (¬ A) Γ /\ binds x A Γ.
 Proof.
-  ii; induction WT.
-
-Focus 10.
-
-  ii; inversion WT; subst; solve [eexists; simpl_env; eauto
-                                 | specialize (MW x0 A); exfalso; auto]. 
-Qed.
-
-Lemma env_not_match: forall {A B} (Γ:list(A*B)) Δ y A dA
-    (EQ: Γ ++ (y ~ A) = Δ ++ y ~ dA)
-    (NEQ: A <> dA),
-  False.
-Proof.
-  ii; apply app_inj_tail in EQ; des; inversion EQ1; auto.
+  ii; inversion WT; subst.
+  exists A; split; auto.
 Qed.
 
 Theorem proc_sub_red: forall Γ P Q
@@ -700,13 +740,12 @@ Theorem proc_sub_red: forall Γ P Q
     (RED: P ==>cp Q),
   Q ⊢cp Γ.
 Proof.
-  ii; induction RED; subst; inversion WT; subst.
-  pick fresh y; destruct_notin; specialize (CPP _ Fr).
+  ii; induction RED; subst. inversion WT; subst.
+  pick fresh y. destruct_notin; specialize (CPP _ Fr).
 
-  unfold open_proc in CPP; ss; apply axiom_env in CPP; auto.
+  unfold open_proc in CPP; ss. apply axiom_env in CPP; auto.
   inversion CPP as [A' Fr'].
-  destruct (A == A'); [|exfalso; apply env_not_match in Fr'; auto]; subst.
-  apply app_inv_tail in Fr'; subst.
+  destruct (A == A'); des; [|exfalso; analyze_binds Fr'1; eauto]; subst.
 
   assert (NL: w `notin` L) by admit.
   apply CPQ in NL; apply ignore_env_order with (Γ := Δ ++ w ~ ¬A'); auto.
