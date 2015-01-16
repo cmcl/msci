@@ -574,25 +574,67 @@ Proof.
   ; eauto.
 Qed.
 
+Lemma requests_one:
+  forall x A,
+    all_requests (x ~ ? A).
+Proof. ii; apply all_reqs_cons; auto. Qed.
+
 Lemma requests_app: forall xs ys
     (REQXS: all_requests xs)
     (REQYS: all_requests ys),
   all_requests (xs ++ ys).
 Proof.
   induction xs as [|x xs']; auto.
-  intros ys REQXS REQYS; inversion REQXS; subst; simpl_env; auto.
+  introv REQXS REQYS; inverts REQXS; simpl_env; auto.
 Qed.
 
-Hint Resolve requests_app.
+Hint Resolve requests_one requests_app.
 
 Lemma ignore_env_order: forall Γ Δ P
     (INB: Permutation Γ Δ)
     (WT: P ⊢cp Γ),
   P ⊢cp Δ.
 Proof.
-  ii; generalize dependent Δ; induction WT; ii
-  ; try (by econstructor; ss; eauto).
+  ii; gen Δ; induction WT; ii; try (by econstructor; ss; eauto).
 Qed.
+
+Tactic Notation
+  "pick" "fresh" ident(atom_name)
+  "excluding" constr(L)
+  "and" "apply" constr(H) "with" constr(eq)
+  :=
+    first [apply (@H L) with eq | eapply (@H L) with eq];
+      match goal with
+        | |- forall _, _ `notin` _ -> _ =>
+          let Fr := fresh "Fr" in intros atom_name Fr
+        | |- forall _, _ `notin` _ -> _ =>
+          fail 1 "because" atom_name "is already defined"
+        | _ =>
+          idtac
+      end.
+
+Tactic Notation
+  "pick" "fresh" ident(atom_name)
+  "and" "apply" constr(H) "with" constr(eq)
+  :=
+    let L := gather_atoms in
+    let L := beautify_fset L in
+    pick fresh atom_name excluding L and apply H with eq.
+
+Lemma cp_weaken:
+  forall P Γ x A
+         (UN: uniq (Γ ++ x ~ ? A))
+         (WT: P ⊢cp Γ),
+    P ⊢cp Γ ++ (x ~ ? A).
+Proof.
+  ii; induction WT.
+  - eapply cp_fwd with (A:=A0)(Ω:=Ω++x~? A); eauto.
+  -  pick fresh z and apply eauto.
+eapply Permutation_trans. apply Permutation_app. exact PER. auto.
+simpl_env. eauto.
+
+intros. pick fresh z; destruct_notin; specialize (H _ Fr).
+simpl_env in *. apply H.   
 
 Section CPBasicSubstOpenProperties.
 

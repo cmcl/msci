@@ -3,6 +3,7 @@
  *)
 
 Require Import Metatheory Prelude Eqdep_dec.
+Require Export SFLibTactics.
 Declare ML Module "ssreflect".
 
 Global Set Bullet Behavior "Strict Subproofs".
