@@ -1257,7 +1257,7 @@ End BindsDerived.
 
 Hint Resolve @nil_neq_one_mid @one_mid_neq_nil.
 
-Hint Resolve Permutation_trans Permutation_sym Perm_in.
+Hint Resolve Permutation_trans Permutation_app Permutation_sym Perm_in.
 
 Hint Resolve @uniq_insert_mid @uniq_map_app_l uniq_perm.
 
