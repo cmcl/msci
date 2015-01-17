@@ -7,7 +7,7 @@
 
 *)
 Require Import Metatheory.Metatheory Tactics.
-Require Import Coq.Sorting.Permutation.
+Require Import List Coq.Sorting.Permutation.
 
 Set Implicit Arguments.
 
@@ -615,6 +615,27 @@ Tactic Notation
      let L := beautify_fset L in
      set (atoms_name:=L); def_to_eq atoms_name H L.
 
+Ltac bring_to_start X :=
+  try (eapply Permutation_trans
+       ; [|by repeat first [apply (Permutation_app_comm X _)
+                           |apply Permutation_app_head]])
+  ; first [apply Permutation_app_head
+          |eapply Permutation_trans
+           ; [| by repeat first [apply (three_way_perm X)
+                                |apply Permutation_app_head]]
+           ; bring_to_start X].
+
+Lemma cons_app:
+  forall {A} x (xs:list A), x :: xs = app [x] xs.
+Proof. auto. Qed.
+
+Ltac solve_perm :=
+  by repeat first [rewrite <-!app_assoc
+                  |rewrite !cons_app
+                  |match goal with 
+                       |- Permutation (?x ++ _) _ => bring_to_start x
+                   end].
+
 Lemma cp_weaken:
   forall P Γ x A
          (UN: uniq (Γ ++ x ~ ? A))
@@ -705,27 +726,40 @@ Proof.
       simpl_env; eauto. }
 Qed.
 
-Lemma cp_contract:
-  forall P Γ x x' x'' A
+Lemma cp_strengthen:
+  forall P Γ x A
          (UN: uniq (Γ ++ x ~ ? A))
-         (WT: P ⊢cp x' ~ ? A ++ x'' ~ ? A ++ Γ),
-    [x' ~> x]([x'' ~> x]P) ⊢cp Γ ++ (x ~ ? A).
-Proof.
-  ii; rewrite_env (x'~? A++x''~? A++Γ) in WT
-  ; remember (x'~? A++x''~? A++Γ) as Γ'; gen Γ; induction WT
-  ; intros Γ'; i; substs; rename Γ' into Γ.
-Lemma cp_contract_fwd:
-  forall Γ Ω w x x1 x2 x3 A0 A
-         (UN1: uniq (Γ ++ x1 ~ ? A))
-         (UN2: uniq (x2~? A ++ x3~? A ++ Γ))
-         (REQS: all_requests Ω)
-         (PER: Permutation (x2~? A++x3~? A++Γ) (w~¬A0++x~A0++Ω)),
-    [x2 ~> x1]([x3 ~> x1](w ⟷ x)) ⊢cp x1~? A++Γ.
+         (WT: P ⊢cp Γ ++ x ~ ? A),
+    P ⊢cp Γ.
 Proof.
 Admitted.
-apply ignore_env_order with (Γ:=x~? A++Γ); [apply Permutation_app_comm|].
-eauto using cp_contract_fwd.
-Admitted.
+
+Lemma perm_dom_uniq:
+  forall Γ Δ x (A B:prop)
+         (UN: uniq (Γ++x~A))
+         (PER: Permutation (x~A++Γ) (x~B++Δ)),
+    Permutation Γ Δ.
+Proof.
+  intros; forwards UN1: uniq_perm PER; [solve_uniq|].
+  eapply uniq_perm in UN; [|apply Permutation_app_comm].
+  inv UN1; inv UN; destruct (B == A); substs~.
+  - applys~ Permutation_cons_inv PER.
+  - apply Permutation_in with (x:=(x,A)) in PER; s; auto.
+    simpl in PER; des; [inv PER0|]; exfalso; eauto.
+Qed.
+
+Lemma perm_cod_uniq:
+  forall Γ Δ x (A B:prop)
+         (UN: uniq (Γ++x~A))
+         (PER: Permutation (x~A++Γ) (x~B++Δ)),
+    A = B.
+Proof.
+  intros; forwards UN1: uniq_perm PER; [solve_uniq|].
+  eapply uniq_perm in UN; [|apply Permutation_app_comm].
+  inv UN1; inv UN; destruct (B == A); substs~.
+  - apply Permutation_in with (x:=(x,A)) in PER; s; auto.
+    simpl in PER; des; [inv PER0|]; exfalso; eauto.
+Qed.
 
 Section CPBasicSubstOpenProperties.
 
@@ -776,47 +810,29 @@ Section CPBasicSubstOpenProperties.
                                      ; solve [auto | fsetdec]).
   Qed.
 
+  Lemma subst_id:
+    forall (x:atom) t,
+      [x ~> x]t = t.
+  Proof.
+    induction t; ss; try (destruct_all pname; des; substs; f_equal
+                                     ; solve [auto | fsetdec]).
+  Qed.
+
+  Ltac subst_lc_tac Constructor :=
+    pick fresh y and apply Constructor
+    ; by unfold open_proc in *; rewrite lc_open_subst; auto.
+
   Lemma subst_lc :
     forall t u x
            (LCT: lc_proc t),
       lc_proc ([ x ~> u ] t).
   Proof.
-    ii; induction LCT; s; des; subst; auto.
-    Case "lc_p_cut".
-      pick fresh y and apply lc_p_cut
-      ; by unfold open_proc in *; rewrite lc_open_subst; eauto.
-    Case "lc_p_output (x = bound name)".
-      pick fresh y and apply lc_p_output
-      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
-    Case "lc_p_output (x <> bound name)".
-      pick fresh y and apply lc_p_output
-      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
-    Case "lc_p_input (x = bound name)".
-      pick fresh y and apply lc_p_input
-      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
-    Case "lc_p_input (x <> bound name)".
-      pick fresh y and apply lc_p_input
-      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
-    Case "lc_p_accept (x = bound name)".
-      pick fresh y and apply lc_p_accept
-      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
-    Case "lc_p_accept (x <> bound name)".
-      pick fresh y and apply lc_p_accept
-      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
-    Case "lc_p_request (x = bound name)".
-      pick fresh y and apply lc_p_request
-      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
-    Case "lc_p_request (x <> bound name)".
-      pick fresh y and apply lc_p_request
-      ; by unfold open_proc in *; rewrite lc_open_subst; auto.
-  Qed.
-
-  Lemma Permutation_three:
-    forall {A} (xs ys zs:list A),
-      Permutation (zs ++ xs ++ ys) (xs ++ ys ++ zs).
-  Proof.
-    ii; eapply Permutation_trans; [apply Permutation_app_comm|].
-    simpl_env; auto.
+    ii; induction LCT; s; des; subst; auto
+    ; solve [subst_lc_tac lc_p_cut
+            |subst_lc_tac lc_p_output
+            |subst_lc_tac lc_p_input
+            |subst_lc_tac lc_p_accept
+            |subst_lc_tac lc_p_request].
   Qed.
 
   (* Lemma typing_weaken: *)
@@ -829,7 +845,7 @@ Section CPBasicSubstOpenProperties.
   (*   generalize dependent Γ. *)
   (*   induction WT; intros ΓG EQ UNG; subst *)
   (*   ; apply ignore_env_order with (Γ:=ΓG++Ε++Δ) *)
-  (*   ; try (by apply Permutation_app; [|apply Permutation_app_comm]; auto). *)
+  (* ; try (by apply Permutation_app; [|apply Permutation_app_comm]; auto). *)
   (*   - rewrite_env ((ΓG ++ Ε) ++ Δ); rewrite <-EQ; simpl_env. *)
   (*     apply uniq_reorder_2 in UNG; rewrite <-EQ in UNG. *)
   (*     apply cp_fwd with (Ω:=Ω++Δ); auto. *)
@@ -839,13 +855,111 @@ Section CPBasicSubstOpenProperties.
   (*     pick fresh z and apply cp_cut; auto; try solve_uniq. *)
   (* Qed. *)
 
-  Lemma typing_subst:
-    forall Γ Δ P (x y:atom) A
-           (NINX: uniq ((y ~ A) ++ Γ ++ Δ))
-           (WT: P ⊢cp Γ ++ (x ~ A) ++ Δ),
-      [x ~> y]P ⊢cp Γ ++ (y ~ A) ++ Δ.
+Lemma requests_in: forall x A Ω
+            (REQS: all_requests Ω)
+            (IN: In (x,A) Ω),
+       exists B, A = ? B.
+Proof.
+  ii; induction REQS; tryfalse; []; ss; des; substs~; []; inv IN0; eauto.
+Qed.
+  Lemma typing_subst_fwd:
+    forall Γ Ω w x y z A B
+           (UNY: uniq (Γ ++ y ~ A))
+           (UNX: uniq (Γ ++ z ~ A))
+           (REQS: all_requests Ω)
+           (PER: Permutation (Γ ++ z ~ A) (w ~ ¬B ++ x ~ B ++ Ω)),
+      [z ~> y](w ⟷ x) ⊢cp Γ ++ y ~ A.
   Proof.
+    ii; des; substs.
+    - apply uniq_perm in PER; auto; []; inv PER; ss; substs; fsetdec.
+    - apply cp_fwd with (A:=¬A)(Ω:=Ω); first [auto|solve_uniq].
+      rewrite <-prop_dual_involutive.
+      eapply Permutation_trans in PER; [|apply Permutation_app_comm]; ss.
+      rewrite !cons_app_one in *.
+      forwards EQ: perm_cod_uniq PER; apply perm_dom_uniq in PER; substs~.
+      eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto|].
+      rewrite <-prop_dual_involutive; solve_perm.
+    - apply cp_fwd with (A:=A)(Ω:=Ω); first [auto|solve_uniq].
+      eapply Permutation_trans in PER; [|apply Permutation_app_comm]; ss.
+      rewrite !cons_app_one in *.
+      apply Permutation_sym in PER; eapply Permutation_trans in PER
+      ; [|apply three_way_perm]; apply Permutation_sym in PER.
+      forwards EQ: perm_cod_uniq PER; apply perm_dom_uniq in PER; substs~.
+      eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto|].
+      solve_perm.
+    - forwards PER2: Perm_in z PER; [rewrite dom_app; s; auto|].
+      ss; do !(rewrite F.add_iff in *; des; substs~); tryfalse.
+
+SearchAbout (binds _ _).
+Lemma requests_in': forall (x:atom) A Γ Δ Ω
+            (REQS: all_requests Ω)
+            (UN: uniq (Γ++x~A))
+            (PER: Permutation (Γ++x~A) (Δ++Ω))
+            (IN: x `in` dom Ω),
+       exists B, A = ? B.
+Proof.
+  ii; gen Δ; induction REQS; ii; try fsetdec; []; ss
+  ; do !(rewrite F.add_iff in *; des; substs~).
+  - eapply Permutation_trans in PER; [|apply Permutation_app_comm]; ss.
+    rewrite !cons_app_one in *; apply Permutation_sym in PER
+    ; eapply Permutation_trans in PER; [|apply three_way_perm]
+    ; apply Permutation_sym in PER.
+    forwards EQ: perm_cod_uniq PER; substs*.
+  - rewrite cons_app_one,app_assoc in PER; apply* IHREQS.
+Qed.
+idtac.
+rewrite !cons_app_one,app_assoc in PER; forwards*:requests_in' A Γ PER2.
+      inversion H1 as [C H1']; substs.
+      apply cp_fwd with (A:=B)(Ω:=Ω++y~? C); auto.
+Admitted.
+
+  Lemma typing_subst:
+    forall Γ P (x y:atom) A
+           (NINX: uniq ((y ~ A) ++ Γ))
+           (WT: P ⊢cp Γ ++ (x ~ A)),
+      [x ~> y]P ⊢cp Γ ++ (y ~ A).
+  Proof.
+    ii; destruct (x == y); substs; [by rewrite subst_id|].
+    forwards UN2: uniq_perm NINX; [apply Permutation_cons_append|].
+    remember (Γ++x~A) as Γ'; gen Γ; induction WT; i; substs~.
+    - applys* typing_subst_fwd.
   Admitted.
+
+Lemma cp_contract:
+  forall P Γ x x' x'' A
+         (UN: uniq (x ~ ? A ++ Γ))
+         (WT: P ⊢cp Γ ++ x' ~ ? A ++ x'' ~ ? A),
+    [x'' ~> x]([x' ~> x]P) ⊢cp Γ ++ (x ~ ? A).
+Proof.
+  ii; destruct (x == x'); substs~; [rewrite subst_id|].
+  - destruct (x'' == x'); substs~
+    ; [apply cp_implies_uniq in WT
+       ; eapply uniq_perm in WT; [|apply Permutation_app_comm]
+       ; inversion WT; substs~; ss; fsetdec|].
+    eapply typing_subst; auto.
+
+
+ rewrite_env ((Γ++x'~? A)++x''~? A++nil) in WT.
+apply typing_subst with (y:=x) in WT.
+
+apply typing_subst; rewrite app_nil_2; auto.
+
+  apply typing_subst.
+  ii; rewrite_env (x'~? A++x''~? A++Γ) in WT
+  ; remember (x'~? A++x''~? A++Γ) as Γ'; gen Γ; induction WT
+  ; intros Γ'; i; substs; rename Γ' into Γ.
+Lemma cp_contract_fwd:
+  forall Γ Ω w x x1 x2 x3 A0 A
+         (UN1: uniq (Γ ++ x1 ~ ? A))
+         (UN2: uniq (x2~? A ++ x3~? A ++ Γ))
+         (REQS: all_requests Ω)
+         (PER: Permutation (x2~? A++x3~? A++Γ) (w~¬A0++x~A0++Ω)),
+    [x2 ~> x1]([x3 ~> x1](w ⟷ x)) ⊢cp x1~? A++Γ.
+Proof.
+Admitted.
+apply ignore_env_order with (Γ:=x~? A++Γ); [apply Permutation_app_comm|].
+eauto using cp_contract_fwd.
+Admitted.
 
   Lemma typing_rename:
     forall Γ P (x y : atom) A
@@ -884,7 +998,7 @@ Proof.
   assert (ΔP = w ~ ¬A).
   {
     destruct ΔP; ss.
-    -
+    - exfalso. inversion CPP. congruence. discriminate.
     - inversion H; subst; destruct Γ0; auto.
       + inversion H; subst; contradict NotInTac2; s; fsetdec.
   }

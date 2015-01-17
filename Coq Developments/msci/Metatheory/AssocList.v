@@ -643,6 +643,16 @@ Section PermutationProperties.
         apply singleton_2; reflexivity.
   Qed.
 
+  Lemma three_way_perm:
+    forall {A} (x y z:list A),
+      Permutation (x ++ y ++ z) (y ++ x ++ z).
+  Proof.
+    clear; intros; rewrite <-app_assoc.
+    eapply Permutation_trans; [apply Permutation_app|]
+    ; [apply Permutation_app_comm| |]; auto.
+    rewrite app_assoc; auto.
+  Qed.
+
 End PermutationProperties.
 
 
