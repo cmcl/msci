@@ -939,18 +939,6 @@ Section CPBasicSubstOpenProperties.
       solve_perm.
   Qed.
 
-  Lemma in_env_split:
-    forall x (Γ:penv)
-           (IN: x `in` (dom Γ)),
-    exists A Γ1 Γ2, Γ = Γ1++(x,A)::Γ2.
-  Proof.
-    ii; induction Γ; try fsetdec; []; destruct a as [y B]
-    ; rewrite dom_cons in IN; destruct_in; substs~.
-    - exists B (@nil (atom*prop)) Γ; reflexivity.
-    - specializes~ IHΓ; inversion_clear IHΓ as (C & Γ1' & Γ2' & H); substs~.
-      exists C ((y,B)::Γ1') Γ2'; reflexivity.
-  Qed.
-
   Lemma typing_subst:
     forall Γ P (x y:atom) A
 (*           (NINX: uniq ((y ~ A) ++ Γ))*)
@@ -963,9 +951,9 @@ Section CPBasicSubstOpenProperties.
     clear HeqΓ'; gen Γ; induction WT; i; substs~.
     - applys* typing_subst_fwd.
     - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
-      forwards~ UN2: uniq_perm PER0.
-      forwards IN: Perm_in x PER; [rewrite dom_app; ss; fsetdec|].
-      rewrite !dom_app in *; destruct_in.
+      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
+      ; forwards~ BNDS: Perm_binds x A PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
       + apply in_env_split in IN0; inversion_clear IN0 as (A' & Γ1 & Γ2 & H')
         ; substs~; rewrite <-app_assoc,<-app_comm_cons in *
         ; forwards EQ: perm_cod_uniq' PER; try symmetry in EQ; substs~.
@@ -979,8 +967,8 @@ Section CPBasicSubstOpenProperties.
           apply ignore_env_order with (Γ:=x0~A0++Γ1++Γ2++Ω++y~A)
           ; [solve_perm|].
           rewrite !app_assoc; apply~ H; rewrite <-!app_assoc; try solve_perm.
-          apply~ uniq_push.
-          admit. }
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
+          destruct_uniq; solve_uniq. }
         { admit. }
       + admit (* x in dom ΔQ *).
       + rewrite !app_assoc in PER
@@ -1069,14 +1057,29 @@ Proof.
   ii; induction RED; subst. inversion WT; subst.
   pick fresh y; destruct_notin; specializes CPP Fr.
   rewrite /open_proc in CPP; simpl in CPP.
-  assert (ΔP = w ~ ¬A).
-  {
-    destruct ΔP; ss.
-    - exfalso. inversion CPP. congruence. discriminate.
-    - inversion H; subst; destruct Γ0; auto.
-      + inversion H; subst; contradict NotInTac2; s; fsetdec.
-  }
-  subst.
+  inverts keep CPP.
+Goal forall (x w:atom) A Ω
+            (NEQ: w <> x)
+            (UN: uniq (w ~ ! ¬A ++ x ~ ? A ++ Ω))
+            (REQS: all_requests Ω),
+       w ⟷ x ⊢cp w ~ ! ¬A ++ x ~ ? A ++ Ω.
+Proof.
+  ii; eapply cp_fwd with (Ω:=Ω)(A:=? A); auto.
+Qed. idtac.
+(* perhaps I shouldn't invert CPP again here. I need to show that the
+   ΔP environment has to be w (or rather that is the "interesting" case).
+   The other case is if w in dom Ω which should imply that y is also in
+   dom Ω but then this leads to an ill-typed fwd. Perhaps I can prove that
+   for all well-typed w ⟷ x that w,x ∉ dom Ω.
+*)
+
+  inverts keep CPP; forwards: ignore_env_order PER0 CPP.
+  rewrite cons_app_one in *.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  eapply uniq_perm with (F:=(ΔP++Ω)++y~A) in UN0; [|solve_perm].
+  forwards EQ: perm_cod_uniq' PER0; substs~.
+  apply perm_dom_uniq' in PER0; auto.
+
   apply ignore_env_order with (Γ:=Δ++w~¬A0++Ω).
   rewrite <-app_assoc; eapply Permutation_trans
   ; [apply Permutation_app|]; [apply Permutation_app_comm| |]; auto.

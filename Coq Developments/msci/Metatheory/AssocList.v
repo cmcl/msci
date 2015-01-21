@@ -25,6 +25,7 @@ Require Import Coq.Sorting.Permutation.
 
 Require Import CoqFSetDecide.
 Require Import CoqListFacts.
+Require Import FSetWeakNotin.
 Require Import LibTactics.
 
 
@@ -71,6 +72,7 @@ Module Make
   (Import KeySet : FSetInterface.WSfun X).
 
 Module Import D := CoqFSetDecide.WDecide_fun X KeySet.
+Module Import D':= FSetWeakNotin.Notin_fun X KeySet.
 Module KeySetProperties := FSetProperties.WProperties_fun X KeySet.
 Module KeySetFacts := FSetFacts.WFacts_fun X KeySet.
 
@@ -1026,13 +1028,25 @@ Section UniqDerived.
       eauto using Perm_in,Permutation_sym.
     - inversion UN as [|? ? ? UN1 UN2]; clear UN
       ; inversion UN1; clear UN1; subst.
-      rewrite dom_cons in UN2.
-      repeat apply uniq_push; auto.
-        intros IN; apply UN2; apply union_3; auto.
-        intros IN. rewrite dom_cons in IN. apply union_1 in IN.
-        destruct IN as [INL|INR]; auto.
-        apply singleton_1 in INL; subst; apply UN2.
-        auto using union_2,singleton_2.
+      rewrite dom_cons in UN2; apply uniq_push; solve_notin.
+  Qed.
+
+  Lemma uniq_perm_app:
+    forall (PER: Permutation E F)
+           (UN: uniq (E++G)),
+      uniq (F++G).
+  Proof.
+    intros; induction PER; auto.
+    - inversion UN; subst; apply uniq_push; auto
+      ; rewrite dom_app in *; intros IN; apply union_1 in IN
+      ; destruct IN as [INL|INR]; apply H2; [|eauto using union_3].
+      apply Permutation_sym in PER; apply Perm_in with (x:=x1) in PER
+      ; eauto using union_2.
+    - inversion UN as [|? ? ? UN1 UN2]; clear UN; inversion UN1; clear UN1
+      ; subst; rewrite app_comm_cons in UN2; rewrite dom_app in *
+      ; rewrite dom_cons in UN2.
+      repeat (apply uniq_push; auto)
+      ; repeat try (rewrite dom_cons || rewrite dom_app); solve [solve_notin].
   Qed.
 
 End UniqDerived.
@@ -1259,8 +1273,50 @@ Section BindsDerived.
     solve_uniq.
   Qed.
 
+  Lemma Perm_binds:
+    forall (PER: Permutation E F)
+           (BNDS: binds x a E),
+      binds x a F.
+  Proof.
+    clear; intros; induction PER; auto.
+    - destruct x0; analyze_binds BNDS.
+    - destruct y; destruct x0; analyze_binds BNDS.
+  Qed.
+
+  Lemma binds_env_split:
+    forall (BNDS: binds x a E),
+    exists E1 E2, E = E1 ++ x~a ++ E2.
+  Proof.
+    clear; intros; induction E as [|bnd E']; [analyze_binds BNDS|].
+    destruct bnd as [x' a']; analyze_binds BNDS; simpl.
+    - exists nil,E'; reflexivity.
+    - apply IHE' in BindsTac; inversion BindsTac as (E1 & E2 & EQ); subst.
+      simpl; exists ((x',a')::E1),E2; reflexivity.
+  Qed.
+
 End BindsDerived.
 
+(* *********************************************************************** *)
+(** * Miscellaneous facts about lists and [dom]. *)
+
+Section ListDerived.
+  Variables A B   : Type.
+  Variables f     : A -> B.
+  Variables x y   : X.t.
+  Variables a b   : A.
+  Variables E F G : list (X.t*A).
+
+  Lemma in_env_split:
+    forall (IN: In x (dom E)),
+    exists a E1 E2, E = E1 ++ x ~ a ++ E2.
+  Proof.
+    clear; intros; apply binds_In_inv in IN.
+    inversion IN as (a & BNDS); apply binds_env_split in BNDS.
+    inversion BNDS as (E1 & E2 & EQ); subst.
+    exists a,E1,E2; reflexivity.
+  Qed.
+
+End ListDerived.
 
 (* *********************************************************************** *)
 (** * Hints *)
