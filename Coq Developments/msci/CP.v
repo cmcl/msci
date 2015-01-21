@@ -954,10 +954,9 @@ Section CPBasicSubstOpenProperties.
       forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
       ; forwards~ BNDS: Perm_binds x A PER.
       analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
-      + apply in_env_split in IN0; inversion_clear IN0 as (A' & Γ1 & Γ2 & H')
-        ; substs~; rewrite <-app_assoc,<-app_comm_cons in *
-        ; forwards EQ: perm_cod_uniq' PER; try symmetry in EQ; substs~.
-        rewrite cons_app_one in PER; apply perm_dom_uniq' in PER; auto.
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite <-!app_assoc in *; apply perm_dom_uniq' in PER; auto.
         s; obtain atoms L' as LEQ.
         eapply cp_cut with (L:=L')(ΔP:=Γ1++Γ2++y~A)(ΔQ:=ΔQ)(Ω:=Ω)
         ; ii; substs~; destruct_notin.
