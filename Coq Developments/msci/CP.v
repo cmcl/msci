@@ -727,47 +727,146 @@ Proof.
 Admitted.
 
 Lemma perm_dom_uniq:
-  forall Γ Δ x (A B:prop)
-         (UN: uniq (Γ++x~A))
-         (PER: Permutation (x~A++Γ) (x~B++Δ)),
-    Permutation Γ Δ.
-Proof.
-  intros; forwards UN1: uniq_perm PER; [solve_uniq|].
-  eapply uniq_perm in UN; [|apply Permutation_app_comm].
-  inv UN1; inv UN; destruct (B == A); substs~.
-  - applys~ Permutation_cons_inv PER.
-  - apply Permutation_in with (x:=(x,A)) in PER; s; auto.
-    simpl in PER; des; [inv PER0|]; exfalso; eauto.
-Qed.
-
-Lemma perm_dom_uniq':
   forall Γ Δ1 Δ2 x (A B:prop)
          (UN: uniq (Γ++x~A))
          (PER: Permutation (Γ++x~A) (Δ1++x~B++Δ2)),
     Permutation Γ (Δ1++Δ2).
 Proof.
-Admitted.
-
-Lemma perm_cod_uniq:
-  forall Γ Δ x (A B:prop)
-         (UN: uniq (Γ++x~A))
-         (PER: Permutation (x~A++Γ) (x~B++Δ)),
-    A = B.
-Proof.
   intros; forwards UN1: uniq_perm PER; [solve_uniq|].
   eapply uniq_perm in UN; [|apply Permutation_app_comm].
   inv UN1; inv UN; destruct (B == A); substs~.
-  - apply Permutation_in with (x:=(x,A)) in PER; s; auto.
-    simpl in PER; des; [inv PER0|]; exfalso; eauto.
+  - rewrite <-H0 in *; apply Permutation_sym,Permutation_nil in PER.
+    apply app_eq_nil in PER; des; substs~. eauto.
+    rewrite !cons_app_one in *; apply nil_eq_app in H0; des.
+    apply app_eq_nil in H3; des; substs~; auto.
+  - rewrite <-H0 in *; apply Permutation_sym,Permutation_nil in PER.
+    apply app_eq_nil in PER; des; substs~. eauto.
+    rewrite !cons_app_one in *; apply nil_eq_app in H0; des.
+    apply app_eq_nil in H3; des; substs~; auto.
+  - eapply Permutation_trans in PER; [|apply Permutation_app_comm].
+    applys~ Permutation_cons_app_inv PER.
+  - apply Permutation_in with (x:=(x,A)) in PER
+    ; [|apply in_or_app; s; branch~ 2].
+    apply in_app_or in PER; des; [|ss; des; [inv PER0|]; exfalso; eauto]
+    ; by match goal with
+           | [H: In (?x,?A) ?E |- _] =>
+             let E1 := fresh "E" in
+             let E2 := fresh "E" in
+             apply binds_env_split in H; inversion_clear H as (E1 & E2 & ?)
+             ; substs~; destruct_uniq; solve_notin
+         end.
 Qed.
 
-Lemma perm_cod_uniq':
+Lemma perm_cod_uniq:
   forall Γ Δ1 Δ2 x (A B:prop)
          (UN: uniq (Γ++x~A))
          (PER: Permutation (Γ++x~A) (Δ1++x~B++Δ2)),
     A = B.
 Proof.
-Admitted.
+  intros; forwards UN1: uniq_perm PER; [solve_uniq|].
+  eapply uniq_perm in UN; [|apply Permutation_app_comm].
+  inv UN1; inv UN; destruct (B == A); substs~.
+  - rewrite <-H0 in *; apply Permutation_sym,Permutation_nil in PER.
+    apply app_eq_nil in PER; des; tryfalse.
+  - apply Permutation_in with (x:=(x,A)) in PER
+    ; [|apply in_or_app; s; branch~ 2].
+    apply in_app_or in PER; des; [|ss; des; [inv PER0|]; exfalso; eauto]
+    ; by match goal with
+           | [H: In (?x,?A) ?E |- _] =>
+             let E1 := fresh "E" in
+             let E2 := fresh "E" in
+             apply binds_env_split in H; inversion_clear H as (E1 & E2 & ?)
+             ; substs~; destruct_uniq; solve_notin
+         end.
+Qed.
+
+Lemma open_fv_proc:
+  forall x y k P
+         (NEQ: x <> y)
+         (FV: x `notin` fv_proc ({k ~> y}P)),
+    x `notin` fv_proc P.
+Proof.
+  i; gen k; induction P; ii; solve [ii; destruct_notin; destruct_in; eauto
+                                   | destruct_all pname; fsetdec].
+Qed.
+
+Hint Resolve open_fv_proc.
+
+Lemma fv_env_proc:
+  forall Γ P x
+         (FV: x `notin` dom Γ)
+         (WT: P ⊢cp Γ),
+    x `notin` fv_proc P.
+Proof.
+  i; induction WT
+  ; try (by ii; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER
+         ; auto
+         ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+         ; s; fsetdec).
+  - ii; destruct_in; pick fresh y; destruct_notin. 
+    + apply (@open_fv_proc x y 0) in H2; auto.
+      ii; apply (H y); auto; ii; destruct_in; auto.
+      apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+    + apply (@open_fv_proc x y 0) in H3; auto.
+      ii; apply (H0 y); auto; ii; destruct_in; auto.
+      apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+  - ii; destruct_in; pick fresh y; destruct_notin; substs~.
+    + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; []; s; fsetdec.
+    + apply (@open_fv_proc x y 0) in H0; auto.
+      ii; apply (H y); auto; ii; destruct_in; auto.
+      apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+    + apply IHWT; auto; i.
+      apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+  - ii; destruct_in; pick fresh y; destruct_notin; substs~.
+    + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; []; s; fsetdec.
+    + apply (@open_fv_proc x y 0) in H2; auto.
+      ii; apply (H y); auto; ii; destruct_in; substs~
+      ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+  - ii; destruct_in; pick fresh y; destruct_notin; substs~.
+    + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; []; s; fsetdec.
+    + apply (@open_fv_proc x y 0) in H2; auto.
+      ii; apply (H y); auto; ii; destruct_in; substs~
+      ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+  - ii; destruct_in; pick fresh y; destruct_notin; substs~.
+    + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; []; s; fsetdec.
+    + apply (@open_fv_proc x y 0) in H2; auto.
+      ii; apply (H y); auto; ii; destruct_in; substs~
+      ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+  - ii; destruct_in; pick fresh y; destruct_notin; substs~.
+    + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; []; s; fsetdec.
+    + apply (@open_fv_proc x y 0) in H2; auto.
+      ii; apply (H y); auto; ii; destruct_in; substs~
+      ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+  - ii; destruct_in; pick fresh y; destruct_notin; substs~.
+    + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; []; s; fsetdec.
+    + apply (@open_fv_proc x y 0) in H2; auto.
+      ii; apply (H y); auto; ii; destruct_in; substs~
+      ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
+      ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
+      ; s; fsetdec.
+Qed.
 
 Section CPBasicSubstOpenProperties.
 
@@ -882,7 +981,7 @@ Section CPBasicSubstOpenProperties.
   Proof.
     ii; gen Δ; induction REQS; ii; try fsetdec; []; ss
     ; do !(rewrite F.add_iff in *; des; substs~).
-    - rewrite !cons_app_one in *; forwards EQ: perm_cod_uniq' PER; substs*.
+    - rewrite !cons_app_one in *; forwards EQ: perm_cod_uniq PER; substs*.
     - rewrite cons_app_one,app_assoc in PER; apply* IHREQS.
   Qed.
 
@@ -896,7 +995,7 @@ Section CPBasicSubstOpenProperties.
   Proof.
     ii; gen Δ; induction REQS; ii; try fsetdec; []; ss
     ; do !(rewrite F.add_iff in *; des; substs~).
-    - rewrite !cons_app_one in *; forwards EQ: perm_cod_uniq' PER; substs*.
+    - rewrite !cons_app_one in *; forwards EQ: perm_cod_uniq PER; substs*.
     - specializes IHREQS IN1; specializes IHREQS (Δ++x0~? A0).
       rewrite <-app_assoc in IHREQS; ss; specializes IHREQS PER.
       inversion_clear IHREQS as [B H1]; inversion_clear H1 as [Ω' H2]
@@ -918,12 +1017,12 @@ Section CPBasicSubstOpenProperties.
     - apply cp_fwd with (A:=¬A)(Ω:=Ω); first [auto|solve_uniq].
       rewrite <-prop_dual_involutive.
       rewrite cons_app_one in PER; rewrite <- app_nil_l in PER
-      ; forwards EQ: perm_cod_uniq' PER; apply perm_dom_uniq' in PER; substs~.
+      ; forwards EQ: perm_cod_uniq PER; apply perm_dom_uniq in PER; substs~.
       eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto|].
       rewrite <-prop_dual_involutive; solve_perm.
     - apply cp_fwd with (A:=A)(Ω:=Ω); first [auto|solve_uniq].
       rewrite !cons_app_one in *.
-      forwards EQ: perm_cod_uniq' PER; apply perm_dom_uniq' in PER; substs~.
+      forwards EQ: perm_cod_uniq PER; apply perm_dom_uniq in PER; substs~.
       eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto|].
       solve_perm.
     - forwards PER2: Perm_in z PER; [rewrite dom_app; s; auto|].
@@ -932,7 +1031,7 @@ Section CPBasicSubstOpenProperties.
       ; forwards*: requests_in_perm A Γ PER2
       ; forwards* EQ: requests_in_cod A Γ PER2.
       inversion_clear H1 as (A0 & Ω' & H2); des.
-      apply perm_dom_uniq' in H3; [|solve_uniq].
+      apply perm_dom_uniq in H3; [|solve_uniq].
       inversion_clear EQ as (B0); substs~.
       apply cp_fwd with (A:=B)(Ω:=Ω'++y~? B0); auto.
       eapply Permutation_trans; [apply Permutation_app|]; [eassumption|auto|].
@@ -956,7 +1055,7 @@ Section CPBasicSubstOpenProperties.
       analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
       + apply binds_env_split in BindsTac
         ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
-        rewrite <-!app_assoc in *; apply perm_dom_uniq' in PER; auto.
+        rewrite <-!app_assoc in *; apply perm_dom_uniq in PER; auto.
         s; obtain atoms L' as LEQ.
         eapply cp_cut with (L:=L')(ΔP:=Γ1++Γ2++y~A)(ΔQ:=ΔQ)(Ω:=Ω)
         ; ii; substs~; destruct_notin.
@@ -968,13 +1067,14 @@ Section CPBasicSubstOpenProperties.
           rewrite !app_assoc; apply~ H; rewrite <-!app_assoc; try solve_perm.
           apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
           destruct_uniq; solve_uniq. }
-        { admit. }
+        { specializes CPQ NL; forwards FV: fv_env_proc x CPQ; [solve_notin|].
+          rewrite* subst_fresh. }
       + admit (* x in dom ΔQ *).
       + rewrite !app_assoc in PER
         ; forwards*: requests_in_perm A Γ0 PER
         ; forwards* EQ: requests_in_cod A Γ0 PER (* x in dom Ω *).
         inversion_clear H1 as (A1 & Ω' & H2); des.
-        apply perm_dom_uniq' in H3; [|solve_uniq].
+        apply perm_dom_uniq in H3; [|solve_uniq].
         inversion_clear EQ as (B0); substs~.
         s; obtain atoms L' as LEQ.
         apply cp_cut with (L:=L')(ΔP:=ΔP)(ΔQ:=ΔQ)(Ω:=Ω'++y~? B0); auto.
@@ -1076,8 +1176,8 @@ Qed. idtac.
   rewrite cons_app_one in *.
   eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
   eapply uniq_perm with (F:=(ΔP++Ω)++y~A) in UN0; [|solve_perm].
-  forwards EQ: perm_cod_uniq' PER0; substs~.
-  apply perm_dom_uniq' in PER0; auto.
+  forwards EQ: perm_cod_uniq PER0; substs~.
+  apply perm_dom_uniq in PER0; auto.
 
   apply ignore_env_order with (Γ:=Δ++w~¬A0++Ω).
   rewrite <-app_assoc; eapply Permutation_trans
