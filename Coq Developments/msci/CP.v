@@ -462,86 +462,76 @@ Inductive cp_rule : proc -> penv -> Prop :=
                     (UN: uniq Γ)
                     (REQS: all_requests Ω),
                w ⟷ x ⊢cp Γ
-  | cp_cut : forall (L:atoms) Ω P Q A Γ ΔP ΔQ
-                    (PER: Permutation Γ (ΔP ++ ΔQ ++ Ω))
+  | cp_cut : forall (L:atoms) P Q A Γ ΔP ΔQ
+                    (PER: Permutation Γ (ΔP ++ ΔQ))
                     (UN: uniq Γ)
-                    (REQS: all_requests Ω)
                     (CPP: forall (x:atom) (NL: x `notin` L),
-                            (open_proc P x) ⊢cp (x ~ A) ++ ΔP ++ Ω)
+                            (open_proc P x) ⊢cp (x ~ A) ++ ΔP)
                     (CPQ: forall (x:atom) (NL: x `notin` L),
-                            (open_proc Q x) ⊢cp (x ~ ¬A) ++ ΔQ ++ Ω),
+                            (open_proc Q x) ⊢cp (x ~ ¬A) ++ ΔQ),
                ν A → P ‖ Q ⊢cp Γ
-  | cp_output : forall (L:atoms) Ω P Q Γ ΔP ΔQ x A B
-                       (PER: Permutation Γ ((x ~ A ⨂ B) ++ ΔP ++ ΔQ ++ Ω))
+  | cp_output : forall (L:atoms) P Q Γ ΔP ΔQ x A B
+                       (PER: Permutation Γ ((x ~ A ⨂ B) ++ ΔP ++ ΔQ))
                        (UN: uniq Γ)
-                       (REQS: all_requests Ω)
                        (CPP: forall (y:atom) (NL: y `notin` L),
-                               (open_proc P y) ⊢cp (y ~ A) ++ ΔP ++ Ω)
-                       (CPQ: Q ⊢cp (x ~ B) ++ ΔQ ++ Ω),
+                               (open_proc P y) ⊢cp (y ~ A) ++ ΔP)
+                       (CPQ: Q ⊢cp (x ~ B) ++ ΔQ),
                   [A]x → P ‖ Q ⊢cp Γ
-  | cp_input : forall (L:atoms) Ω P Γ ΔP x A B
-                      (PER: Permutation Γ ((x ~ A ⅋ B) ++ ΔP ++ Ω))
+  | cp_input : forall (L:atoms) P Γ ΔP x A B
+                      (PER: Permutation Γ ((x ~ A ⅋ B) ++ ΔP))
                       (UN: uniq Γ)
-                      (REQS: all_requests Ω)
                       (CPP: forall (y:atom) (NL: y `notin` L),
-                           (open_proc P y) ⊢cp (y ~ A) ++ (x ~ B) ++ ΔP ++ Ω),
+                           (open_proc P y) ⊢cp (y ~ A) ++ (x ~ B) ++ ΔP),
                  ⟨A⟩x → P ⊢cp Γ
-  | cp_left : forall Ω P Γ Δ x A B
-                     (PER: Permutation Γ ((x ~ A ⨂ B) ++ Δ ++ Ω))
-                     (REQS: all_requests Ω)
-                     (CPP: P ⊢cp (x ~ A) ++ Δ ++ Ω),
+  | cp_left : forall P Γ Δ x A B
+                     (PER: Permutation Γ ((x ~ A ⨂ B) ++ Δ))
+                     (CPP: P ⊢cp (x ~ A) ++ Δ),
                 x[inl] → P ⊢cp Γ
-  | cp_right : forall Ω P Γ Δ x A B
-                      (PER: Permutation Γ ((x ~ A ⨂ B) ++ Δ ++ Ω))
-                      (REQS: all_requests Ω)
-                      (CPP: P ⊢cp (x ~ B) ++ Δ ++ Ω),
+  | cp_right : forall P Γ Δ x A B
+                      (PER: Permutation Γ ((x ~ A ⨂ B) ++ Δ))
+                      (CPP: P ⊢cp (x ~ B) ++ Δ),
                  x[inr] → P ⊢cp Γ
-  | cp_choice : forall Ω P Q Γ Δ x A B
-                       (PER: Permutation Γ ((x ~ A & B) ++ Δ ++ Ω))
-                       (REQS: all_requests Ω)
-                       (CPP: P ⊢cp (x ~ A) ++ Δ ++ Ω)
-                       (CPQ: Q ⊢cp (x ~ B) ++ Δ ++ Ω),
+  | cp_choice : forall P Q Γ Δ x A B
+                       (PER: Permutation Γ ((x ~ A & B) ++ Δ))
+                       (CPP: P ⊢cp (x ~ A) ++ Δ)
+                       (CPQ: Q ⊢cp (x ~ B) ++ Δ),
                   x CASE P OR Q ⊢cp Γ
-  | cp_accept : forall (L:atoms) Ω P Γ Δ (x:atom) A
-                       (PER: Permutation Γ (x ~ ! A ++ Δ ++ Ω))
-                       (REQSΓ: all_requests Δ) (REQSΩ: all_requests Ω)
+  | cp_accept : forall (L:atoms) P Γ Δ (x:atom) A
+                       (PER: Permutation Γ (x ~ ! A ++ Δ))
+                       (REQSΓ: all_requests Δ)
                        (UN: uniq Γ)
                        (CPP: forall (y:atom) (NL: y `notin` L),
-                               (open_proc P y) ⊢cp (y ~ A) ++ Δ ++ Ω),
+                               (open_proc P y) ⊢cp (y ~ A) ++ Δ),
                   ! ⟨A⟩ x → P ⊢cp Γ
-  | cp_request : forall (L:atoms) Ω P Γ Δ (x:atom) A
-                        (PER: Permutation Γ (x ~ ? A ++ Δ ++ Ω))
-                        (REQS: all_requests Ω)
+  | cp_request : forall (L:atoms) P Γ Δ (x:atom) A
+                        (PER: Permutation Γ (x ~ ? A ++ Δ))
                         (UN: uniq Γ)
                         (CPP: forall (y:atom) (NL: y `notin` L),
-                                (open_proc P y) ⊢cp (y ~ A) ++ Δ ++ Ω),
+                                (open_proc P y) ⊢cp (y ~ A) ++ Δ),
                    ? [A] x → P ⊢cp Γ
   (* | cp_contract : forall P Γ (x x' x'':atom) A *)
   (*                        (UN: uniq (Γ ++ (x ~ ? A))) *)
   (*                        (CPP: P ⊢cp Γ ++ (x' ~ ? A) ++ (x'' ~ ? A)), *)
   (*                   [x' ~> x]([x'' ~> x]P) ⊢cp Γ ++ (x ~ ? A) *)
-  | cp_send : forall (L:atoms) Ω Γ Δ P x A B
-                     (PER: Permutation Γ (x ~ pp_exists B ++ Δ ++ Ω))
-                     (REQS: all_requests Ω)
+  | cp_send : forall (L:atoms) Γ Δ P x A B
+                     (PER: Permutation Γ (x ~ pp_exists B ++ Δ))
                      (CPP: forall (y:atom) (NL: y `notin` L),
-                           P ⊢cp x ~ {{ A // y }} (open_prop B y) ++ Δ ++ Ω),
+                           P ⊢cp x ~ {{ A // y }} (open_prop B y) ++ Δ),
                 p_send x A P ⊢cp Γ
-  | cp_recv : forall (L:atoms) Ω Γ Δ P x B
-                     (PER: Permutation Γ (x ~ pp_forall B ++ Δ ++ Ω))
-                     (REQS: all_requests Ω)
+  | cp_recv : forall (L:atoms) Γ Δ P x B
+                     (PER: Permutation Γ (x ~ pp_forall B ++ Δ))
                      (CPP: forall (y:atom) (NL: y `notin` L),
-                             P ⊢cp x ~ (open_prop B y) ++ Δ ++ Ω),
+                             P ⊢cp x ~ (open_prop B y) ++ Δ),
                 p_recv x P ⊢cp Γ
   | cp_empout : forall Ω Γ (x: atom)
                        (PER: Permutation Γ (x ~ pp_one ++ Ω))
                        (UN: uniq Γ)
                        (REQS: all_requests Ω),
                   x → 0 ⊢cp Γ
-  | cp_empin : forall Ω P Γ Δ (x:atom)
-                      (PER: Permutation Γ (x ~ pp_bot ++ Δ ++ Ω))
+  | cp_empin : forall P Γ Δ (x:atom)
+                      (PER: Permutation Γ (x ~ pp_bot ++ Δ))
                       (UN: uniq Γ)
-                      (REQS: all_requests Ω)
-                      (CPP: P ⊢cp Δ ++ Ω),
+                      (CPP: P ⊢cp Δ),
                  ⟨⟩ x → P ⊢cp Γ
   | cp_empcho : forall Ω Γ Δ (x:atom)
                        (PER: Permutation Γ (x ~ pp_top ++ Δ ++ Ω))
@@ -643,88 +633,57 @@ Lemma cp_weaken:
          (WT: P ⊢cp Γ),
     P ⊢cp Γ ++ (x ~ ? A).
 Proof.
-  ii; induction WT; dup UN; apply uniq_perm with (F:=x~? A++Γ) in UN
-  ; try (by apply Permutation_app_comm).
+  ii; induction WT
+  ; try (by apply Permutation_app_comm)
+  ; try (forwards UN3: uniq_perm_app PER UN).
   - eapply cp_fwd with (A:=A0)(Ω:=Ω++x~? A); eauto.
-  - obtain atoms L' as LEQ; applys cp_cut L' (Ω++x~? A); substs~.
+  - obtain atoms L' as LEQ; applys cp_cut L' (ΔP++x~? A) ΔQ
+    ; i; substs; destruct_notin; auto.
     { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { intros z Fr; destruct_notin; specializes H Fr; simpl_env in *; apply H.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-    { intros z Fr;destruct_notin; specializes H0 Fr; simpl_env in *; apply H0.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - obtain atoms L' as LEQ; applys cp_output L' (Ω++x~? A); substs~.
+      solve_perm. }
+    { apply~ H; destruct_uniq; solve_uniq. }
+  - obtain atoms L' as LEQ; applys cp_output L' (ΔP++x~? A) ΔQ
+    ; try (exact WT); i; substs; destruct_notin; auto.
     { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { intros z Fr; destruct_notin; specializes H Fr; simpl_env in *; apply H.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-    { simpl_env in *; apply IHWT; eapply uniq_perm in UN
-      ; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - obtain atoms L' as LEQ; applys cp_input L' (Ω++x~? A); substs~.
+      solve_perm. }
+    { apply~ H; solve_uniq. }
+  - obtain atoms L' as LEQ; applys cp_input L' (ΔP++x~? A); i; substs
+    ; destruct_notin; auto.
     { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { intros z Fr; destruct_notin; specializes H Fr; simpl_env in *; apply H.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - applys cp_left (Ω++x~? A); substs~.
+      solve_perm. }
+    { apply~ H; solve_uniq. }
+  - applys cp_left (Δ++x~? A); rewrite app_assoc
+    ; [apply Permutation_app; [exact PER|auto]|]; []; apply IHWT; solve_uniq.
+  - applys cp_right (Δ++x~? A); rewrite app_assoc
+    ; [apply Permutation_app; [exact PER|auto]|]; []; apply IHWT; solve_uniq.
+  - applys cp_choice (Δ++x~? A); rewrite app_assoc
+    ; [apply Permutation_app; [exact PER|auto]| |]
+    ; by first [apply IHWT1 | apply IHWT2]; solve_uniq.
+  - obtain atoms L' as LEQ; applys cp_accept L' (Δ++x~? A); i; substs
+    ; destruct_notin; auto.
     { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { simpl_env in *; apply IHWT.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - applys cp_right (Ω++x~? A); substs~.
+      solve_perm. }
+    { apply~ H; solve_uniq. }
+  - obtain atoms L' as LEQ; applys cp_request L' (Δ++x~? A); i; substs
+    ; destruct_notin; auto.
     { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { simpl_env in *; apply IHWT.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - applys cp_choice (Ω++x~? A); substs~.
+      solve_perm. }
+    { apply~ H; solve_uniq. }
+  - obtain atoms L' as LEQ; applys cp_send L' (Δ++x~? A); i; substs
+    ; destruct_notin; auto.
     { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { simpl_env in *; apply IHWT1.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-    { simpl_env in *; apply IHWT2.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - obtain atoms L' as LEQ; applys cp_accept L' (Ω++x~? A) __ Δ; substs~.
+      solve_perm. }
+    { apply~ H; solve_uniq. }
+  - obtain atoms L' as LEQ; applys cp_recv L' (Δ++x~? A); i; substs
+    ; destruct_notin; auto.
     { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { intros z Fr; destruct_notin; specializes H Fr; simpl_env in *; apply H.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - obtain atoms L' as LEQ; applys cp_request L' (Ω++x~? A); substs~.
-    { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { intros z Fr; destruct_notin; specializes H Fr; simpl_env in *; apply H.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - obtain atoms L' as LEQ; applys cp_send L' (Ω++x~? A) Δ; substs~.
-    { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { intros z Fr; destruct_notin; specializes H Fr; simpl_env in *; apply H.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - obtain atoms L' as LEQ; applys cp_recv L' (Ω++x~? A) Δ; substs~.
-    { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { intros z Fr; destruct_notin; specializes H Fr; simpl_env in *; apply H.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
+      solve_perm. }
+    { apply~ H; solve_uniq. }
   - applys cp_empout (Ω++x~? A); eauto.
-  - applys cp_empin (Ω++x~? A); substs~.
-    { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
-    { simpl_env in *; apply IHWT.
-      eapply uniq_perm in UN; [|apply Permutation_app]; [| | exact PER]; auto.
-      solve_uniq. }
-  - applys cp_empcho (Ω++x~? A); substs~.
-    { eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto |].
-      simpl_env; eauto. }
+  - applys~ cp_empin (Δ++x~? A); try rewrite app_assoc
+    ; [apply Permutation_app; [exact PER|auto]|]; []; apply IHWT; solve_uniq.
+   - applys cp_empcho (Ω++x~? A) Δ; substs~; rewrite !app_assoc
+     ; apply Permutation_app; [exact PER|auto].
 Qed.
 
 Lemma cp_strengthen:
@@ -1068,43 +1027,30 @@ Section CPBasicSubstOpenProperties.
     - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
       forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
       ; forwards~ BNDS: Perm_binds x A PER.
-      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
-      + apply binds_env_split in BindsTac
-        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
-        rewrite <-!app_assoc in *; apply perm_dom_uniq in PER; auto.
-        s; obtain atoms L' as LEQ.
-        eapply cp_cut with (L:=L')(ΔP:=Γ1++Γ2++y~A)(ΔQ:=ΔQ)(Ω:=Ω)
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin
+      ; apply binds_env_split in BindsTac
+      ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~
+      ; [rewrite <-!app_assoc in *|rewrite app_assoc in *]
+      ; apply perm_dom_uniq in PER; auto; s; obtain atoms L' as LEQ.
+      + eapply cp_cut with (L:=L')(ΔP:=Γ1++Γ2++y~A)(ΔQ:=ΔQ)
         ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
-        { rewrite~ subst_open_var; rewrite cons_app_one; rewrite <-!app_assoc.
-          apply ignore_env_order with (Γ:=x0~A0++Γ1++Γ2++Ω++y~A)
-          ; [solve_perm|].
+        { rewrite~ subst_open_var; rewrite cons_app_one.
           rewrite !app_assoc; apply~ H; rewrite <-!app_assoc; try solve_perm.
           apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
           destruct_uniq; solve_uniq. }
         { specializes CPQ NL; forwards FV: fv_env_proc x CPQ; [solve_notin|].
           rewrite* subst_fresh. }
-      + admit (* x in dom ΔQ *).
-      + rewrite !app_assoc in PER; forwards* EQ: requests_in_cod A Γ0 PER
-        ; apply binds_env_split in BindsTac0 (* x in dom Ω *).
-        inversion_clear BindsTac0 as (E1 & E2 & ?)
-        ; inversion_clear EQ as (B0); substs~.
-        rewrite app_assoc in PER; apply perm_dom_uniq in PER; [|solve_uniq].
-        s; obtain atoms L' as LEQ.
-        apply requests_inv_app in REQS; des; apply requests_inv_app in REQS1
-        ; des.
-        apply cp_cut with (L:=L')(ΔP:=ΔP)(ΔQ:=ΔQ)(Ω:=E1++E2++y~? B0); auto
+      + eapply cp_cut with (L:=L')(ΔP:=ΔP)(ΔQ:=Γ1++Γ2++y~A)
         ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|].
           solve_perm. }
-        { rewrite~ subst_open_var; rewrite !cons_app_one,!app_assoc.
-          apply~ H; [|solve_perm]; rewrite <-!app_assoc.
-          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
-          destruct_uniq; solve_uniq. }
-        { rewrite~ subst_open_var; rewrite !cons_app_one,!app_assoc.
-          apply~ H0; [|solve_perm]; rewrite <-!app_assoc.
+        { specializes CPP NL; forwards FV: fv_env_proc x CPP; [solve_notin|].
+          rewrite* subst_fresh. }
+        { rewrite~ subst_open_var; rewrite cons_app_one.
+          rewrite !app_assoc; apply~ H0; rewrite <-!app_assoc; try solve_perm.
           apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
           destruct_uniq; solve_uniq. }
     - admit (* output cp case *).
