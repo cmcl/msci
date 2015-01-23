@@ -594,7 +594,16 @@ Proof with auto.
   introv REQXS REQYS; inverts REQXS; simpl_env...
 Qed.
 
-Hint Resolve requests_one requests_app.
+Lemma requests_inv_app:
+  forall xs ys
+         (REQS: all_requests (xs++ys)),
+    all_requests xs /\ all_requests ys.
+Proof with auto.
+  induction xs as [|x xs']...
+  ii; inverts REQS; specializes IHxs' REQS0; des; splits; simpl_env...
+Qed.
+
+Hint Resolve requests_one requests_app requests_inv_app.
 
 Lemma ignore_env_order: forall Γ Δ P
     (INB: Permutation Γ Δ)
@@ -984,6 +993,12 @@ Section CPBasicSubstOpenProperties.
     - rewrite !cons_app_one in *; forwards EQ: perm_cod_uniq PER; substs*.
     - rewrite cons_app_one,app_assoc in PER; apply* IHREQS.
   Qed.
+  Lemma requests_binds_cod:
+    forall (x:atom) A Ω
+           (REQS: all_requests Ω)
+           (BNDS: binds x A Ω),
+    exists B, A = ? B.
+  Proof. Admitted.
 
   Lemma requests_in_perm:
     forall (x:atom) A Γ Δ Ω
@@ -1025,15 +1040,16 @@ Section CPBasicSubstOpenProperties.
       forwards EQ: perm_cod_uniq PER; apply perm_dom_uniq in PER; substs~.
       eapply Permutation_trans; [apply Permutation_app|]; [exact PER|auto|].
       solve_perm.
-    - forwards PER2: Perm_in z PER; [rewrite dom_app; s; auto|].
-      ss; do !(rewrite F.add_iff in *; des; substs~); tryfalse.
-      rewrite !cons_app_one,app_assoc in PER
-      ; forwards*: requests_in_perm A Γ PER2
-      ; forwards* EQ: requests_in_cod A Γ PER2.
-      inversion_clear H1 as (A0 & Ω' & H2); des.
-      apply perm_dom_uniq in H3; [|solve_uniq].
-      inversion_clear EQ as (B0); substs~.
-      apply cp_fwd with (A:=B)(Ω:=Ω'++y~? B0); auto.
+    - forwards~ PER2: Perm_binds z A PER; analyze_binds PER2.
+      forwards~ EQC: requests_binds_cod BindsTac0
+      ; apply binds_env_split in BindsTac0
+      ; inversion_clear BindsTac0 as (E1 & E2 & ?); inversion EQC as (A0)
+      ; substs~.
+      rewrite !cons_app_one,2 app_assoc in PER
+      ; apply perm_dom_uniq in PER; [|solve_uniq].
+      apply requests_inv_app in REQS; des.
+      apply requests_inv_app in REQS1; des.
+      apply cp_fwd with (A:=B)(Ω:=E1++E2++y~? A0); auto.
       eapply Permutation_trans; [apply Permutation_app|]; [eassumption|auto|].
       solve_perm.
   Qed.
@@ -1070,19 +1086,27 @@ Section CPBasicSubstOpenProperties.
         { specializes CPQ NL; forwards FV: fv_env_proc x CPQ; [solve_notin|].
           rewrite* subst_fresh. }
       + admit (* x in dom ΔQ *).
-      + rewrite !app_assoc in PER
-        ; forwards*: requests_in_perm A Γ0 PER
-        ; forwards* EQ: requests_in_cod A Γ0 PER (* x in dom Ω *).
-        inversion_clear H1 as (A1 & Ω' & H2); des.
-        apply perm_dom_uniq in H3; [|solve_uniq].
-        inversion_clear EQ as (B0); substs~.
+      + rewrite !app_assoc in PER; forwards* EQ: requests_in_cod A Γ0 PER
+        ; apply binds_env_split in BindsTac0 (* x in dom Ω *).
+        inversion_clear BindsTac0 as (E1 & E2 & ?)
+        ; inversion_clear EQ as (B0); substs~.
+        rewrite app_assoc in PER; apply perm_dom_uniq in PER; [|solve_uniq].
         s; obtain atoms L' as LEQ.
-        apply cp_cut with (L:=L')(ΔP:=ΔP)(ΔQ:=ΔQ)(Ω:=Ω'++y~? B0); auto.
+        apply requests_inv_app in REQS; des; apply requests_inv_app in REQS1
+        ; des.
+        apply cp_cut with (L:=L')(ΔP:=ΔP)(ΔQ:=ΔQ)(Ω:=E1++E2++y~? B0); auto
+        ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
-          ; [exact H3|auto|].
+          ; [exact PER|auto|].
           solve_perm. }
-        { admit. }
-        { admit. }
+        { rewrite~ subst_open_var; rewrite !cons_app_one,!app_assoc.
+          apply~ H; [|solve_perm]; rewrite <-!app_assoc.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
+          destruct_uniq; solve_uniq. }
+        { rewrite~ subst_open_var; rewrite !cons_app_one,!app_assoc.
+          apply~ H0; [|solve_perm]; rewrite <-!app_assoc.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
+          destruct_uniq; solve_uniq. }
     - admit (* output cp case *).
   Admitted.
 
