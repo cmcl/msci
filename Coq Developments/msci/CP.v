@@ -592,6 +592,18 @@ Proof with auto.
   ii; inverts REQS; specializes IHxs' REQS0; des; splits; simpl_env...
 Qed.
 
+Lemma requests_perm:
+  forall xs ys
+         (PER: Permutation xs ys)
+         (REQS: all_requests xs),
+    all_requests ys.
+Proof.
+  i; induction PER; auto.
+  - destruct x; rewrite !cons_app_one; inverts REQS; auto.
+  - destruct x; destruct y; rewrite !cons_app_one; inverts REQS
+    ; inverts REQS0; auto.
+Qed.
+
 Ltac des_reqs :=
   repeat match goal with
            | [H: all_requests (_ ++ _) |- _] =>
@@ -1456,39 +1468,38 @@ Proof.
   ii; induction RED; subst. inversion WT; subst.
   pick fresh y; destruct_notin; specializes CPP Fr.
   rewrite /open_proc in CPP; simpl in CPP.
-  inverts keep CPP.
-Goal forall (x w:atom) A Ω
-            (NEQ: w <> x)
-            (UN: uniq (w ~ ! ¬A ++ x ~ ? A ++ Ω))
-            (REQS: all_requests Ω),
-       w ⟷ x ⊢cp w ~ ! ¬A ++ x ~ ? A ++ Ω.
-Proof.
-  ii; eapply cp_fwd with (Ω:=Ω)(A:=? A); auto.
-Qed. idtac.
-(* perhaps I shouldn't invert CPP again here. I need to show that the
-   ΔP environment has to be w (or rather that is the "interesting" case).
-   The other case is if w in dom Ω which should imply that y is also in
-   dom Ω but then this leads to an ill-typed fwd. Perhaps I can prove that
-   for all well-typed w ⟷ x that w,x ∉ dom Ω.
-*)
-
-  inverts keep CPP; forwards: ignore_env_order PER0 CPP.
-  rewrite cons_app_one in *.
+  inverts keep CPP; rewrite !cons_app_one in *.
+  forwards UN1: uniq_perm PER0 UN0.
   eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
-  eapply uniq_perm with (F:=(ΔP++Ω)++y~A) in UN0; [|solve_perm].
-  forwards EQ: perm_cod_uniq PER0; substs~.
-  apply perm_dom_uniq in PER0; auto.
+  forwards EQC: perm_cod_uniq PER0; [solve_uniq|]; substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq].
+  eapply Permutation_sym,Permutation_trans in PER0
+  ; [|apply Permutation_app_comm].
+  forwards~ BNDS: Perm_binds w (¬A0) PER0.
+  apply binds_env_split in BNDS.
+  inversion_clear BNDS as (E1 & E2 & EQ); substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq].
+  apply requests_perm in PER0; auto; des_reqs.
 
-  apply ignore_env_order with (Γ:=Δ++w~¬A0++Ω).
-  rewrite <-app_assoc; eapply Permutation_trans
-  ; [apply Permutation_app|]; [apply Permutation_app_comm| |]; auto.
-  inversion UN; subst; rewrite !dom_app in *; destruct_notin.
-  
-  apply ignore_env_order with (Γ:=(Δ++Ω)++w~¬A0).
-  rewrite app_assoc; apply Permutation_app;[|apply Permutation_app_comm];auto.
-  apply typing_rename with (x:=y); try (by rewrite !dom_app; fsetdec).
-  simpl_env; apply ignore_env_order with (Γ:=Δ++(y~¬A0)++Ω).
-  apply Permutation_app;[|apply Permutation_app_comm];auto.
-  inversion H; subst.
-  rewrite_env (Δ++(y,¬A)::Ω). apply (CPQ _ Fr).
+
+  Lemma typing_weaken:
+    forall Γ Δ Ε P
+           (WT: P ⊢cp Γ ++ Ε) (UN: uniq(Γ ++ Δ ++ Ε))
+           (REQS: all_requests Δ),
+      P ⊢cp Γ ++ Δ ++ Ε.
+  Proof. Admitted.
+
+idtac.
+forwards~ UN3: uniq_perm PER.
+apply Permutation_sym in PER; rewrite !app_assoc in PER
+; eapply Permutation_trans in PER
+; [|apply Permutation_app]; [|apply Permutation_app|]
+; [|apply Permutation_app_comm| |]; auto.
+applys ignore_env_order PER; rewrite <-!app_assoc; rewrite (app_assoc E1).
+apply~ typing_weaken; [|apply Permutation_sym in PER; applys~ uniq_perm PER].
+eapply ignore_env_order; [apply Permutation_app_comm|].
+apply typing_rename with (x:=y); try (by destruct_uniq; solve_notin).
+eapply ignore_env_order; [apply Permutation_app_comm|].
+apply~ CPQ.
+
 Qed.
