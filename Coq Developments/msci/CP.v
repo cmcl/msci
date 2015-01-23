@@ -533,10 +533,9 @@ Inductive cp_rule : proc -> penv -> Prop :=
                       (UN: uniq Γ)
                       (CPP: P ⊢cp Δ),
                  ⟨⟩ x → P ⊢cp Γ
-  | cp_empcho : forall Ω Γ Δ (x:atom)
-                       (PER: Permutation Γ (x ~ pp_top ++ Δ ++ Ω))
-                       (UN: uniq Γ)
-                       (REQS: all_requests Ω),
+  | cp_empcho : forall Γ Δ (x:atom)
+                       (PER: Permutation Γ (x ~ pp_top ++ Δ))
+                       (UN: uniq Γ),
                   x CASE 0 ⊢cp Γ
 where "P '⊢cp' Γ" := (cp_rule P Γ) : cp_scope.
 
@@ -593,7 +592,13 @@ Proof with auto.
   ii; inverts REQS; specializes IHxs' REQS0; des; splits; simpl_env...
 Qed.
 
-Hint Resolve requests_one requests_app requests_inv_app.
+Ltac des_reqs :=
+  repeat match goal with
+           | [H: all_requests (_ ++ _) |- _] =>
+             apply requests_inv_app in H; des
+         end.
+
+Hint Resolve requests_one requests_app.
 
 Lemma ignore_env_order: forall Γ Δ P
     (INB: Permutation Γ Δ)
@@ -682,7 +687,7 @@ Proof.
   - applys cp_empout (Ω++x~? A); eauto.
   - applys~ cp_empin (Δ++x~? A); try rewrite app_assoc
     ; [apply Permutation_app; [exact PER|auto]|]; []; apply IHWT; solve_uniq.
-   - applys cp_empcho (Ω++x~? A) Δ; substs~; rewrite !app_assoc
+   - applys cp_empcho (Δ++x~? A); substs~; rewrite !app_assoc
      ; apply Permutation_app; [exact PER|auto].
 Qed.
 
@@ -1004,10 +1009,8 @@ Section CPBasicSubstOpenProperties.
       ; apply binds_env_split in BindsTac0
       ; inversion_clear BindsTac0 as (E1 & E2 & ?); inversion EQC as (A0)
       ; substs~.
-      rewrite !cons_app_one,2 app_assoc in PER
-      ; apply perm_dom_uniq in PER; [|solve_uniq].
-      apply requests_inv_app in REQS; des.
-      apply requests_inv_app in REQS1; des.
+      rewrite !cons_app_one,2 app_assoc in PER; apply perm_dom_uniq in PER
+      ; [|solve_uniq]; des_reqs.
       apply cp_fwd with (A:=B)(Ω:=E1++E2++y~? A0); auto.
       eapply Permutation_trans; [apply Permutation_app|]; [eassumption|auto|].
       solve_perm.
@@ -1015,24 +1018,23 @@ Section CPBasicSubstOpenProperties.
 
   Lemma typing_subst:
     forall Γ P (x y:atom) A
-(*           (NINX: uniq ((y ~ A) ++ Γ))*)
            (NINX: uniq (Γ ++ y ~ A))
            (WT: P ⊢cp Γ ++ (x ~ A)),
       [x ~> y]P ⊢cp Γ ++ (y ~ A).
   Proof.
     ii; destruct (x == y); substs; [by rewrite subst_id|].
     remember (Γ++x~A) as Γ'; assert (PER: Permutation Γ' (Γ++x~A)) by substs~.
-    clear HeqΓ'; gen Γ; induction WT; i; substs~.
+    clear HeqΓ'; gen A Γ; induction WT; i; substs~.
     - applys* typing_subst_fwd.
     - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
       forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
-      ; forwards~ BNDS: Perm_binds x A PER.
+      ; forwards~ BNDS: Perm_binds x A0 PER.
       analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin
       ; apply binds_env_split in BindsTac
       ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~
       ; [rewrite <-!app_assoc in *|rewrite app_assoc in *]
       ; apply perm_dom_uniq in PER; auto; s; obtain atoms L' as LEQ.
-      + eapply cp_cut with (L:=L')(ΔP:=Γ1++Γ2++y~A)(ΔQ:=ΔQ)
+      + eapply cp_cut with (L:=L')(ΔP:=Γ1++Γ2++y~A0)(ΔQ:=ΔQ)
         ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
@@ -1042,7 +1044,7 @@ Section CPBasicSubstOpenProperties.
           destruct_uniq; solve_uniq. }
         { specializes CPQ NL; forwards FV: fv_env_proc x CPQ; [solve_notin|].
           rewrite* subst_fresh. }
-      + eapply cp_cut with (L:=L')(ΔP:=ΔP)(ΔQ:=Γ1++Γ2++y~A)
+      + eapply cp_cut with (L:=L')(ΔP:=ΔP)(ΔQ:=Γ1++Γ2++y~A0)
         ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|].
@@ -1053,8 +1055,336 @@ Section CPBasicSubstOpenProperties.
           rewrite !app_assoc; apply~ H0; rewrite <-!app_assoc; try solve_perm.
           apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
           destruct_uniq; solve_uniq. }
-    - admit (* output cp case *).
-  Admitted.
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
+      ; forwards~ BNDS: Perm_binds x A0 PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H1; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; obtain atoms L' as LEQ
+        ; eapply cp_output with (L:=L')(ΔP:=ΔP)(ΔQ:=ΔQ); ii; substs~
+        ; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { specializes CPP NL; forwards~ FV: fv_env_proc x0 CPP
+          ; rewrite* subst_fresh. }
+        { rewrite !cons_app_one.
+          eapply ignore_env_order; [apply Permutation_app_comm|].
+          forwards UNX: uniq_perm_app PER NINX.
+          apply~ IHWT; [destruct_uniq; solve_uniq|solve_perm]. }
+      + apply binds_env_split in BindsTac0
+        ; inversion_clear BindsTac0 as (Γ1 & Γ2 & EQ); substs~.
+        rewrite <-!app_assoc in *; rewrite app_assoc in *.
+        apply perm_dom_uniq in PER; auto; ss; obtain atoms L' as LEQ.
+        destruct_notin; destruct (x0 == x); tryfalse.
+        clear n0; eapply cp_output with (L:=L')(ΔP:=Γ1++Γ2++y~A0)(ΔQ:=ΔQ)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite~ subst_open_var; rewrite cons_app_one.
+          rewrite !app_assoc; apply~ H; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
+          destruct_uniq; solve_uniq. }
+        { rewrite~ subst_fresh; forwards~ FV: fv_env_proc x WT. }
+      + apply binds_env_split in BindsTac0
+        ; inversion_clear BindsTac0 as (Γ1 & Γ2 & EQ); substs~.
+        rewrite 2 app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; obtain atoms L' as LEQ; destruct_notin; destruct (x0 == x)
+        ; tryfalse.
+        clear n0; eapply cp_output with (L:=L')(ΔP:=ΔP)(ΔQ:=Γ1++Γ2++y~A0)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { specializes CPP NL; forwards FV: fv_env_proc x CPP; [solve_notin|].
+          rewrite* subst_fresh. }
+        { rewrite cons_app_one; rewrite !app_assoc.
+          apply~ IHWT; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; [solve_uniq|solve_notin]. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
+      ; forwards~ BNDS: Perm_binds x A0 PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H1; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; obtain atoms L' as LEQ
+        ; eapply cp_input with (L:=L')(ΔP:=ΔP); ii; substs~
+        ; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite~ subst_open_var; rewrite !cons_app_one.
+          eapply ignore_env_order
+          ; [apply Permutation_app|]; [auto|apply Permutation_app_comm|].
+          rewrite app_assoc; forwards UNX: uniq_perm_app PER NINX.
+          apply~ H; [destruct_uniq; solve_uniq|solve_perm]. }
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; obtain atoms L' as LEQ; destruct_notin; destruct (x0 == x)
+        ; tryfalse.
+        clear n0; eapply cp_input with (L:=L')(ΔP:=Γ1++Γ2++y~A0)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite~ subst_open_var; rewrite !cons_app_one.
+          rewrite !app_assoc; apply~ H; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
+          destruct_uniq; solve_uniq. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: cp_implies_uniq WT; apply Permutation_sym in PER
+      ; forwards~ UN3: uniq_perm PER; [solve_uniq|]
+      ; apply Permutation_sym in PER.
+      forwards~ BNDS: Perm_binds x A0 PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H0; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; eapply cp_left with (Δ:=Δ)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one.
+          eapply ignore_env_order; [apply Permutation_app_comm|].
+          forwards UNX: uniq_perm_app PER NINX.
+          apply~ IHWT; [destruct_uniq; solve_uniq|solve_perm]. }
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; destruct_notin; destruct (x0 == x); tryfalse.
+        clear n0; eapply cp_left with (Δ:=Γ1++Γ2++y~A0); ii; substs~.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one; rewrite !app_assoc.
+          apply~ IHWT; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; [solve_uniq|solve_notin]. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: cp_implies_uniq WT; apply Permutation_sym in PER
+      ; forwards~ UN3: uniq_perm PER; [solve_uniq|]
+      ; apply Permutation_sym in PER.
+      forwards~ BNDS: Perm_binds x A0 PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H0; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; eapply cp_right with (Δ:=Δ)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one.
+          eapply ignore_env_order; [apply Permutation_app_comm|].
+          forwards UNX: uniq_perm_app PER NINX.
+          apply~ IHWT; [destruct_uniq; solve_uniq|solve_perm]. }
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; destruct_notin; destruct (x0 == x); tryfalse.
+        clear n0; eapply cp_right with (Δ:=Γ1++Γ2++y~A0); ii; substs~.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one; rewrite !app_assoc.
+          apply~ IHWT; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; [solve_uniq|solve_notin]. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: cp_implies_uniq WT1; apply Permutation_sym in PER
+      ; forwards~ UN3: uniq_perm PER; [solve_uniq|]
+      ; apply Permutation_sym in PER.
+      forwards~ BNDS: Perm_binds x A0 PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H0; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; eapply cp_choice with (Δ:=Δ)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one.
+          eapply ignore_env_order; [apply Permutation_app_comm|].
+          forwards UNX: uniq_perm_app PER NINX.
+          apply~ IHWT1; [destruct_uniq; solve_uniq|solve_perm]. }
+        { rewrite !cons_app_one.
+          eapply ignore_env_order; [apply Permutation_app_comm|].
+          forwards UNX: uniq_perm_app PER NINX.
+          apply~ IHWT2; [destruct_uniq; solve_uniq|solve_perm]. }
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; destruct_notin; destruct (x0 == x); tryfalse.
+        clear n0; eapply cp_choice with (Δ:=Γ1++Γ2++y~A0); ii; substs~.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one; rewrite !app_assoc.
+          apply~ IHWT1; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; [solve_uniq|solve_notin]. }
+        { rewrite !cons_app_one; rewrite !app_assoc.
+          apply~ IHWT2; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; [solve_uniq|solve_notin]. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
+      ; forwards~ BNDS: Perm_binds x A0 PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H1; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; obtain atoms L' as LEQ
+        ; eapply cp_accept with (L:=L')(Δ:=Δ); ii; substs~
+        ; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { specializes CPP NL; forwards~ FV: fv_env_proc x0 CPP
+          ; rewrite* subst_fresh. }
+      + forwards~ EQC: requests_binds_cod BindsTac
+        ; apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ)
+        ; inversion_clear EQC as (B); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; obtain atoms L' as LEQ; destruct_notin; destruct (x0 == x)
+        ; tryfalse; des_reqs.
+        clear n0; eapply cp_accept with (L:=L')(Δ:=Γ1++Γ2++y~? B); ii
+        ; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite~ subst_open_var; rewrite !cons_app_one; rewrite !app_assoc.
+          apply~ H; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; solve_uniq. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
+      ; forwards~ BNDS: Perm_binds x A0 PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H1; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; obtain atoms L' as LEQ
+        ; eapply cp_request with (L:=L')(Δ:=Δ); ii; substs~
+        ; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { specializes CPP NL; forwards~ FV: fv_env_proc x0 CPP
+          ; rewrite* subst_fresh. }
+      +  apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; obtain atoms L' as LEQ; destruct_notin; destruct (x0 == x)
+        ; tryfalse; des_reqs.
+        clear n0; eapply cp_request with (L:=L')(Δ:=Γ1++Γ2++y~A0); ii
+        ; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite~ subst_open_var; rewrite !cons_app_one; rewrite !app_assoc.
+          apply~ H; rewrite <-!app_assoc; try solve_perm.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; solve_uniq. }
+    - pick fresh z; destruct_notin; specializes CPP Fr
+      ; forwards UN0: cp_implies_uniq CPP; inversion UN0; substs~; clears z.
+      eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN3: uniq_perm (Permutation_sym PER)
+      ; forwards~ BNDS: Perm_binds x A0 PER; try solve_uniq.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H1; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; obtain atoms L' as LEQ
+        ; eapply cp_send with (L:=L')(Δ:=Δ); ii; substs~
+        ; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one.
+          eapply ignore_env_order; [apply Permutation_app_comm|].
+          forwards UNX: uniq_perm_app PER NINX.
+          apply~ H; try solve_perm; auto.
+          destruct_uniq; solve_uniq. }
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; obtain atoms L' as LEQ; destruct_notin; destruct (x0 == x)
+        ; tryfalse; des_reqs.
+        clear n0; eapply cp_send with (L:=L')(Δ:=Γ1++Γ2++y~A0); ii
+        ; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one; rewrite !app_assoc.
+          apply~ H; try solve_perm; auto.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; solve_uniq. }
+    - pick fresh z; destruct_notin; specializes CPP Fr
+      ; forwards UN0: cp_implies_uniq CPP; inversion UN0; substs~; clears z.
+      eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN3: uniq_perm (Permutation_sym PER)
+      ; forwards~ BNDS: Perm_binds x A PER; try solve_uniq.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H1; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; obtain atoms L' as LEQ
+        ; eapply cp_recv with (L:=L')(Δ:=Δ); ii; substs~
+        ; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one.
+          eapply ignore_env_order; [apply Permutation_app_comm|].
+          forwards UNX: uniq_perm_app PER NINX.
+          apply~ H; try solve_perm; auto.
+          destruct_uniq; solve_uniq. }
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; obtain atoms L' as LEQ; destruct_notin; destruct (x0 == x)
+        ; tryfalse; des_reqs.
+        clear n0; eapply cp_recv with (L:=L')(Δ:=Γ1++Γ2++y~A); ii
+        ; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite !cons_app_one; rewrite !app_assoc.
+          apply~ H; try solve_perm; auto.
+          apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX
+          ; destruct_uniq; solve_uniq. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
+      ; forwards~ BNDS: Perm_binds x A PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H0; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; eapply cp_empout with (Ω:=Ω)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+      + forwards~ EQC: requests_binds_cod BindsTac
+        ; apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ)
+        ; inversion_clear EQC as (B); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; destruct_notin; destruct (x0 == x); tryfalse; des_reqs.
+        clear n0; eapply cp_empout with (Ω:=Γ1++Γ2++y~? B)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
+      ; forwards~ BNDS: Perm_binds x A PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H0; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; eapply cp_empin with (Δ:=Δ)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { forwards~ FV: fv_env_proc x0 WT; rewrite~ subst_fresh. }
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; destruct_notin; destruct (x0 == x)
+        ; tryfalse; des_reqs.
+        clear n0; eapply cp_empin with (Δ:=Γ1++Γ2++y~ A)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+        { rewrite app_assoc; apply IHWT; try solve_perm.
+          forwards UNX: uniq_perm_app PER NINX; destruct_uniq; solve_uniq. }
+    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
+      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
+      ; forwards~ BNDS: Perm_binds x A PER.
+      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
+      + s; des; clear H0; rewrite <-app_nil_l in PER
+        ; apply perm_dom_uniq in PER; auto; ss; eapply cp_empcho
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+      + apply binds_env_split in BindsTac
+        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
+        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
+        ; destruct_notin; destruct (x0 == x)
+        ; tryfalse; des_reqs.
+        clear n0; eapply cp_empcho with (Δ:=Γ1++Γ2++y~ A)
+        ; ii; substs~; destruct_notin.
+        { eapply Permutation_trans; [apply Permutation_app|]
+          ; [exact PER|auto|]; []; solve_perm. }
+Qed.
 
 (* Lemma cp_contract: *)
 (*   forall P Γ x x' x'' A *)
