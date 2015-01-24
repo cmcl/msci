@@ -963,25 +963,6 @@ Section CPBasicSubstOpenProperties.
     ii; induction REQS; analyze_binds BNDS; eauto.
   Qed.
 
-  Lemma requests_in_perm:
-    forall (x:atom) A Γ Δ Ω
-           (REQS: all_requests Ω)
-           (UN: uniq (Γ++x~A))
-           (PER: Permutation (Γ++x~A) (Δ++Ω))
-           (IN: x `in` dom Ω),
-    exists B Ω', all_requests Ω' /\ Permutation (Γ++x~? B) (Δ++x~? B++Ω').
-  Proof.
-    ii; gen Δ; induction REQS; ii; try fsetdec; []; ss
-    ; do !(rewrite F.add_iff in *; des; substs~).
-    - rewrite !cons_app_one in *; forwards EQ: perm_cod_uniq PER; substs*.
-    - specializes IHREQS IN1; specializes IHREQS (Δ++x0~? A0).
-      rewrite <-app_assoc in IHREQS; ss; specializes IHREQS PER.
-      inversion_clear IHREQS as [B H1]; inversion_clear H1 as [Ω' H2]
-      ; rewrite <-app_assoc in H2; des.
-      exists B (x0~? A0++Ω'); rewrite cons_app_one in *.
-      split; auto; []; eapply Permutation_trans; [eassumption|]; solve_perm.
-  Qed.
-
   Lemma typing_subst_fwd:
     forall Γ Ω w x y z A B
            (UNY: uniq (Γ ++ y ~ A))
