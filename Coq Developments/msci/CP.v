@@ -954,26 +954,14 @@ Section CPBasicSubstOpenProperties.
             |subst_lc_tac lc_p_request].
   Qed.
 
-  Lemma requests_in_cod:
-    forall (x:atom) A Γ Δ Ω
-           (REQS: all_requests Ω)
-           (UN: uniq (Γ++x~A))
-           (PER: Permutation (Γ++x~A) (Δ++Ω))
-           (IN: x `in` dom Ω),
-    exists B, A = ? B.
-  Proof.
-    ii; gen Δ; induction REQS; ii; try fsetdec; []; ss
-    ; do !(rewrite F.add_iff in *; des; substs~).
-    - rewrite !cons_app_one in *; forwards EQ: perm_cod_uniq PER; substs*.
-    - rewrite cons_app_one,app_assoc in PER; apply* IHREQS.
-  Qed.
-
   Lemma requests_binds_cod:
     forall (x:atom) A Ω
            (REQS: all_requests Ω)
            (BNDS: binds x A Ω),
     exists B, A = ? B.
-  Proof. Admitted.
+  Proof.
+    ii; induction REQS; analyze_binds BNDS; eauto.
+  Qed.
 
   Lemma requests_in_perm:
     forall (x:atom) A Γ Δ Ω
