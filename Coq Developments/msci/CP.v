@@ -119,6 +119,11 @@ Proof.
   induction A; simpl; f_equal; auto.
 Qed.
 
+Lemma prop_eq_dual:
+  forall A (EQ: A = ¬A),
+    False.
+Proof. ii; induction A; ss; tryfalse. Qed.
+
 Lemma prop_dual_self: forall A,
   dual_props A (¬A).
 Proof. induction A; ss; eauto. Qed.
@@ -711,15 +716,6 @@ Lemma cp_weaken:
          (WT: P ⊢cp Γ),
     P ⊢cp Γ ++ (x ~ ? A).
 Proof. ii; apply typing_weaken with (Δ:=x~? A); simpl_env; auto. Qed.
-
-Lemma cp_contract:
-  forall P Γ x x' x'' A
-         (UN: uniq (x ~ ? A ++ Γ))
-         (WT: P ⊢cp Γ ++ x' ~ ? A ++ x'' ~ ? A),
-    [x'' ~> x]([x' ~> x]P) ⊢cp Γ ++ (x ~ ? A).
-Proof.
-Admitted.
-
 
 Lemma cp_strengthen:
   forall P Γ x A
@@ -1364,7 +1360,7 @@ Section CPBasicSubstOpenProperties.
         ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
-Qed.
+  Qed.
 
   Lemma typing_rename:
     forall Γ P (x y : atom) A
@@ -1383,6 +1379,188 @@ Qed.
   Qed.    
 
 End CPBasicSubstOpenProperties.
+
+Lemma perm_cod_dual:
+  forall Γ Δ (x y:atom) A B
+         (UN: uniq (Γ++x~A++y~A))
+         (PER: Permutation (Γ++x~A++y~A) (x~¬B++y~B++Δ)),
+    False.
+Proof.
+  i; eapply Permutation_trans in PER
+  ; [|apply Permutation_app]; [|auto|apply Permutation_app_comm]
+  ; rewrite <-app_nil_l in PER; rewrite app_assoc in PER.
+  forwards EQ1: perm_cod_uniq PER; [solve_uniq|].
+  rewrite <-app_assoc,app_nil_l in PER; eapply Permutation_trans in PER
+  ; [|apply Permutation_app]; [|auto|apply Permutation_app_comm].
+  rewrite app_assoc in PER.
+  forwards EQ2: perm_cod_uniq PER; [solve_uniq|]; substs~.
+  eauto using prop_eq_dual.
+Qed.
+
+Lemma cp_contract:
+  forall P Γ x x' x'' A
+         (UN: uniq (x ~ ? A ++ Γ))
+         (WT: P ⊢cp Γ ++ x' ~ ? A ++ x'' ~ ? A),
+    [x'' ~> x]([x' ~> x]P) ⊢cp Γ ++ (x ~ ? A).
+Proof.
+  ii; rewrite !cons_app_one in *; remember (Γ++x'~? A++x''~? A) as Γ'.
+  gen Γ; induction WT; ii; substs~.
+  - des; substs~; try (by rewrite !cons_app_one in *
+                       ; forwards: uniq_perm PER UN; solve_uniq).
+rewrite !cons_app_one in *; exfalso; eauto using perm_cod_dual.
+Focus 2.
+rewrite !cons_app_one in *; exfalso; eauto using perm_cod_dual.
+Focus 3.
+rewrite !cons_app_one in *; eapply Permutation_trans in PER
+; [|apply Permutation_app]; [|auto|apply Permutation_app_comm].
+apply perm_cod_dual in PER; [|solve_uniq]; tryfalse.
+Focus 3.
+rewrite !cons_app_one in *; eapply Permutation_trans in PER
+; [|apply Permutation_app]; [|auto|apply Permutation_app_comm].
+apply perm_cod_dual in PER; [|solve_uniq]; tryfalse.
+
+rewrite !cons_app_one in *; eapply Permutation_trans in PER
+; [|apply Permutation_app]; [|auto|apply Permutation_app_comm].
+rewrite app_assoc in PER; rewrite <-app_nil_l in PER.
+forwards EQ: perm_cod_uniq PER; try solve_uniq.
+rewrite prop_dual_iff in EQ; apply dual_sym in EQ
+; rewrite <-prop_dual_iff in EQ; substs; rewrite <-prop_dual_involutive in *.
+apply perm_dom_uniq in PER; [|solve_uniq]; rewrite app_nil_l in PER.
+forwards UN1: uniq_perm PER; try solve_uniq.
+forwards~ BNDS: Perm_binds x'' (? A) PER; analyze_binds_uniq BNDS.
+apply binds_env_split in BindsTac; inversion_clear BindsTac as (E1 & E2 & EQ)
+; substs~; des_reqs.
+apply Permutation_sym in PER; applys ignore_env_order PER.
+rewrite !app_assoc; eapply ignore_env_order; [apply Permutation_app|]
+; [apply Permutation_app_comm|auto|].
+rewrite <-!app_assoc. apply cp_fwd with (A:=!¬A)(Ω:=E1++E2); auto.
+s; rewrite <-prop_dual_involutive; solve_perm.
+solve_uniq.
+
+
+rewrite !cons_app_one in *; eapply Permutation_trans in PER
+; [|apply Permutation_app]; [|auto|apply Permutation_app_comm].
+rewrite app_assoc in PER; rewrite <-app_nil_l in PER.
+forwards EQ: perm_cod_uniq PER; try solve_uniq.
+rewrite prop_dual_iff in EQ; apply dual_sym in EQ
+; rewrite <-prop_dual_iff in EQ; substs; rewrite <-prop_dual_involutive in *.
+apply perm_dom_uniq in PER; [|solve_uniq]; rewrite app_nil_l in PER.
+forwards UN1: uniq_perm PER; try solve_uniq.
+forwards~ BNDS: Perm_binds x'' (? A) PER; analyze_binds_uniq BNDS.
+apply binds_env_split in BindsTac; inversion_clear BindsTac as (E1 & E2 & EQ)
+; substs~; des_reqs.
+rewrite app_assoc in PER; apply perm_dom_uniq in PER; [|solve_uniq].
+eapply Permutation_app with (m:=x~? A) in PER; auto.
+forwards UN3: uniq_perm PER; try solve_uniq.
+apply Permutation_sym in PER; applys ignore_env_order PER.
+eapply ignore_env_order; [apply Permutation_app_comm|]; auto.
+rewrite <-!app_assoc. apply cp_fwd with (A:=!¬A)(Ω:=E1++E2); auto.
+s; rewrite <-prop_dual_involutive; solve_perm.
+solve_uniq.
+
+rewrite !cons_app_one in *
+; rewrite app_assoc in PER; rewrite <-app_nil_l in PER.
+forwards EQ: perm_cod_uniq PER; try solve_uniq.
+rewrite prop_dual_iff in EQ; apply dual_sym in EQ
+; rewrite <-prop_dual_iff in EQ; substs; rewrite <-prop_dual_involutive in *.
+apply perm_dom_uniq in PER; [|solve_uniq]; rewrite app_nil_l in PER.
+forwards UN1: uniq_perm PER; try solve_uniq.
+forwards~ BNDS: Perm_binds x' (? A) PER; analyze_binds_uniq BNDS.
+apply binds_env_split in BindsTac; inversion_clear BindsTac as (E1 & E2 & EQ)
+; substs~; des_reqs.
+rewrite app_assoc in PER; apply perm_dom_uniq in PER; [|solve_uniq].
+eapply Permutation_app with (m:=x~? A) in PER; auto.
+forwards UN3: uniq_perm PER; try solve_uniq.
+apply Permutation_sym in PER; applys ignore_env_order PER.
+eapply ignore_env_order; [apply Permutation_app_comm|]; auto.
+rewrite <-!app_assoc. apply cp_fwd with (A:=!¬A)(Ω:=E1++E2); auto.
+s; rewrite <-prop_dual_involutive; solve_perm.
+solve_uniq.
+
+rewrite !cons_app_one in *; eapply Permutation_trans in PER
+; [|apply Permutation_app]; [|auto|apply Permutation_app_comm].
+rewrite app_assoc in PER; forwards EQ: perm_cod_uniq PER; try solve_uniq.
+rewrite <-EQ in *; clear EQ.
+apply perm_dom_uniq in PER; [|solve_uniq].
+forwards UN1: uniq_perm PER; try solve_uniq.
+forwards~ BNDS: Perm_binds x'' (? A) PER; analyze_binds_uniq BNDS.
+apply binds_env_split in BindsTac; inversion_clear BindsTac as (E1 & E2 & EQ)
+; substs~; des_reqs.
+apply Permutation_sym in PER; applys ignore_env_order PER.
+eapply ignore_env_order; [apply Permutation_app_head|]
+; [apply Permutation_app_comm|].
+rewrite <-!app_assoc. apply cp_fwd with (A:=? A)(Ω:=E2++E1); auto.
+solve_uniq.
+
+rewrite !cons_app_one in *; eapply Permutation_trans in PER
+; [|apply Permutation_app]; [|auto|apply Permutation_app_comm].
+rewrite app_assoc in PER; forwards EQ: perm_cod_uniq PER; try solve_uniq.
+rewrite <-EQ in *; clear EQ.
+apply perm_dom_uniq in PER; [|solve_uniq].
+forwards UN1: uniq_perm PER; try solve_uniq.
+forwards~ BNDS: Perm_binds x'' (? A) PER; analyze_binds_uniq BNDS.
+apply binds_env_split in BindsTac; inversion_clear BindsTac as (E1 & E2 & EQ)
+; substs~; des_reqs.
+rewrite app_assoc in PER; apply perm_dom_uniq in PER; [|solve_uniq].
+eapply Permutation_app with (m:=x~? A) in PER; auto.
+forwards UN3: uniq_perm PER; try solve_uniq.
+apply Permutation_sym in PER; applys ignore_env_order PER.
+rewrite <-!app_assoc; rewrite (app_assoc E1).
+eapply ignore_env_order; [apply Permutation_app_head|]
+; [apply Permutation_app_comm|].
+apply cp_fwd with (A:=? A)(Ω:=E1++E2); auto.
+solve_uniq.
+
+rewrite !cons_app_one in *
+; rewrite app_assoc in PER; forwards EQ: perm_cod_uniq PER; try solve_uniq.
+rewrite <-EQ in *; clear EQ.
+apply perm_dom_uniq in PER; [|solve_uniq].
+forwards UN1: uniq_perm PER; try solve_uniq.
+forwards~ BNDS: Perm_binds x' (? A) PER; analyze_binds_uniq BNDS.
+apply binds_env_split in BindsTac; inversion_clear BindsTac as (E1 & E2 & EQ)
+; substs~; des_reqs.
+rewrite app_assoc in PER; apply perm_dom_uniq in PER; [|solve_uniq].
+eapply Permutation_app with (m:=x~? A) in PER; auto.
+forwards UN3: uniq_perm PER; try solve_uniq.
+apply Permutation_sym in PER; applys ignore_env_order PER.
+rewrite <-!app_assoc; rewrite (app_assoc E1).
+eapply ignore_env_order; [apply Permutation_app_head|]
+; [apply Permutation_app_comm|].
+apply cp_fwd with (A:=? A)(Ω:=E1++E2); auto.
+solve_uniq.
+
+rewrite !cons_app_one in *.
+forwards UN1: uniq_perm PER; try solve_uniq.
+forwards~ BNDS: Perm_binds x'' (? A) PER; analyze_binds_uniq BNDS.
+apply binds_env_split in BindsTac0
+; inversion_clear BindsTac0 as (E1 & E2 & EQ); substs~; des_reqs.
+rewrite 3 app_assoc in PER; apply perm_dom_uniq in PER; [|solve_uniq].
+rewrite <-!app_assoc in PER.
+forwards~ BNDS: Perm_binds x' (? A) PER; analyze_binds_uniq BNDS.
+ {
+   apply binds_env_split in BindsTac
+   ; inversion_clear BindsTac as (E11 & E12 & EQ); substs~; des_reqs.
+   rewrite <-!app_assoc in PER; rewrite 2 app_assoc in PER
+   ; apply perm_dom_uniq in PER; [|solve_uniq].
+   eapply Permutation_app with (m:=x~? A) in PER; auto.
+   forwards UN3: uniq_perm PER; try (by applys uniq_perm UN0; solve_perm).
+   apply Permutation_sym in PER; applys ignore_env_order PER.
+   rewrite <-!app_assoc in *.
+   apply cp_fwd with (A:=A0)(Ω:=E11++E12++E2++x~? A); auto.
+ }
+ {
+   apply binds_env_split in BindsTac
+   ; inversion_clear BindsTac as (E21 & E22 & EQ); substs~; des_reqs.
+   rewrite 3 app_assoc in PER; apply perm_dom_uniq in PER
+   ; [|rewrite app_assoc in UN; apply uniq_app_1 in UN; exact UN].
+   eapply Permutation_app with (m:=x~? A) in PER; auto.
+   forwards UN3: uniq_perm PER; try (by applys uniq_perm UN0; solve_perm).
+   apply Permutation_sym in PER; applys ignore_env_order PER.
+   rewrite <-!app_assoc in *.
+   apply cp_fwd with (A:=A0)(Ω:=E1++E21++E22++x~? A); auto.
+ }
+
+Admitted.
 
 Reserved Notation "P '==>cp' Q" (at level 69, right associativity).
 
