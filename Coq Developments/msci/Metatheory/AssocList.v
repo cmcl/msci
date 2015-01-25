@@ -993,6 +993,11 @@ Section UniqDerived.
     uniq (E ++ G).
   Proof. clear. solve_uniq. Qed.
 
+  Lemma uniq_remove_last:
+    uniq (E ++ F ++ G) ->
+    uniq (E ++ F).
+  Proof. clear. solve_uniq. Qed.
+
   Lemma uniq_reorder_1 :
     uniq (E ++ F) ->
     uniq (F ++ E).
