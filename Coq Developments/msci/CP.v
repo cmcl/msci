@@ -1477,7 +1477,7 @@ Ltac extract_bnd x A :=
                  ; substs~; des_reqs
              end)
   end.
-
+(*
 Lemma fv_env_proc_wt:
   forall Γ P x A
          (FV: x `notin` fv_proc P)
@@ -1507,8 +1507,8 @@ Proof.
       - apply H with (A1:=A0); auto; try solve_perm.
         apply~ open_fv_proc_1.
     }
-Admitted.
-
+Admitted.*)
+(*
 Lemma cp_strengthen:
   forall P Γ x y A
          (BNDS: binds x (? A) Γ)
@@ -1629,8 +1629,8 @@ Proof.
     {
       admit.
     }
-Admitted.
-
+Admitted.*)
+(*
 Lemma cp_contract:
   forall P Γ x x' x'' A
          (UN: uniq (x ~ ? A ++ Γ))
@@ -1649,7 +1649,7 @@ Proof.
     apply (cp_weaken x A) in WT; [|solve_uniq].
     eapply ignore_env_order; [|exact WT]; []; solve_perm.
 Qed.
-
+*)
 (*   - *)
 (*   ii; rewrite !cons_app_one in *; remember (Γ++x'~? A++x''~? A) as Γ'. *)
 (*   gen Γ; induction WT; ii; substs~. *)
