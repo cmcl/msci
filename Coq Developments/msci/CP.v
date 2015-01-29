@@ -1823,39 +1823,77 @@ Qed.
 Reserved Notation "P '==>cp' Q" (at level 69, right associativity).
 
 Inductive proc_red : proc -> proc -> Prop :=
-  | red_axcut : forall P A dA (w x:atom) (DUA: dual_props A dA)
-                       (NF: w `notin` fv_proc P),
-                  ν A → w ⟷ 0 ‖ P ==>cp (open_proc P w)
+  | red_axcut :
+      forall P A (w x:atom) (NF: w `notin` fv_proc P),
+        ν A → w ⟷ 0 ‖ P
+      ==>cp
+        (open_proc P w)
+  | red_multi :
+      forall P Q R A dA B (DUA: dual_props A dA),
+        ν A ⨂ B → ([A]0 → P ‖ Q) ‖ ⟨dA⟩ 0 → R
+      ==>cp
+        ν A → P ‖ (ν B → Q ‖ R)
+  | red_add :
+      forall P Q R A B,
+        ν A ⨂ B → (0[inl] → P) ‖ 0 CASE Q OR R
+      ==>cp
+        ν A → P ‖ Q
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
+
+(** Lemmas for proving well-typedness of reduction rules. *)
+
+Lemma reduce_axcut:
+  forall P A (w : atom) Γ
+         (NFV: w `notin` fv_proc P)
+         (WT: ν A → w ⟷ 0 ‖ P ⊢cp Γ),
+    P ^^ w ⊢cp Γ.
+Proof.
+  ii; inversion WT; subst.
+  pick fresh y; destruct_notin; specializes CPP Fr.
+  rewrite /open_proc in CPP; simpl in CPP.
+  inverts keep CPP; rewrite !cons_app_one in *.
+  forwards UN1: uniq_perm PER0 UN0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  forwards EQC: perm_cod_uniq PER0; [solve_uniq|]; substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq].
+  eapply Permutation_sym,Permutation_trans in PER0
+  ; [|apply Permutation_app_comm].
+  extract_bnd w (¬A0).
+  apply perm_dom_uniq in PER0; [|solve_uniq].
+  apply requests_perm in PER0; auto; des_reqs.
+  forwards~ UN3: uniq_perm PER.
+  apply Permutation_sym in PER; rewrite !app_assoc in PER
+  ; eapply Permutation_trans in PER
+  ; [|apply Permutation_app]; [|apply Permutation_app|]
+  ; [|apply Permutation_app_comm| |]; auto.
+  applys ignore_env_order PER; rewrite <-!app_assoc; rewrite (app_assoc E1).
+  apply~ typing_weaken; [|apply Permutation_sym in PER
+                          ; applys~ uniq_perm PER].
+  eapply ignore_env_order; [apply Permutation_app_comm|].
+  apply typing_rename with (x:=y); try (by destruct_uniq; solve_notin).
+  eapply ignore_env_order; [apply Permutation_app_comm|].
+  apply~ CPQ.
+Qed.
+
+Lemma reduce_multi:
+  forall P Q R A dA B Γ
+         (DUA: dual_props A dA)
+         (WT: ν A ⨂ B → [A]0 → P ‖ Q ‖ ⟨dA ⟩ 0 → R ⊢cp Γ),
+    ν A → P ‖ ν B → Q ‖ R ⊢cp Γ.
+Proof.
+Admitted.
+
+Lemma reduce_add:
+  forall P Q R A B Γ
+         (WT: ν A ⨂ B → (0[inl] → P) ‖ 0 CASE Q OR R ⊢cp Γ),
+    ν A → P ‖ Q ⊢cp Γ.
+Proof.
+Admitted.
+
+Hint Resolve reduce_axcut reduce_multi reduce_add.
 
 Theorem proc_sub_red: forall Γ P Q
     (WT: P ⊢cp Γ)
     (RED: P ==>cp Q),
   Q ⊢cp Γ.
-Proof.
-  ii; induction RED; subst; inversion WT; subst.
-  - pick fresh y; destruct_notin; specializes CPP Fr.
-    rewrite /open_proc in CPP; simpl in CPP.
-    inverts keep CPP; rewrite !cons_app_one in *.
-    forwards UN1: uniq_perm PER0 UN0.
-    eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
-    forwards EQC: perm_cod_uniq PER0; [solve_uniq|]; substs~.
-    apply perm_dom_uniq in PER0; [|solve_uniq].
-    eapply Permutation_sym,Permutation_trans in PER0
-    ; [|apply Permutation_app_comm].
-    extract_bnd w (¬A0).
-    apply perm_dom_uniq in PER0; [|solve_uniq].
-    apply requests_perm in PER0; auto; des_reqs.
-    forwards~ UN3: uniq_perm PER.
-    apply Permutation_sym in PER; rewrite !app_assoc in PER
-    ; eapply Permutation_trans in PER
-    ; [|apply Permutation_app]; [|apply Permutation_app|]
-    ; [|apply Permutation_app_comm| |]; auto.
-    applys ignore_env_order PER; rewrite <-!app_assoc; rewrite (app_assoc E1).
-    apply~ typing_weaken; [|apply Permutation_sym in PER
-                            ; applys~ uniq_perm PER].
-    eapply ignore_env_order; [apply Permutation_app_comm|].
-    apply typing_rename with (x:=y); try (by destruct_uniq; solve_notin).
-    eapply ignore_env_order; [apply Permutation_app_comm|].
-    apply~ CPQ.
-Qed.
+Proof. ii; induction RED; subst; eauto. Qed.
