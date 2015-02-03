@@ -1881,6 +1881,15 @@ Lemma reduce_multi:
          (WT: ν A ⨂ B → [A]0 → P ‖ Q ‖ ⟨dA ⟩ 0 → R ⊢cp Γ),
     ν A → P ‖ ν B → Q ‖ R ⊢cp Γ.
 Proof.
+  ii; inversion WT; subst.
+  pick fresh y; destruct_notin; specializes CPP Fr.
+  rewrite /open_proc in CPP; simpl in CPP.
+  inverts keep CPP; rewrite !cons_app_one in *.
+  forwards UN1: uniq_perm PER0 UN0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER0; forwards EQC: perm_cod_uniq PER0
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq]; rewrite app_nil_l in PER0.
 Admitted.
 
 Lemma reduce_add:
