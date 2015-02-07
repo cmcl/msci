@@ -10,6 +10,9 @@ Global Set Bullet Behavior "Strict Subproofs".
 
 Hint Unfold not.
 
+(* Haskell-inspired infix function application operator. *)
+Infix "$" := apply (at level 100).
+
 (* Like destruct_all but applied to the goal. *)
 Ltac des_goal t :=
   repeat
@@ -45,6 +48,10 @@ Ltac des :=
       | [H: context[?X == ?Y] |- _] => desT (X == Y)
       | |- context[match ?X with _ => _ end] => destruct X; subst
       | [H: context[match ?X with _ => _ end] |- _] => destruct X; subst
+      | [H: ?P <-> ?Q |- _] =>
+        let HP := fresh H in
+        let HQ := fresh H in destruct H as [HP HQ]
+      | |- ?P <-> ?Q => split
       | _ => idtac
     end.
 
@@ -55,6 +62,8 @@ Ltac simpl_existT :=
          end.
 
 Tactic Notation "dup" hyp(H) := let H' := fresh H in assert (H' := H).
+
+Tactic Notation "s" "in" hyp(H) := simpl in H.
 
 Ltac s := simpl.
 Ltac ss := repeat (unfold not in *; simpl in *).
