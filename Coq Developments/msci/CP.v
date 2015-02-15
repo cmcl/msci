@@ -800,23 +800,41 @@ Qed.
 Lemma open_fv_proc_1:
   forall x y k P
          (NEQ: x <> y)
-         (FV: x `notin` fv_proc P),
+         (FV: x `in` fv_proc ({k ~> y}P)),
+    x `in` fv_proc P.
+Proof.
+  i; gen k; induction P; ii; destruct_all pname; des; destruct_in; tryfalse
+  ; eauto.
+Qed.
+
+Lemma open_fv_proc_2:
+  forall x y k P
+         (FV: x `in` fv_proc P),
+    x `in` fv_proc ({k ~> y}P).
+Proof.
+  i; gen k; induction P; ii; destruct_all pname; des; destruct_in; eauto.
+Qed.
+
+Lemma open_nfv_proc_1:
+  forall x y k P
+         (NEQ: x <> y)
+         (NFV: x `notin` fv_proc P),
     x `notin` fv_proc ({k ~> y}P).
 Proof.
   i; gen k; induction P; ii; destruct_all pname; des; destruct_in; eauto.
 Qed.
 
-Lemma open_fv_proc_2:
+Lemma open_nfv_proc_2:
   forall x y k P
-         (FV: x `notin` fv_proc ({k ~> y}P)),
+         (NFV: x `notin` fv_proc ({k ~> y}P)),
     x `notin` fv_proc P.
 Proof.
   i; gen k; induction P; ii; destruct_all pname; des; destruct_in; eauto.
 Qed.
 
-Hint Resolve open_fv_proc_1 open_fv_proc_2.
+Hint Resolve open_fv_proc_1 open_fv_proc_2 open_nfv_proc_1 open_nfv_proc_2.
 
-Lemma fv_env_proc:
+Lemma nfv_env_proc:
   forall Γ P x
          (FV: x `notin` dom Γ)
          (WT: P ⊢cp Γ),
@@ -828,12 +846,12 @@ Proof.
          ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
          ; s; fsetdec).
   - ii; destruct_in; pick fresh y; destruct_notin. 
-    + apply (@open_fv_proc_2 x y 0) in H2; auto.
+    + apply (@open_nfv_proc_2 x y 0) in H2; auto.
       ii; apply (H y); auto; ii; destruct_in; auto.
       apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
       ; s; fsetdec.
-    + apply (@open_fv_proc_2 x y 0) in H3; auto.
+    + apply (@open_nfv_proc_2 x y 0) in H3; auto.
       ii; apply (H0 y); auto; ii; destruct_in; auto.
       apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
@@ -841,7 +859,7 @@ Proof.
   - ii; destruct_in; pick fresh y; destruct_notin; substs~.
     + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; []; s; fsetdec.
-    + apply (@open_fv_proc_2 x y 0) in H0; auto.
+    + apply (@open_nfv_proc_2 x y 0) in H0; auto.
       ii; apply (H y); auto; ii; destruct_in; auto.
       apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
@@ -853,7 +871,7 @@ Proof.
   - ii; destruct_in; pick fresh y; destruct_notin; substs~.
     + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; []; s; fsetdec.
-    + apply (@open_fv_proc_2 x y 0) in H2; auto.
+    + apply (@open_nfv_proc_2 x y 0) in H2; auto.
       ii; apply (H y); auto; ii; destruct_in; substs~
       ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
@@ -861,7 +879,7 @@ Proof.
   - ii; destruct_in; pick fresh y; destruct_notin; substs~.
     + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; []; s; fsetdec.
-    + apply (@open_fv_proc_2 x y 0) in H2; auto.
+    + apply (@open_nfv_proc_2 x y 0) in H2; auto.
       ii; apply (H y); auto; ii; destruct_in; substs~
       ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
@@ -869,7 +887,7 @@ Proof.
   - ii; destruct_in; pick fresh y; destruct_notin; substs~.
     + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; []; s; fsetdec.
-    + apply (@open_fv_proc_2 x y 0) in H2; auto.
+    + apply (@open_nfv_proc_2 x y 0) in H2; auto.
       ii; apply (H y); auto; ii; destruct_in; substs~
       ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
@@ -877,7 +895,7 @@ Proof.
   - ii; destruct_in; pick fresh y; destruct_notin; substs~.
     + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; []; s; fsetdec.
-    + apply (@open_fv_proc_2 x y 0) in H2; auto.
+    + apply (@open_nfv_proc_2 x y 0) in H2; auto.
       ii; apply (H y); auto; ii; destruct_in; substs~
       ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
@@ -885,7 +903,7 @@ Proof.
   - ii; destruct_in; pick fresh y; destruct_notin; substs~.
     + apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; []; s; fsetdec.
-    + apply (@open_fv_proc_2 x y 0) in H2; auto.
+    + apply (@open_nfv_proc_2 x y 0) in H2; auto.
       ii; apply (H y); auto; ii; destruct_in; substs~
       ; apply Permutation_sym in PER; apply Perm_in with (x:=x) in PER; auto
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
@@ -1051,14 +1069,14 @@ Section CPBasicSubstOpenProperties.
           rewrite !app_assoc; apply~ H; rewrite <-!app_assoc; try solve_perm.
           apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
           destruct_uniq; solve_uniq. }
-        { specializes CPQ NL; forwards FV: fv_env_proc x CPQ; [solve_notin|].
+        { specializes CPQ NL; forwards FV: nfv_env_proc x CPQ; [solve_notin|].
           rewrite* subst_fresh. }
       + eapply cp_cut with (L:=L')(ΔP:=ΔP)(ΔQ:=Γ1++Γ2++y~A0)
         ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|].
           solve_perm. }
-        { specializes CPP NL; forwards FV: fv_env_proc x CPP; [solve_notin|].
+        { specializes CPP NL; forwards FV: nfv_env_proc x CPP; [solve_notin|].
           rewrite* subst_fresh. }
         { rewrite~ subst_open_var; rewrite cons_app_one.
           rewrite !app_assoc; apply~ H0; rewrite <-!app_assoc; try solve_perm.
@@ -1074,7 +1092,7 @@ Section CPBasicSubstOpenProperties.
         ; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
-        { specializes CPP NL; forwards~ FV: fv_env_proc x0 CPP
+        { specializes CPP NL; forwards~ FV: nfv_env_proc x0 CPP
           ; rewrite* subst_fresh. }
         { rewrite !cons_app_one.
           eapply ignore_env_order; [apply Permutation_app_comm|].
@@ -1093,7 +1111,7 @@ Section CPBasicSubstOpenProperties.
           rewrite !app_assoc; apply~ H; rewrite <-!app_assoc; try solve_perm.
           apply~ uniq_push; forwards UNX: uniq_perm_app PER NINX.
           destruct_uniq; solve_uniq. }
-        { rewrite~ subst_fresh; forwards~ FV: fv_env_proc x WT. }
+        { rewrite~ subst_fresh; forwards~ FV: nfv_env_proc x WT. }
       + apply binds_env_split in BindsTac0
         ; inversion_clear BindsTac0 as (Γ1 & Γ2 & EQ); substs~.
         rewrite 2 app_assoc in *; apply perm_dom_uniq in PER; auto; ss
@@ -1103,7 +1121,7 @@ Section CPBasicSubstOpenProperties.
         ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
-        { specializes CPP NL; forwards FV: fv_env_proc x CPP; [solve_notin|].
+        { specializes CPP NL; forwards FV: nfv_env_proc x CPP; [solve_notin|].
           rewrite* subst_fresh. }
         { rewrite cons_app_one; rewrite !app_assoc.
           apply~ IHWT; rewrite <-!app_assoc; try solve_perm.
@@ -1233,7 +1251,7 @@ Section CPBasicSubstOpenProperties.
         ; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
-        { specializes CPP NL; forwards~ FV: fv_env_proc x0 CPP
+        { specializes CPP NL; forwards~ FV: nfv_env_proc x0 CPP
           ; rewrite* subst_fresh. }
       + forwards~ EQC: requests_binds_cod BindsTac
         ; apply binds_env_split in BindsTac
@@ -1260,7 +1278,7 @@ Section CPBasicSubstOpenProperties.
         ; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
-        { specializes CPP NL; forwards~ FV: fv_env_proc x0 CPP
+        { specializes CPP NL; forwards~ FV: nfv_env_proc x0 CPP
           ; rewrite* subst_fresh. }
       +  apply binds_env_split in BindsTac
         ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
@@ -1284,7 +1302,7 @@ Section CPBasicSubstOpenProperties.
         ; apply cp_weaken with (A:=A)(Δ:=Δ); ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
-        { forwards~ FV: fv_env_proc x0 WT; rewrite~ subst_fresh. }
+        { forwards~ FV: nfv_env_proc x0 WT; rewrite~ subst_fresh. }
       + apply binds_env_split in BindsTac
         ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
         rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
@@ -1370,7 +1388,7 @@ Section CPBasicSubstOpenProperties.
         ; ii; substs~; destruct_notin.
         { eapply Permutation_trans; [apply Permutation_app|]
           ; [exact PER|auto|]; []; solve_perm. }
-        { forwards~ FV: fv_env_proc x0 WT; rewrite~ subst_fresh. }
+        { forwards~ FV: nfv_env_proc x0 WT; rewrite~ subst_fresh. }
       + apply binds_env_split in BindsTac
         ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
         rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
@@ -1500,7 +1518,7 @@ Ltac extract_bnd x A :=
              end)
   end.
 (*
-Lemma fv_env_proc_wt:
+Lemma nfv_env_proc_wt:
   forall Γ P x A
          (FV: x `notin` fv_proc P)
          (WT: P ⊢cp Γ ++ x ~ ? A),
@@ -1527,7 +1545,7 @@ Proof.
       ; eapply cp_cut with (L:=L')(ΔQ:=ΔQ); ii; destruct_notin; substs~.
       - solve_uniq.
       - apply H with (A1:=A0); auto; try solve_perm.
-        apply~ open_fv_proc_1.
+        apply~ open_nfv_proc_1.
     }
 Admitted.*)
 (*
@@ -1635,7 +1653,7 @@ Proof.
       obtain atoms L' as LEQ; eapply cp_cut with (L:=L')(ΔQ:=ΔQ)
       ; [apply~ Permutation_app_tail|solve_uniq| |]; ii
       ; substs; destruct_notin; first last.
-      - specializes CPQ NL; forwards~ FV: fv_env_proc y CPQ
+      - specializes CPQ NL; forwards~ FV: nfv_env_proc y CPQ
         ; rewrite* subst_fresh.
       - apply Permutation_sym in PER; extract_bnd x (? A0).
         + rewrite~ subst_open_var; rewrite !cons_app_one,<-!app_assoc.
@@ -1972,29 +1990,64 @@ Proof.
     apply perm_dom_uniq in PER1; [|solve_uniq]; rewrite app_nil_l in PER1.
     apply Permutation_sym in PER1; apply (ignore_env_order PER1) in CPP1.
     applys wt_nin_proc NotInTac4 CPP1.
-  -
-SearchAbout (fv_proc _).
-Lemma open_fv_proc_2':
-  forall x y k P
-         (NFV: x `notin` fv_proc ({k ~> y}P)),
-    lc_proc P.
+  - pick fresh w; destruct_notin; specializes CPP0 NotInTac8.
+    rewrite /open_proc in CPP0; rewrite~ open_rec_comm in CPP0.
+    forwards PER1: Permutation_app_head (w~B) PER0.
+    apply Permutation_sym in PER1; apply (ignore_env_order PER1) in CPP0.
+    apply wt_nin_proc in CPP0; [|ss;fsetdec].
+    eapply ignore_env_order in CPP0; [|apply Permutation_app_comm].
+Lemma blah:
+  forall P (x y:atom)
+         (NFX: x `notin` fv_proc P)
+         (NFY: y `notin` fv_proc P),
+    remove y (fv_proc (P ^^ y))[=]remove x (fv_proc (P ^^ x)).
+Proof. Admitted.
+
+Lemma blah2:
+  forall xs ys x
+         (EQ: xs[=]ys)
+         (IN: InA Logic.eq x (elements xs)),
+    InA Logic.eq x (elements ys).
 Proof.
-  i; gen k; induction P. ii; destruct_all pname; des; destruct_in; eauto.
+  ii; apply elements_iff in IN; apply elements_iff; fsetdec.
 Qed.
 idtac.
-SearchAbout (fv_proc _).
-Lemma open_fv_proc_2'':
-  forall x y k P
-         (NFV: x `notin` fv_proc ({k ~> y}P)),
-    lc_proc P.
+forwards EQ: blah NF NotInTac17.
+split; ii.
+apply InA_iff_In; applys blah2 EQ.
+apply Permutation_sym in PER0; forwards IN: Perm_in PER0 H.
+forwards UN3: cp_implies_uniq CPP0.
+apply elements_iff,remove_iff; destruct (x == w); [analyze_in x; solve_uniq|].
+split; auto.
+apply open_fv_proc_2.
+Lemma blah3:
+  forall P Γ
+         (WT: P ⊢cp Γ),
+    forall x, x `in` dom Γ <-> x `in` fv_proc P.
 Proof.
-  i; gen k; induction P; ii; destruct_all pname; des; destruct_in; eauto.
-
-idtac.
-apply open_fv_proc_2' in NFV.
-
-  rewrite~ lc_no_bvar in CPP1.
+  ii; induction WT.
+  - split; i.
+    + forwards IN: Perm_in PER H; ss; fsetdec.
+    + apply Permutation_sym in PER; applys Perm_in PER; ss; fsetdec.
+  - pick fresh y; destruct_notin; specializes H Fr; specializes H0 Fr; des; i.
+    + forwards IN: Perm_in PER H; ss; rewrite dom_app in *; destruct_in.
+      specialize (H0 (add_2 _ IN0)); apply open_fv_proc_1 in H0; auto.
+      specialize (H1 (add_2 _ IN1)); apply open_fv_proc_1 in H1; auto.
+    + apply Permutation_sym in PER; applys Perm_in PER; ss
+      ; rewrite !dom_app in *; destruct_in.
+      apply (open_fv_proc_2 y 0) in H4; fsetdec.
+      apply (open_fv_proc_2 y 0) in H5; fsetdec.
 Admitted.
+idtac.
+apply blah3 with (x:=x) in CPP0; des; rewrite !dom_app in *.
+specialize (CPP1 (union_2 _ IN)); apply open_fv_proc_1 in CPP1; auto.
+
+apply equal_sym in EQ; apply InA_iff_In,(blah2 EQ) in H.
+apply elements_iff,remove_iff in H; des.
+apply blah3 with (x:=x) in CPP0; des; rewrite !dom_app in *.
+applys Perm_in PER0.
+apply CPP2 in H0; destruct_in; ss; fsetdec.
+Qed.
 
 Hint Resolve reduce_axcut reduce_multi reduce_add.
 
