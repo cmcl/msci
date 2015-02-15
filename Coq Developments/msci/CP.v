@@ -541,10 +541,7 @@ Inductive cp_rule : proc -> penv -> Prop :=
                       (UN: uniq Γ)
                       (CPP: P ⊢cp Δ),
                  ⟨⟩ x → P ⊢cp Γ
-  | cp_empcho : forall Γ Δ (x:atom)
-                       (PER: Permutation Γ (x ~ pp_top ++ Δ))
-                       (UN: uniq Γ),
-                  x CASE 0 ⊢cp Γ
+  | cp_empcho : forall (x:atom), x CASE 0 ⊢cp x ~ pp_top
 where "P '⊢cp' Γ" := (cp_rule P Γ) : cp_scope.
 
 Hint Constructors cp_rule.
@@ -668,7 +665,8 @@ Lemma ignore_env_order: forall Γ Δ P
   P ⊢cp Δ.
 Proof.
   ii; gen Δ; induction WT; ii; try (by econstructor; ss; eauto).
-  apply Permutation_length_1_inv in INB; substs; simpl_env; auto.
+  - apply Permutation_length_1_inv in INB; substs; simpl_env; auto.
+  - apply Permutation_length_1_inv in INB; substs; simpl_env; auto.
 Qed.
 
 Tactic Notation
@@ -909,6 +907,101 @@ Proof.
       ; try repeat (rewrite !cons_app_one in *||rewrite !dom_app in *)
       ; s; fsetdec.
 Qed.
+
+Section FVProcProperties.
+
+  Export AtomSetImpl AtomSetFacts.
+
+  Lemma remove_nfv_proc_eq:
+    forall P (x y:atom)
+           (NFX: x `notin` fv_proc P)
+           (NFY: y `notin` fv_proc P),
+      remove y (fv_proc (P ^^ y))[=]remove x (fv_proc (P ^^ x)).
+  Proof. Admitted.
+
+  Lemma eq_InA_elements:
+    forall xs ys x
+           (EQ: xs[=]ys)
+           (IN: InA Logic.eq x (elements xs)),
+      InA Logic.eq x (elements ys).
+  Proof.
+    ii; apply elements_iff in IN; apply elements_iff; fsetdec.
+  Qed.
+
+  Lemma in_env_fv_1:
+    forall P Γ x
+           (WT: P ⊢cp Γ)
+           (IN: x `in` dom Γ),
+      x `in` fv_proc P.
+  Proof.
+    ii; induction WT.
+    - forwards IN2: Perm_in PER IN; ss; fsetdec.
+    - pick fresh y; destruct_notin; specializes H Fr; specializes H0 Fr; s; des.
+      forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in.
+      + exploit H; [fsetdec|]; []; ii; apply open_fv_proc_1 in H; auto.
+      + exploit H0; [fsetdec|]; []; ii; apply open_fv_proc_1 in H0; auto.
+    - pick fresh y; destruct_notin; specializes H Fr; s; des.
+      forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+      exploit H; [fsetdec|]; ii; apply open_fv_proc_1 in H; auto.
+    - pick fresh y; destruct_notin; specializes H Fr; s; des.
+      forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+      exploit H; [fsetdec|]; ii; apply open_fv_proc_1 in H; auto.
+    - forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+    - forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+    - forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+    - pick fresh y; destruct_notin; specializes H Fr; s; des.
+      forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+      exploit H; [fsetdec|]; ii; apply open_fv_proc_1 in H; auto.
+    - pick fresh y; destruct_notin; specializes H Fr; s; des.
+      forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+      exploit H; [fsetdec|]; ii; apply open_fv_proc_1 in H; auto.
+    - forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+    - pick fresh y; destruct_notin; specializes H Fr; s; des.
+      forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+    - pick fresh y; destruct_notin; specializes H Fr; s; des.
+      forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+    - ss; fsetdec.
+    - forwards IN2: Perm_in PER IN; rewrite !dom_app in *; destruct_in
+      ; try (by ss; fsetdec).
+    - ss; fsetdec.
+  Qed.
+
+  Lemma in_env_fv_2:
+    forall P Γ x
+           (WT: P ⊢cp Γ)
+           (IN: x `in` fv_proc P),
+      x `in` dom Γ.
+  Proof.
+    ii; induction WT.
+    - apply Permutation_sym in PER; applys Perm_in PER; ss; fsetdec.
+    - pick fresh y; destruct_notin; specializes H Fr; specializes H0 Fr; des; i.
+      + forwards IN: Perm_in PER H; ss; rewrite dom_app in *; destruct_in.
+        specialize (H0 (add_2 _ IN0)); apply open_fv_proc_1 in H0; auto.
+        specialize (H1 (add_2 _ IN1)); apply open_fv_proc_1 in H1; auto.
+      + apply Permutation_sym in PER; applys Perm_in PER; ss
+        ; rewrite !dom_app in *; destruct_in.
+        apply (open_fv_proc_2 y 0) in H4; fsetdec.
+        apply (open_fv_proc_2 y 0) in H5; fsetdec.
+
+  Admitted.
+
+  Lemma in_env_fv:
+    forall P Γ x
+           (WT: P ⊢cp Γ),
+      x `in` dom Γ <-> x `in` fv_proc P.
+  Proof. ii; split; eauto using in_env_fv_1,in_env_fv_2. Qed.
+
+End FVProcProperties.
 
 Lemma cp_implies_lc:
   forall P Γ
@@ -1446,7 +1539,7 @@ Section ProcEquiv.
   
 End ProcEquiv.
 
-Export  AtomSetImpl AtomSetFacts AtomSetProperties.
+
 SearchAbout (elements _).
 
 Lemma fv_proc_NoDup:
@@ -1959,39 +2052,7 @@ Proof.
              ; rewrite dom_app; fsetdec].
 Admitted.
 
-Lemma remove_nfv_proc_eq:
-  forall P (x y:atom)
-         (NFX: x `notin` fv_proc P)
-         (NFY: y `notin` fv_proc P),
-    remove y (fv_proc (P ^^ y))[=]remove x (fv_proc (P ^^ x)).
-Proof. Admitted.
 
-Lemma eq_InA_elements:
-  forall xs ys x
-         (EQ: xs[=]ys)
-         (IN: InA Logic.eq x (elements xs)),
-    InA Logic.eq x (elements ys).
-Proof.
-  ii; apply elements_iff in IN; apply elements_iff; fsetdec.
-Qed.
-
-Lemma in_env_fv:
-  forall P Γ
-         (WT: P ⊢cp Γ),
-    forall x, x `in` dom Γ <-> x `in` fv_proc P.
-Proof.
-  ii; induction WT.
-  - split; i.
-    + forwards IN: Perm_in PER H; ss; fsetdec.
-    + apply Permutation_sym in PER; applys Perm_in PER; ss; fsetdec.
-  - pick fresh y; destruct_notin; specializes H Fr; specializes H0 Fr; des; i.
-    + forwards IN: Perm_in PER H; ss; rewrite dom_app in *; destruct_in.
-      specialize (H0 (add_2 _ IN0)); apply open_fv_proc_1 in H0; auto.
-      specialize (H1 (add_2 _ IN1)); apply open_fv_proc_1 in H1; auto.
-    + apply Permutation_sym in PER; applys Perm_in PER; ss
-      ; rewrite !dom_app in *; destruct_in.
-      apply (open_fv_proc_2 y 0) in H4; fsetdec.
-      apply (open_fv_proc_2 y 0) in H5; fsetdec.
 Admitted.
 
 Lemma reduce_gc:
