@@ -1959,6 +1959,41 @@ Proof.
              ; rewrite dom_app; fsetdec].
 Admitted.
 
+Lemma remove_nfv_proc_eq:
+  forall P (x y:atom)
+         (NFX: x `notin` fv_proc P)
+         (NFY: y `notin` fv_proc P),
+    remove y (fv_proc (P ^^ y))[=]remove x (fv_proc (P ^^ x)).
+Proof. Admitted.
+
+Lemma eq_InA_elements:
+  forall xs ys x
+         (EQ: xs[=]ys)
+         (IN: InA Logic.eq x (elements xs)),
+    InA Logic.eq x (elements ys).
+Proof.
+  ii; apply elements_iff in IN; apply elements_iff; fsetdec.
+Qed.
+
+Lemma in_env_fv:
+  forall P Γ
+         (WT: P ⊢cp Γ),
+    forall x, x `in` dom Γ <-> x `in` fv_proc P.
+Proof.
+  ii; induction WT.
+  - split; i.
+    + forwards IN: Perm_in PER H; ss; fsetdec.
+    + apply Permutation_sym in PER; applys Perm_in PER; ss; fsetdec.
+  - pick fresh y; destruct_notin; specializes H Fr; specializes H0 Fr; des; i.
+    + forwards IN: Perm_in PER H; ss; rewrite dom_app in *; destruct_in.
+      specialize (H0 (add_2 _ IN0)); apply open_fv_proc_1 in H0; auto.
+      specialize (H1 (add_2 _ IN1)); apply open_fv_proc_1 in H1; auto.
+    + apply Permutation_sym in PER; applys Perm_in PER; ss
+      ; rewrite !dom_app in *; destruct_in.
+      apply (open_fv_proc_2 y 0) in H4; fsetdec.
+      apply (open_fv_proc_2 y 0) in H5; fsetdec.
+Admitted.
+
 Lemma reduce_gc:
   forall P Q (y:atom) A B Γ
          (NF: y `notin` fv_proc P)
@@ -1996,57 +2031,22 @@ Proof.
     apply Permutation_sym in PER1; apply (ignore_env_order PER1) in CPP0.
     apply wt_nin_proc in CPP0; [|ss;fsetdec].
     eapply ignore_env_order in CPP0; [|apply Permutation_app_comm].
-Lemma blah:
-  forall P (x y:atom)
-         (NFX: x `notin` fv_proc P)
-         (NFY: y `notin` fv_proc P),
-    remove y (fv_proc (P ^^ y))[=]remove x (fv_proc (P ^^ x)).
-Proof. Admitted.
-
-Lemma blah2:
-  forall xs ys x
-         (EQ: xs[=]ys)
-         (IN: InA Logic.eq x (elements xs)),
-    InA Logic.eq x (elements ys).
-Proof.
-  ii; apply elements_iff in IN; apply elements_iff; fsetdec.
-Qed.
-idtac.
-forwards EQ: blah NF NotInTac17.
-split; ii.
-apply InA_iff_In; applys blah2 EQ.
-apply Permutation_sym in PER0; forwards IN: Perm_in PER0 H.
-forwards UN3: cp_implies_uniq CPP0.
-apply elements_iff,remove_iff; destruct (x == w); [analyze_in x; solve_uniq|].
-split; auto.
-apply open_fv_proc_2.
-Lemma blah3:
-  forall P Γ
-         (WT: P ⊢cp Γ),
-    forall x, x `in` dom Γ <-> x `in` fv_proc P.
-Proof.
-  ii; induction WT.
-  - split; i.
-    + forwards IN: Perm_in PER H; ss; fsetdec.
-    + apply Permutation_sym in PER; applys Perm_in PER; ss; fsetdec.
-  - pick fresh y; destruct_notin; specializes H Fr; specializes H0 Fr; des; i.
-    + forwards IN: Perm_in PER H; ss; rewrite dom_app in *; destruct_in.
-      specialize (H0 (add_2 _ IN0)); apply open_fv_proc_1 in H0; auto.
-      specialize (H1 (add_2 _ IN1)); apply open_fv_proc_1 in H1; auto.
-    + apply Permutation_sym in PER; applys Perm_in PER; ss
-      ; rewrite !dom_app in *; destruct_in.
-      apply (open_fv_proc_2 y 0) in H4; fsetdec.
-      apply (open_fv_proc_2 y 0) in H5; fsetdec.
-Admitted.
-idtac.
-apply blah3 with (x:=x) in CPP0; des; rewrite !dom_app in *.
-specialize (CPP1 (union_2 _ IN)); apply open_fv_proc_1 in CPP1; auto.
-
-apply equal_sym in EQ; apply InA_iff_In,(blah2 EQ) in H.
-apply elements_iff,remove_iff in H; des.
-apply blah3 with (x:=x) in CPP0; des; rewrite !dom_app in *.
-applys Perm_in PER0.
-apply CPP2 in H0; destruct_in; ss; fsetdec.
+    forwards UN3: cp_implies_uniq CPP0.
+    forwards EQ: remove_nfv_proc_eq NF NotInTac17.
+    split; ii.
+    + apply InA_iff_In; applys eq_InA_elements EQ.
+      apply Permutation_sym in PER0; forwards IN: Perm_in PER0 H.
+      apply elements_iff,remove_iff; destruct (x == w)
+      ; [analyze_in x; solve_uniq|].
+      split; auto.
+      apply open_fv_proc_2.
+      apply in_env_fv with (x:=x) in CPP0; des; rewrite !dom_app in *.
+      specialize (CPP1 (union_2 _ IN)); apply open_fv_proc_1 in CPP1; auto.
+    + apply equal_sym in EQ; apply InA_iff_In,(eq_InA_elements EQ) in H.
+      apply elements_iff,remove_iff in H; des.
+      apply in_env_fv with (x:=x) in CPP0; des; rewrite !dom_app in *.
+      applys Perm_in PER0.
+      apply CPP2 in H0; destruct_in; ss; fsetdec.
 Qed.
 
 Hint Resolve reduce_axcut reduce_multi reduce_add.
