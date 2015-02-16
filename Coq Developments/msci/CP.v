@@ -908,13 +908,45 @@ Proof.
       ; s; fsetdec.
 Qed.
 
-Export AtomSetImpl AtomSetFacts.
+Export AtomSetImpl AtomSetFacts AtomSetProperties.
+Lemma remove_union:
+  forall x s s',
+    remove x (union s s')[=]union (remove x s) (remove x s').
+Proof. fsetdec. Qed.
+
 Lemma remove_nfv_proc_eq:
-  forall P (x y:atom)
+  forall P k (x y:atom)
          (NFX: x `notin` fv_proc P)
          (NFY: y `notin` fv_proc P),
-    remove y (fv_proc (P ^^ y))[=]remove x (fv_proc (P ^^ x)).
-Proof. Admitted.
+    remove y (fv_proc ({k ~> y}P))[=]remove x (fv_proc ({k ~> x}P)).
+Proof.
+  induction P; ii; destruct_notin
+  ; try (by destruct_all pname; des; destruct_notin; fsetdec).
+  - rewrite !remove_union; rewrite~ (IHP1 (S k) x y)
+    ; rewrite~ (IHP2 (S k) y x); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP1 (S k) x y); rewrite~ (IHP2 (S k) y x); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP (S k) x y); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP k x y); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP k x y); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP1 k x y); rewrite~ (IHP2 k y x); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP (S k) x y); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP (S k) x y); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP k x y); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP k x y); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP k x y); fsetdec.
+  - destruct_all pname; des; destruct_notin; rewrite !remove_union
+    ; rewrite~ (IHP k x y); fsetdec.
+Qed.
 
 Lemma eq_InA_elements:
   forall xs ys x
