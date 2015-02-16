@@ -908,7 +908,15 @@ Proof.
       ; s; fsetdec.
 Qed.
 
-Export AtomSetImpl AtomSetFacts AtomSetProperties.
+(** Exporting required entities from AtomSetImpl, AtomSetFacts and
+    AtomSetProperties. *)
+Definition elements := Metatheory.elements.
+Definition elements_3w := AtomSetImpl.elements_3w.
+Definition elements_iff := AtomSetFacts.elements_iff.
+Definition equal_sym := AtomSetProperties.equal_sym.
+Definition remove := Metatheory.remove.
+Definition remove_iff := AtomSetFacts.remove_iff.
+
 Lemma remove_union:
   forall x s s',
     remove x (union s s')[=]union (remove x s) (remove x s').
@@ -1068,7 +1076,6 @@ Proof.
   ii; induction WT; eauto
   ; pick fresh y; destruct_notin; specializes H Fr; eauto.
 Qed.
-
 
 Section CPBasicSubstOpenProperties.
 
@@ -1550,24 +1557,9 @@ Section CPBasicSubstOpenProperties.
           ; [exact PER|auto|]; []; solve_perm. }
         { rewrite app_assoc; apply IHWT; try solve_perm.
           forwards UNX: uniq_perm_app PER NINX; destruct_uniq; solve_uniq. }
-    - eapply Permutation_trans in PER; [|apply Permutation_sym; exact PER0].
-      forwards~ UN2: uniq_perm PER0; forwards~ UN3: uniq_perm PER
-      ; forwards~ BNDS: Perm_binds x A PER.
-      analyze_binds_uniq BNDS; try rewrite !dom_app in *; destruct_notin.
-      + s; des; clear H0; rewrite <-app_nil_l in PER
-        ; apply perm_dom_uniq in PER; auto; ss; eapply cp_empcho
-        ; ii; substs~; destruct_notin.
-        { eapply Permutation_trans; [apply Permutation_app|]
-          ; [exact PER|auto|]; []; solve_perm. }
-      + apply binds_env_split in BindsTac
-        ; inversion_clear BindsTac as (Γ1 & Γ2 & EQ); substs~.
-        rewrite app_assoc in *; apply perm_dom_uniq in PER; auto; ss
-        ; destruct_notin; destruct (x0 == x)
-        ; tryfalse; des_reqs.
-        clear n0; eapply cp_empcho with (Δ:=Γ1++Γ2++y~ A)
-        ; ii; substs~; destruct_notin.
-        { eapply Permutation_trans; [apply Permutation_app|]
-          ; [exact PER|auto|]; []; solve_perm. }
+    - eapply Permutation_sym,Permutation_trans,Permutation_sym in PER
+      ; [|apply Permutation_app_comm].
+      apply Permutation_length_1_inv in PER; inverts PER; s; des; auto.
   Qed.
 
   Lemma typing_rename:
@@ -1587,6 +1579,112 @@ Section CPBasicSubstOpenProperties.
   Qed.
 
 End CPBasicSubstOpenProperties.
+
+Lemma wt_nin_env:
+  forall (Γ Δ:penv) (x:atom)
+         (NIN: x `notin` dom Γ)
+         (IN: x `in` dom Δ)
+         (PER: Permutation Γ Δ),
+    False.
+Proof.
+  ii; apply NIN; analyze_in x; apply Permutation_sym in PER
+  ; forwards: Perm_in x PER; simpl_env; fsetdec.
+Qed.
+
+Lemma wt_nin_proc:
+  forall Γ P k (x:atom)
+         (NIN: x `notin` dom Γ)
+         (WT: {k ~> x}P ⊢cp Γ),
+    P ⊢cp Γ.
+Proof.
+  i; remember ({k ~> x}P) as P'; gen P k; induction WT; ii
+  ; match goal with
+    | |- context[?P ⊢cp ?Γ] => destruct P; try discriminate; inv HeqP'
+    end.
+  - forwards UN1: uniq_perm PER UN.
+    destruct_all pname; des; destr_eq H0; destr_eq H1; subst
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    apply cp_fwd with (A:=A); auto.
+  - pick fresh y and apply cp_cut; destruct_notin
+    ; try (solve [eassumption|auto]); specializes H Fr; specializes H0 Fr
+    ; first [apply H with (k0:=S k)|apply H0 with (k0:=S k)]
+    ; solve [rewrite /open_proc; rewrite~ open_rec_comm
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H1; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    pick fresh y and apply cp_output; destruct_notin; ss
+    ; try (solve [eassumption|auto])
+    ; first [specializes H Fr; apply H with (k0:=S k)
+            |apply IHWT with (k0:=S k)]
+    ; solve [reflexivity
+            |rewrite /open_proc; rewrite~ open_rec_comm
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H1; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    pick fresh y and apply cp_input; destruct_notin; ss
+    ; try (solve [eassumption|auto]); specializes H Fr; apply H with (k0:=S k)
+    ; solve [rewrite /open_proc; rewrite~ open_rec_comm
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H; destr_eq H0; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    applys cp_left PER; apply IHWT with (k0:=k); eauto using wt_nin_env.
+  - destruct_all pname; des; destr_eq H; destr_eq H0; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    applys cp_right PER; apply IHWT with (k0:=k); eauto using wt_nin_env.
+  - destruct_all pname; des; destr_eq H0; destr_eq H1; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    applys cp_choice PER
+    ; first [apply IHWT1 with (k0:=k)
+            |apply IHWT2 with (k0:=k)]
+    ; solve [reflexivity
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H1; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    pick fresh y and apply cp_accept; destruct_notin; ss
+    ; try (solve [eassumption|auto]); specializes H Fr; apply H with (k0:=S k)
+    ; solve [rewrite /open_proc; rewrite~ open_rec_comm
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H1; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    pick fresh y and apply cp_request; destruct_notin; ss
+    ; try (solve [eassumption|auto]); specializes H Fr; apply H with (k0:=S k)
+    ; solve [rewrite /open_proc; rewrite~ open_rec_comm
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H1; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    applys~ cp_weaken PER; apply IHWT with (k0:=k)
+    ; solve [reflexivity
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H1; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    pick fresh y and apply cp_send; destruct_notin; ss
+    ; try (solve [eassumption|auto]); specializes H Fr; apply H with (k0:=k)
+    ; solve [reflexivity
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H1; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    pick fresh y and apply cp_recv; destruct_notin; ss
+    ; try (solve [eassumption|auto]); specializes H Fr; apply H with (k0:=k)
+    ; solve [reflexivity
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H; substs~; fsetdec.
+  - destruct_all pname; des; destr_eq H0; destr_eq H; substs
+    ; try (by exfalso; applys wt_nin_env x PER; simpl_env; fsetdec).
+    applys~ cp_empin PER; apply IHWT with (k0:=k)
+    ; solve [reflexivity
+            |rewrite_env (x `notin` dom Γ) in NIN; i
+             ; applys wt_nin_env NIN PER; simpl_env; fsetdec].
+  - destruct_all pname; des; destr_eq H0; destr_eq H; substs~; fsetdec.
+Qed.
 
 Section ProcEquiv.
 
@@ -2084,32 +2182,6 @@ Lemma reduce_add:
          (WT: ν A ⨂ B → (0[inl] → P) ‖ 0 CASE Q OR R ⊢cp Γ),
     ν A → P ‖ Q ⊢cp Γ.
 Proof.
-Admitted.
-
-Lemma wt_nin_proc:
-  forall Γ P k (x:atom)
-         (NIN: x `notin` dom Γ)
-         (WT: {k ~> x}P ⊢cp Γ),
-    P ⊢cp Γ.
-Proof.
-  i; remember ({k ~> x}P) as P'; gen P k; induction WT; ii
-  ; match goal with
-    | |- context[?P ⊢cp ?Γ] => destruct P; try discriminate; inv HeqP'
-    end.
-  - forwards UN1: uniq_perm PER UN.
-    destruct_all pname; des; destr_eq H0; destr_eq H1; subst
-    ; try (by exfalso; apply NIN; apply Permutation_sym in PER
-           ; applys Perm_in PER; ss; fsetdec).
-    apply cp_fwd with (A:=A); auto.
-  - pick fresh y and apply cp_cut; destruct_notin
-    ; try (solve [eassumption|auto]); specializes H Fr; specializes H0 Fr
-    ; first [apply H with (k0:=S k)|apply H0 with (k0:=S k)]
-    ; solve [rewrite /open_proc; rewrite~ open_rec_comm
-            |i; apply NIN; apply Permutation_sym in PER; applys Perm_in PER
-             ; rewrite dom_app; fsetdec].
-Admitted.
-
-
 Admitted.
 
 Lemma reduce_gc:
