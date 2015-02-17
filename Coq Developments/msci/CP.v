@@ -1566,16 +1566,16 @@ Section CPBasicSubstOpenProperties.
     forall Γ P (x y : atom) A
            (NINX: x `notin` dom Γ `union` fv_proc P)
            (NINY: y `notin` dom Γ `union` fv_proc P)
-           (WTX: P ^^ x ⊢cp Γ ++ (x ~ A)),
-      P ^^ y ⊢cp Γ ++ (y ~ A).
+           (WTX: P ^^ x ⊢cp (x ~ A) ++ Γ),
+      P ^^ y ⊢cp (y ~ A) ++ Γ.
   Proof.
-    ii; destruct (x == y); subst; auto.
-    assert (UN: uniq ((x ~ A) ++ Γ)) by (eapply uniq_reorder_1
-                                         ; eapply cp_implies_uniq; eauto).
-    assert (UN': uniq Γ) by (inversion UN; auto).
+    ii; destruct (x == y); subst; auto; simpl_env in *.
+    forwards UN: cp_implies_uniq WTX.
     rewrite (@subst_intro x); auto.
-    rewrite_env (Γ ++ (y ~ A) ++ nil).
-    apply typing_subst with (A := A); auto.
+    rewrite_env ((y ~ A) ++ Γ).
+    eapply ignore_env_order; [apply Permutation_app_comm|].
+    apply typing_subst with (A := A); [solve_uniq|].
+    eapply ignore_env_order; [apply Permutation_app_comm|]; auto.
   Qed.
 
 End CPBasicSubstOpenProperties.
@@ -2154,10 +2154,7 @@ Proof.
   apply Permutation_sym,Permutation_length_1_inv in PER0; substs~; s in PER.
   forwards~ UN3: uniq_perm PER.
   apply Permutation_sym in PER; applys ignore_env_order PER; simpl_env.
-  eapply ignore_env_order; [apply Permutation_app_comm|].
   apply typing_rename with (x:=y); try (by destruct_uniq; solve_notin).
-  eapply ignore_env_order; [apply Permutation_app_comm|].
-  apply~ CPQ.
 Qed.
 
 Lemma reduce_multi:
@@ -2167,14 +2164,49 @@ Lemma reduce_multi:
     ν A → P ‖ ν B → Q ‖ R ⊢cp Γ.
 Proof.
   ii; inversion WT; subst.
-  pick fresh y; destruct_notin; specializes CPP Fr.
-  rewrite /open_proc in CPP; simpl in CPP.
-  inverts keep CPP; rewrite !cons_app_one in *.
-  forwards UN1: uniq_perm PER0 UN0.
+  pick fresh y; destruct_notin
+  ; repeat match goal with
+             | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
+               => specializes H H1; rewrite /open_proc in H; s in H
+                  ; inverts keep H; simpl_env in *
+           end.
+  pick fresh z; destruct_notin.
+  specializes CPP0 NotInTac5; specializes CPP1 NotInTac6.
+
+  forwards UNP: uniq_perm PER0 UN0.
   eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
   rewrite <-app_nil_l in PER0; forwards EQC: perm_cod_uniq PER0
   ; [solve_uniq|]; inverts EQC; substs~.
   apply perm_dom_uniq in PER0; [|solve_uniq]; rewrite app_nil_l in PER0.
+
+  forwards UNQ: uniq_perm PER1 UN1.
+  eapply Permutation_trans in PER1; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER1; forwards EQC: perm_cod_uniq PER1
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER1; [|solve_uniq]; rewrite app_nil_l in PER1.
+
+  rewrite /open_proc open_rec_comm in CPP1; auto.
+  apply wt_nin_proc in CPP1; [|simpl_env; autounfold; i; destruct_in; auto
+                               ; applys wt_nin_env NotInTac0 PER1; simpl_env
+                               ; fsetdec].
+  eapply Permutation_sym,Permutation_trans in PER
+  ; [|apply Permutation_app; apply Permutation_sym; eassumption].
+  apply Permutation_sym in PER; forwards UNG: uniq_perm PER UN
+  ; apply Permutation_sym in PER.
+  applys ignore_env_order PER; simpl_env.
+  pick fresh w and apply cp_cut; destruct_notin; auto; first solve_uniq
+  ; let v := match goal with
+               | |- context[P] => z
+               | |- context[Q] => y
+             end
+    in
+    apply typing_rename with (x:=v); try (by destruct_uniq; solve_notin)
+    ; clears w.
+  eapply ignore_env_order; [apply Permutation_app_comm|].
+  rewrite /open_proc; s; simpl_env.
+  pick fresh w and apply cp_cut; destruct_notin; auto; first solve_uniq.
+  - admit.
+  - eapply ignore_env_order; [apply Permutation_app_head; apply Permutation_app_comm|].
 Admitted.
 
 Lemma reduce_add:
