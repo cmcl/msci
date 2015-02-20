@@ -2,7 +2,7 @@
 
 \usepackage{macros}
 \usepackage{hyperref}
-
+\usepackage{comment}
 \usepackage{listings}
 \usepackage{lstcoq}
 \usepackage{graphicx}
@@ -30,30 +30,40 @@
 
 \begin{document}
 
-\title{Mechanisation of Session-based Lambda Calculus Type Systems}
+\title{Propositions as Sessions, Mechanically}
 \author{Craig McLaughlin}
 \matricnum{1002524}
 
 \maketitle
 
 \begin{abstract}
-According to Simon Peyton Jones, an abstract should address
-four key questions. First, what is the problem that this
-paper tackles? Second, why is this an interesting problem?
-Third, what is the solution this paper proposes?
-Finally, why is the proposed solution a good one?
+\begin{comment}
+SPL (+CPL)
+
+WTD
+
+ROF
+
+IMP
+\end{comment}
 \end{abstract}
 
-\section{Introduction}\label{intro}
+\begin{comment}
+\section{Issues}
 
-Two aspects of programming language research are relevant for this
-project. The first is concerned with static type systems for ensuring runtime
-safety properties for concurrent communication systems. The second is the
-increasing use of proof assistants and interactive theorem provers for
-studying and mechanically verifying the semantics and properties of
-programming languages.
+\begin{itemize}
+\item What is required of a Metatheory library for linear type systems?
+  Permutation reasoning? Weakening/Contraction for non-linear components?
+\item Discuss the different approaches that were taken to maintain close
+  correspondence with the paper presentation
+\item Make sure to note that the paper leaves details (a lot of the ``cruft'')
+  out of the proofs e.g. where weakening is applied in the typing derivations
+\item Mention the use of Metatheory and its limitations when mechanising
+  linear type systems like GV/CP
+\end{itemize}
+\end{comment}
 
-\subsection{On Communication}
+\section{Introduction}\label{sec:intro}
 
 Distributed communication systems are becoming increasingly prevalent in
 modern society. To facilitate communication between concurrently executing
@@ -82,8 +92,6 @@ associated with an explicit type which provides a description of its
 protocol. Thus, in session-based systems a channel is usually provided as a
 primitive type.
 
-\subsection{On Verification}
-
 In programming language research, work on static type systems is usually
 presented on paper complete with informal proofs of correctness for the system
 properties. Most types systems in the session types community have been
@@ -91,22 +99,34 @@ developed in this way. However, it is more difficult to extend work using this
 approach, as it may be unclear how changes affect proofs and one will
 typically have to re-consider all proofs to be convinced the properties still
 hold. More generally, unassisted formalisms are error-prone to develop and do
-not provide a firm basis upon which other researchers can experiment; often it
-will require ``rolling your own'' compiler for the language of interest.
+not provide a firm basis upon which other researchers can experiment.
 
 Proof assistants such as Coq~\cite{Coq:manual} offer a platform on which to
 develop programming languages and type systems and associated proofs of
 properties with strong guarantees of correctness. Not only is proving with a
 proof assistant much less error-prone than the unaided approach, it also eases
 extension of the system since the proof assistant will highlight parts of
-proofs that have been affected by changes. However, one may have to prove more
-properties using this approach since this setting does not permit appealing to
-human intuition. For example, alpha-equivalence and freshness of binders are
-usually assumed in informal presentations, whereas in the mechanised setting
-one has to explicitly encode and reason about these
+proofs that have been affected by changes. On the other hand, one may have to
+prove more properties using this approach since this setting does not permit
+appealing to human intuition. For example, alpha-equivalence and freshness of
+binders are usually assumed in informal presentations, whereas in the
+mechanised setting one has to explicitly encode and reason about these
 properties~\cite{Aydemir:2005:MMM, Aydemir:2008:EFM}.
 
-\section{Background}
+This project describes work towards the development of a framework for
+formalising lambda calculus type systems with session types using interactive
+theorem proving (in particular, the system Coq). The framework should enable a
+whole class of related languages and type systems to be formalised with little
+extra proof effort. Inspired by previous work on a mechanised framework for
+$\pi$-calculus type systems~\cite{Gay:2001:FFP}, the current work focuses on
+the lambda calculus to provide a basis on which session types for mainstream
+programming languages can be studied, whilst taking advantage of previous
+proof effort and specialising only for those parts unique to the particular
+system. The framework is heavily based on calculi developed by
+\citeauthor{Wadler:2014}~\cite{Wadler:2014} describing a relationship between
+classical linear logic (CP) and a functional language with session types (GV).
+
+\section{Related Work}\label{sec:rw}
 
 The background for this project can be categorised roughly as previous work on
 session-based type systems (sub-divided into $\pi$ and $\lambda$-calculi
@@ -524,23 +544,14 @@ $\pi$-calculus and the main focus is proving soundness properties for the
 deduction rules allowing polymorphism, rather than a more general basis for
 studying programming with session types.
 
-\section{Evaluation}
+\section{Formalisation}
 
-Graphs are always good. I recommend getting to grips with Matlab, R or
-gnuplot rather than exporting horribly Excel bitmapped graphs.
+I describe the formalisation as it currently stands in this section.
 
 
-\begin{quotation}
- The Assyrian came down like the wolf on the fold,
- And his cohorts were gleaming in purple and gold;
- And the sheen of their spears was like stars on the sea,
- When the blue wave rolls nightly on deep Galilee.
+\subsection{Future Work}
 
- Like the leaves of the forest when Summer is green,
- That host with their banners at sunset were seen:
- Like the leaves of the forest when Autumn hath blown,
- That host on the morrow lay withered and strown.
-\end{quotation}
+There remains much to be done.
 
 \section{Conclusions}
 
