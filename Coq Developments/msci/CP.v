@@ -524,11 +524,11 @@ Inductive cp_rule : proc -> penv -> Prop :=
                            (open_proc P y) ⊢cp (y ~ A) ++ (x ~ B) ++ ΔP),
                  ⟨A⟩x → P ⊢cp Γ
   | cp_left : forall P Γ Δ x A B
-                     (PER: Permutation Γ ((x ~ A ⨂ B) ++ Δ))
+                     (PER: Permutation Γ ((x ~ A ⨁ B) ++ Δ))
                      (CPP: P ⊢cp (x ~ A) ++ Δ),
                 x[inl] → P ⊢cp Γ
   | cp_right : forall P Γ Δ x A B
-                      (PER: Permutation Γ ((x ~ A ⨂ B) ++ Δ))
+                      (PER: Permutation Γ ((x ~ A ⨁ B) ++ Δ))
                       (CPP: P ⊢cp (x ~ B) ++ Δ),
                  x[inr] → P ⊢cp Γ
   | cp_choice : forall P Q Γ Δ x A B
@@ -1842,11 +1842,16 @@ Inductive proc_red : proc -> proc -> Prop :=
         ν A ⨂ B → ([A]0 → P ‖ Q) ‖ ⟨dA⟩ 0 → R
       ==>cp
         ν A → P ‖ (ν B → {0 <~> 1}Q ‖ {0 <~> 1}R)
-  | red_add :
+  | red_add_inl :
       forall P Q R A B,
-        ν A ⨂ B → (0[inl] → P) ‖ 0 CASE Q OR R
+        ν A ⨁ B → (0[inl] → P) ‖ 0 CASE Q OR R
       ==>cp
         ν A → P ‖ Q
+  | red_add_inr :
+      forall P Q R A B,
+        ν A ⨁ B → (0[inr] → P) ‖ 0 CASE Q OR R
+      ==>cp
+        ν B → P ‖ R
   | red_gc :
       forall P Q (y:atom) A B
              (NF: y `notin` fv_proc P),
@@ -1988,12 +1993,83 @@ Proof.
     rewrite~ open_rec_comm.
 Qed.
 
-Lemma reduce_add:
+Lemma reduce_add_inl:
   forall P Q R A B Γ
-         (WT: ν A ⨂ B → (0[inl] → P) ‖ 0 CASE Q OR R ⊢cp Γ),
+         (WT: ν A ⨁ B → (0[inl] → P) ‖ 0 CASE Q OR R ⊢cp Γ),
     ν A → P ‖ Q ⊢cp Γ.
 Proof.
-Admitted.
+  ii; inversion WT; subst.
+  pick fresh y; destruct_notin
+  ; repeat match goal with
+             | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
+               => specializes H H1; rewrite /open_proc in H; s in H
+                  ; inverts keep H; simpl_env in *
+           end.
+
+  forwards UN0: cp_implies_uniq CPP0.
+  apply Permutation_sym in PER0; forwards UNQ: uniq_perm PER0; [solve_uniq|]
+  ; apply Permutation_sym in PER0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER0; forwards EQC: perm_cod_uniq PER0
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq]; rewrite app_nil_l in PER0.
+
+  forwards UN1: cp_implies_uniq CPP1.
+  apply Permutation_sym in PER1; forwards UNP: uniq_perm PER1; [solve_uniq|]
+  ; apply Permutation_sym in PER1.
+  eapply Permutation_trans in PER1; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER1; forwards EQC: perm_cod_uniq PER1
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER1; [|solve_uniq]; rewrite app_nil_l in PER1.
+
+  eapply Permutation_sym,Permutation_trans in PER
+  ; [|apply Permutation_app; apply Permutation_sym; eassumption].
+  applys ignore_env_order PER.
+  apply Permutation_sym in PER; apply (uniq_perm _ _ _ PER) in UN.
+  forwards NINP: Perm_notin PER1 NotInTac0.
+  forwards NINQ: Perm_notin PER0 NotInTac1.
+  pick fresh x and apply cp_cut; destruct_notin; auto
+  ; apply typing_rename with (x:=y); try (by solve_notin).
+Qed.
+
+Lemma reduce_add_inr:
+  forall P Q R A B Γ
+         (WT: ν A ⨁ B → (0[inr] → P) ‖ 0 CASE Q OR R ⊢cp Γ),
+    ν B → P ‖ R ⊢cp Γ.
+Proof.
+  ii; inversion WT; subst.
+  pick fresh y; destruct_notin
+  ; repeat match goal with
+             | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
+               => specializes H H1; rewrite /open_proc in H; s in H
+                  ; inverts keep H; simpl_env in *
+           end.
+
+  forwards UN0: cp_implies_uniq CPP0.
+  apply Permutation_sym in PER0; forwards UNQ: uniq_perm PER0; [solve_uniq|]
+  ; apply Permutation_sym in PER0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER0; forwards EQC: perm_cod_uniq PER0
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq]; rewrite app_nil_l in PER0.
+
+  forwards UN1: cp_implies_uniq CPP1.
+  apply Permutation_sym in PER1; forwards UNP: uniq_perm PER1; [solve_uniq|]
+  ; apply Permutation_sym in PER1.
+  eapply Permutation_trans in PER1; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER1; forwards EQC: perm_cod_uniq PER1
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER1; [|solve_uniq]; rewrite app_nil_l in PER1.
+
+  eapply Permutation_sym,Permutation_trans in PER
+  ; [|apply Permutation_app; apply Permutation_sym; eassumption].
+  applys ignore_env_order PER.
+  apply Permutation_sym in PER; apply (uniq_perm _ _ _ PER) in UN.
+  forwards NINP: Perm_notin PER1 NotInTac0.
+  forwards NINQ: Perm_notin PER0 NotInTac1.
+  pick fresh x and apply cp_cut; destruct_notin; auto
+  ; apply typing_rename with (x:=y); try (by solve_notin).
+Qed.
 
 Lemma reduce_gc:
   forall P Q (y:atom) A B Γ
@@ -2050,7 +2126,8 @@ Proof.
       apply CPP2 in H0; destruct_in; ss; fsetdec.
 Qed.
 
-Hint Resolve reduce_axcut reduce_multi reduce_add reduce_gc.
+Hint Resolve reduce_axcut reduce_multi reduce_add_inl reduce_add_inr
+     reduce_gc.
 
 Theorem proc_sub_red: forall Γ P Q
     (WT: P ⊢cp Γ)
