@@ -394,6 +394,39 @@ Fixpoint fv_proc (p : proc) : atoms :=
     | z CASE 0 => fv z
     end.
 
+(* Permute binders inside process. *)
+Reserved Notation "{ a <~> b } Q" (at level 68).
+
+Fixpoint swap_binders (a b:nat) (Q:proc) : proc :=
+  let
+    swap := fun x => match x with
+                     | p_bn n =>
+                       p_bn (if n == a then b else if n == b then a else n)
+                     | _ => x
+                     end
+  in
+    match Q with
+    | w ⟷ z => swap w ⟷ swap z
+    | ν A → P ‖ R
+      => ν A → ({S a <~> S b} P) ‖ ({S a <~> S b} R)
+    | [A] z → P ‖ R
+      => [A] (swap z) → ({S a <~> S b} P) ‖ ({S a <~> S b}R)
+    | ⟨A⟩ z → P => ⟨A⟩ (swap z) → ({S a <~> S b} P)
+    | z [inl] → P => (swap z) [inl] → ({a <~> b} P)
+    | z [inr] → P => (swap z) [inr] → ({a <~> b} P)
+    | z CASE P OR R
+      => (swap z) CASE ({a <~> b} P) OR ({a <~> b} R)
+    | ! ⟨A⟩ z → P => ! ⟨A⟩ (swap z) → ({S a <~> S b} P)
+    | ? [A] z → P => ? [A] (swap z) → ({S a <~> S b} P)
+    | ? [] z → P => ? [] (swap z) → ({a <~> b} P)
+    | p_send z A P => p_send (swap z) A ({a <~> b} P)
+    | p_recv z P => p_recv (swap z) ({a <~> b} P)
+    | z → 0 => swap z → 0
+    | ⟨⟩ z → P => ⟨⟩ (swap z) → ({a <~> b} P)
+    | z CASE 0 => (swap z) CASE 0
+    end
+where "{ a <~> b } P" := (swap_binders a b P).
+
 (** Environments for the process calculus are mappings of atoms to
     propositions. *)
 Definition penv := list (atom * prop).
@@ -1127,6 +1160,14 @@ Section CPBasicSubstOpenProperties.
                           ; solve [auto | fsetdec]).
   Qed.
 
+  Lemma subst_open_rec:
+    forall P x y k,
+      [y ~> x] ({k ~> y} P) = {k ~> x} ([y ~> x] P).
+  Proof.
+    ii; gen k; induction P; ii; destruct_all pname; des; tryfalse
+    ; f_equal; auto.
+  Qed.
+
   Lemma subst_open_var :
     forall (x y : atom) u t
            (NEQ: y <> x),
@@ -1578,6 +1619,42 @@ Section CPBasicSubstOpenProperties.
     eapply ignore_env_order; [apply Permutation_app_comm|]; auto.
   Qed.
 
+  Lemma swap_binders_id:
+    forall P i,
+      {i <~> i} P = P.
+  Proof.
+    intro; induction P; i; ss; destruct_all pname; des; substs; f_equal; auto.
+  Qed.
+
+  Lemma swap_binders_fv:
+    forall P i j,
+      fv_proc ({i <~> j}P) = fv_proc P.
+  Proof.
+    ii; destruct (i == j); substs; [rewrite~ swap_binders_id|]; gen i j.
+    induction P; ii; destruct_all pname; des; substs; tryfalse
+    ; repeat (f_equal; auto).
+  Qed.
+
+  Lemma swap_binders_open_id:
+    forall P x i j,
+      {i ~> x}({j ~> x}({i <~> j}P)) = {i ~> x}({j ~> x}P).
+  Proof.
+    ii; destruct (i == j); substs; [rewrite~ swap_binders_id|].
+    gen i j; induction P; ii; destruct_all pname; des; substs; tryfalse
+    ; f_equal; auto.
+  Qed.
+
+  Lemma swap_binders_open:
+    forall P x y i j,
+      {i ~> x}({j ~> y}({i <~> j}P)) = {j ~> x}({i ~> y}P).
+  Proof.
+    ii; destruct (i == j); substs; [rewrite~ swap_binders_id|].
+    destruct (x == y); substs
+    ; [rewrite swap_binders_open_id; rewrite~ open_rec_comm|].
+    gen i j; induction P; ii; destruct_all pname; des; substs; tryfalse
+    ; f_equal; auto.
+  Qed.
+
 End CPBasicSubstOpenProperties.
 
 Lemma wt_nin_env:
@@ -1694,9 +1771,6 @@ Section ProcEquiv.
   
 End ProcEquiv.
 
-
-SearchAbout (elements _).
-
 Lemma fv_proc_NoDup:
   forall P, NoDupA Logic.eq (elements (fv_proc P)).
 Proof.
@@ -1709,7 +1783,9 @@ Qed.
 (*          (WT: {k ~> x}P ⊢cp Γ), *)
 (*     lc_proc P. *)
 (* Proof. *)
-(*   i; gen Γ k; induction P; ii; destruct_all pname; des; destruct_in; auto; inverts WT; try solve_notin. pick fresh y and apply lc_p_cut; destruct_notin. *)
+(*   i; gen Γ k; induction P; ii; destruct_all pname; des; destruct_in; auto
+     ; inverts WT; try solve_notin. pick fresh y and apply lc_p_cut
+     ; destruct_notin. *)
 (* specializes CPP Fr. *)
 (* unfold open_proc in *; rewrite~ open_rec_comm in CPP. *)
 (* specialize (IHP1 _ _ NFV CPP). *)
@@ -2134,6 +2210,45 @@ Inductive proc_red : proc -> proc -> Prop :=
         weakenv (elements (remove y (fv_proc (P ^^ y)))) Q
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
 
+Lemma assoc:
+  forall P Q R A B Γ
+         (WT: ν A → P ‖ ν B → Q ‖ R ⊢cp Γ),
+    ν B → ν A → P ‖ Q ‖ R ⊢cp Γ.
+Proof.
+  ii; inverts WT.
+  pick fresh x; destruct_notin.
+  specializes CPP Fr.
+  specializes CPQ Fr.
+  inverts CPQ.
+  pick fresh y; destruct_notin.
+  specializes CPP0 NotInTac5.
+  specializes CPQ0 NotInTac5.
+  forwards UN1: uniq_perm PER0 UN0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  extract_bnd x (¬A).
+  - simpl_env in *; apply perm_dom_uniq in PER0; [|solve_uniq].
+    eapply Permutation_sym,Permutation_trans,Permutation_sym in PER
+    ; [|apply Permutation_app]; [|auto|apply Permutation_sym; exact PER0].
+    rewrite /open_proc in CPQ0; rewrite~ open_rec_comm in CPQ0.
+    apply wt_nin_proc in CPQ0; [|simpl_env; solve_notin].
+    rewrite !app_assoc in PER.
+    forwards UN2: uniq_perm PER UN.
+    obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); try exact PER; auto
+    ; i; substs; destruct_notin.
+    + forwards NIN: Perm_notin PER0 NotInTac1; simpl_env in *.
+      apply typing_rename with (x:=y); try by solve_notin.
+      rewrite /open_proc; s; simpl_env.
+      eapply ignore_env_order; [apply Permutation_app_comm|].
+      simpl_env; obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); auto
+      ; first solve_uniq; i; substs; destruct_notin
+      ; apply typing_rename with (x:=x); try by solve_notin.
+      * rewrite /open_proc; rewrite~ open_rec_comm. 
+        rewrite lc_no_bvar; eauto using cp_implies_lc.
+      * admit (* Not provable... *).
+    + apply typing_rename with (x:=y); try solve_notin.
+  - admit (* this isn't provable either... *).
+Admitted.
+
 (** Lemmas for proving well-typedness of reduction rules. *)
 
 Lemma reduce_axcut:
@@ -2161,7 +2276,7 @@ Lemma reduce_multi:
   forall P Q R A dA B Γ
          (DUA: dual_props A dA)
          (WT: ν A ⨂ B → [A]0 → P ‖ Q ‖ ⟨dA ⟩ 0 → R ⊢cp Γ),
-    ν A → P ‖ ν B → Q ‖ R ⊢cp Γ.
+    ν A → P ‖ ν B → {0 <~> 1}Q ‖ R ⊢cp Γ.
 Proof.
   ii; inversion WT; subst.
   pick fresh y; destruct_notin
@@ -2200,13 +2315,22 @@ Proof.
                | |- context[Q] => y
              end
     in
-    apply typing_rename with (x:=v); try (by destruct_uniq; solve_notin)
+    apply typing_rename with (x:=v); try (by try (s; rewrite swap_binders_fv) 
+                                          ; destruct_uniq; solve_notin)
     ; clears w.
   eapply ignore_env_order; [apply Permutation_app_comm|].
   rewrite /open_proc; s; simpl_env.
   pick fresh w and apply cp_cut; destruct_notin; auto; first solve_uniq.
-  - admit.
-  - eapply ignore_env_order; [apply Permutation_app_head; apply Permutation_app_comm|].
+  - rewrite /open_proc; rewrite swap_binders_open; rewrite~ open_rec_comm.
+    forwards QEQ: subst_fresh y w Q; [solve_notin|].
+    forwards OPQ: subst_open_rec Q w y 1; rewrite QEQ in OPQ.
+    eapply ignore_env_order in CPQ0; [|apply Permutation_app_comm].
+    apply typing_subst with (y:=w) in CPQ0; [|solve_uniq].
+    eapply ignore_env_order in CPQ0; [|apply Permutation_app_comm].
+    rewrite OPQ in CPQ0.
+    forwards LC: cp_implies_lc CPQ0; rewrite~ lc_no_bvar.
+  - eapply ignore_env_order
+    ; [apply Permutation_app_head; apply Permutation_app_comm|].
 Admitted.
 
 Lemma reduce_add:

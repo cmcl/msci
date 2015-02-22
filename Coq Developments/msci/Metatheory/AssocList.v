@@ -645,6 +645,20 @@ Section PermutationProperties.
         apply singleton_2; reflexivity.
   Qed.
 
+  Lemma Perm_notin:
+    forall (PER: Permutation E F)
+           (NIN: ~ In x (dom E)),
+      ~ In x (dom F).
+  Proof.
+    clear; intros; induction PER; auto.
+    - destruct x0 as [x' A']; rewrite ->dom_cons in *.
+      apply notin_union_3; eauto using notin_union_1,notin_union_2.
+    - destruct y as [y' A']; destruct x0 as [x0' A0'].
+      repeat rewrite ->dom_cons in *.
+      repeat apply notin_union_3; eauto using notin_union_1,notin_union_2.
+  Qed.
+
+
   Lemma three_way_perm:
     forall {A} (x y z:list A),
       Permutation (x ++ y ++ z) (y ++ x ++ z).
@@ -1328,7 +1342,8 @@ End ListDerived.
 
 Hint Resolve @nil_neq_one_mid @one_mid_neq_nil.
 
-Hint Resolve Permutation_trans Permutation_app Permutation_sym Perm_in.
+Hint Resolve Permutation_trans Permutation_app Permutation_sym Perm_in
+     Perm_notin.
 
 Hint Resolve @uniq_insert_mid @uniq_map_app_l uniq_perm.
 

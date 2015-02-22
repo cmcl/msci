@@ -1,7 +1,6 @@
 -R . MSciProject
 ./GV.v
 ./CP.v
-./Duality.v
 ./Tactics.v
 ./SFLibTactics.v
 ./Metatheory/AssocList.v
@@ -17,8 +16,6 @@
 ./Metatheory/FSetWeakNotin.v
 ./Metatheory/Fsub_LetSum_Definitions.v
 ./Metatheory/Fsub_LetSum_Infrastructure.v
-./Metatheory/Fsub_LetSum_Lemmas.v
-./Metatheory/Fsub_LetSum_Soundness.v
 ./Metatheory/LibDefaultSimp.v
 ./Metatheory/LibLNgen.v
 ./Metatheory/LibTactics.v
