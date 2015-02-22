@@ -1853,9 +1853,9 @@ Inductive proc_red : proc -> proc -> Prop :=
       ==>cp
         ν B → P ‖ R
   | red_gc :
-      forall P Q (y:atom) A B
+      forall P Q (y:atom) A
              (NF: y `notin` fv_proc P),
-        ν ! A → ! ⟨B⟩0 → P ‖ ? [] 0 → Q
+        ν ! A → ! ⟨A⟩0 → P ‖ ? [] 0 → Q
       ==>cp
         weakenv (elements (remove y (fv_proc (P ^^ y)))) Q
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
@@ -2072,9 +2072,9 @@ Proof.
 Qed.
 
 Lemma reduce_gc:
-  forall P Q (y:atom) A B Γ
+  forall P Q (y:atom) A Γ
          (NF: y `notin` fv_proc P)
-         (WT: ν ! A → ! ⟨B⟩0 → P ‖ ? [] 0 → Q ⊢cp Γ),
+         (WT: ν ! A → ! ⟨A⟩0 → P ‖ ? [] 0 → Q ⊢cp Γ),
     weakenv (elements (remove y (fv_proc (P ^^ y)))) Q ⊢cp Γ.
 Proof.
   ii; forwards LC: cp_implies_lc WT; inversion WT; inverts LC; subst.
@@ -2104,7 +2104,7 @@ Proof.
     applys wt_nin_proc NotInTac4 CPP1.
   - pick fresh w; destruct_notin; specializes CPP0 NotInTac8.
     rewrite /open_proc in CPP0; rewrite~ open_rec_comm in CPP0.
-    forwards PER1: Permutation_app_head (w~B) PER0.
+    forwards PER1: Permutation_app_head (w~A) PER0.
     apply Permutation_sym in PER1; apply (ignore_env_order PER1) in CPP0.
     apply wt_nin_proc in CPP0; [|ss;fsetdec].
     eapply ignore_env_order in CPP0; [|apply Permutation_app_comm].
