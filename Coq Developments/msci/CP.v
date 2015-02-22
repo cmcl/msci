@@ -1852,6 +1852,11 @@ Inductive proc_red : proc -> proc -> Prop :=
         ν A ⨁ B → (0[inr] → P) ‖ 0 CASE Q OR R
       ==>cp
         ν B → P ‖ R
+  | red_spawn :
+      forall P Q A dA (DUA: dual_props A dA),
+        ν ! A → ! ⟨A⟩ 0 → P ‖ ? [dA]0 → Q
+      ==>cp
+        ν A → P ‖ Q
   | red_gc :
       forall P Q (y:atom) A
              (NF: y `notin` fv_proc P),
@@ -2071,6 +2076,52 @@ Proof.
   ; apply typing_rename with (x:=y); try (by solve_notin).
 Qed.
 
+Lemma reduce_spawn:
+  forall P Q A dA Γ
+         (DUA: dual_props A dA)
+         (WT: ν ! A → ! ⟨A⟩ 0 → P ‖ ? [dA]0 → Q ⊢cp Γ),
+    ν A → P ‖ Q ⊢cp Γ.
+Proof.
+  ii; inversion WT; subst.
+  pick fresh y; destruct_notin
+  ; repeat match goal with
+             | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
+               => specializes H H1; rewrite /open_proc in H; s in H
+                  ; inverts keep H; simpl_env in *
+           end.
+  pick fresh z; destruct_notin.
+  specializes CPP0 NotInTac4; specializes CPP1 NotInTac5.
+
+  forwards UNQ: uniq_perm PER0 UN0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER0; forwards EQC: perm_cod_uniq PER0
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq]; rewrite app_nil_l in PER0.
+
+  forwards UNP: uniq_perm PER1 UN1.
+  eapply Permutation_trans in PER1; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER1; forwards EQC: perm_cod_uniq PER1
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER1; [|solve_uniq]; rewrite app_nil_l in PER1.
+
+  rewrite /open_proc open_rec_comm in CPP1; auto.
+  apply wt_nin_proc in CPP1; [|simpl_env; autounfold; i; destruct_in; auto
+                               ; applys wt_nin_env NotInTac0 PER1; simpl_env
+                               ; fsetdec].
+  rewrite /open_proc open_rec_comm in CPP0; auto.
+  apply wt_nin_proc in CPP0; [|simpl_env; autounfold; i; destruct_in; auto
+                               ; applys wt_nin_env NotInTac1 PER0; simpl_env
+                               ; fsetdec].
+  eapply Permutation_sym,Permutation_trans in PER
+  ; [|apply Permutation_app; apply Permutation_sym; eassumption].
+  apply Permutation_sym in PER; forwards UNG: uniq_perm PER UN
+  ; apply Permutation_sym in PER.
+  applys ignore_env_order PER; simpl_env.
+
+  pick fresh w and apply cp_cut; destruct_notin; auto
+  ; apply typing_rename with (x:=z); try (by destruct_uniq; solve_notin).
+Qed.
+
 Lemma reduce_gc:
   forall P Q (y:atom) A Γ
          (NF: y `notin` fv_proc P)
@@ -2127,7 +2178,7 @@ Proof.
 Qed.
 
 Hint Resolve reduce_axcut reduce_multi reduce_add_inl reduce_add_inr
-     reduce_gc.
+     reduce_spawn reduce_gc.
 
 Theorem proc_sub_red: forall Γ P Q
     (WT: P ⊢cp Γ)
