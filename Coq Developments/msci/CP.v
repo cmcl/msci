@@ -213,6 +213,29 @@ Fixpoint prop_open_rec (k: nat) (u: atom) (pp: prop) :=
 
 Definition open_prop t u := prop_open_rec 0 u t.
 
+Fixpoint fv_prop (pp:prop) : atoms :=
+  match pp with
+  | pp_var v
+    => match v with
+       | pvar_fvar y => singleton y
+       | _ => empty
+       end
+  | pp_dvar v
+    => match v with
+       | pvar_fvar y => singleton y
+       | _ => empty
+       end
+  | A ⨂ B => fv_prop A `union` fv_prop B
+  | A ⅋ B => fv_prop A `union` fv_prop B
+  | A ⨁ B => fv_prop A `union` fv_prop B
+  | A & B => fv_prop A `union` fv_prop B
+  | ! A => fv_prop A
+  | ? A => fv_prop A
+  | pp_forall A => fv_prop A
+  | pp_exists A => fv_prop A
+  | _ => empty
+  end.
+
 Lemma prop_dual_preserves_subst: forall A B X,
   ¬({{A // X}}B) = {{A // X}}(¬B).
 Proof.
@@ -220,6 +243,18 @@ Proof.
   ; match goal with
     | |- context[?X == ?Y] => destruct (X == Y)
     end; auto using prop_dual_involutive.
+Qed.
+
+Lemma prop_dual_preserves_open:
+  forall k x A, ¬prop_open_rec k x A = prop_open_rec k x (¬A).
+Proof.
+  ii; gen k; induction A; ii; f_equal; auto; destruct p; des; auto.
+Qed.
+
+Lemma prop_dual_open_prop:
+  forall x A, ¬open_prop A x = open_prop (¬A) x.
+Proof.
+  ii; rewrite /open_prop prop_dual_preserves_open; auto.
 Qed.
 
 (** Names within processes; represent channel identifiers. *)
@@ -255,13 +290,7 @@ Notation "x ⟷ y" := (p_link x y) (at level 68) : cp_scope.
 Notation "'ν' A '→' P '‖' Q" := (p_par A P Q) (at level 68, x ident,
                                                right associativity)
                                               : cp_scope.
-(** Example of using parallel composition :
 
-    Parameter y : atom.
-    Print Grammar constr.
-    Check ν y : ((pp_var 0) ⅋ (pp_dvar 1)) →
-             p_empin y (p_empout y) | p_empout y.
-*)
 (** Change of notation from the paper; Coq doesn't seem to like the x coming
     first. *)
 Notation "'[' A ']' x '→' P '‖' Q" := (p_output x A P Q) (at level 68,
@@ -293,14 +322,6 @@ Notation "⟨⟩ x → P" := (p_empin x P) (at level 68,
                                       right associativity) : cp_scope.
 Notation "x 'CASE' 0" := (p_empcho x) (at level 68) : cp_scope.
 
-(** Example using some notations (demonstrates the right associativity of the
-    rules):
-
-Parameter x y: atom.
-Check ν x : (pp_var 0) ⨁ (pp_var 1) → x ⟷ y | x → 0.
-
-*)
-
 (** The following definition of substitution for a free name
     assumes the term to be substituted is locally closed.
 *)
@@ -330,6 +351,28 @@ Fixpoint proc_subst (x y: atom) (p: proc) : proc :=
     end.
 
 Notation "[ x ~> y ] P" := (proc_subst x y P) (at level 68) : cp_scope.
+
+(** Lifting substitution of a proposition for a propositional variable to
+    processes. *)
+Fixpoint proc_subst_prop (x:atom) (y:prop) (p: proc) : proc :=
+  match p with
+  | ν A → P ‖ Q
+    => ν {{ y // x}}A → (proc_subst_prop x y P) ‖ (proc_subst_prop x y Q)
+  | [A] z → P ‖ Q => [A] z → (proc_subst_prop x y P) ‖ (proc_subst_prop x y Q)
+  | ⟨A⟩ z → P => ⟨{{ y // x}}A⟩ z → (proc_subst_prop x y P)
+  | z [inl] → P => z [inl] → (proc_subst_prop x y P)
+  | z [inr] → P => z [inr] → (proc_subst_prop x y P)
+  | z CASE P OR Q => z CASE (proc_subst_prop x y P) OR (proc_subst_prop x y Q)
+  | ! ⟨A⟩ z → P => ! ⟨{{ y // x }}A⟩ z → (proc_subst_prop x y P)
+  | ? [A] z → P => ? [{{ y // x }}A] z → (proc_subst_prop x y P)
+  | ? [] z → P => ? [] z → (proc_subst_prop x y P)
+  | p_send z A P => p_send z ({{ y // x }}A) (proc_subst_prop x y P)
+  | p_recv z P => p_recv z (proc_subst_prop x y P)
+  | ⟨⟩ z → P => ⟨⟩ z → (proc_subst_prop x y P)
+  | _ => p
+  end.
+
+Notation "[ x ~>p y ] P" := (proc_subst_prop x y P) (at level 68) : cp_scope.
 
 (** Opening a proc p is replacing an unbound name with index k with
     free name x.
@@ -368,6 +411,33 @@ Definition open_proc P x := proc_open_rec 0 x P.
 Notation "P ^^ x" := (open_proc P x) (at level 68) : cp_scope.
 
 Hint Unfold open_proc.
+
+(** Lifting opening of a proposition to a process. *)
+Fixpoint proc_prop_open_rec (k: nat) (x: atom) (p: proc) :=
+  let
+    open := fun A => prop_open_rec k x A
+  in
+    match p with
+    | ν A → P ‖ Q
+      => ν (open A) → (proc_prop_open_rec k x P) ‖ (proc_prop_open_rec k x Q)
+    | [A] z → P ‖ Q
+      => [open A] z → (proc_prop_open_rec k x P) ‖ (proc_prop_open_rec k x Q)
+    | ⟨A⟩ z → P => ⟨open A⟩ z → (proc_prop_open_rec k x P)
+    | z [inl] → P => z [inl] → (proc_prop_open_rec k x P)
+    | z [inr] → P => z [inr] → (proc_prop_open_rec k x P)
+    | z CASE P OR Q
+      => z CASE (proc_prop_open_rec k x P) OR (proc_prop_open_rec k x Q)
+    | ! ⟨A⟩ z → P => ! ⟨open A⟩ z → (proc_prop_open_rec k x P)
+    | ? [A] z → P => ? [open A] z → (proc_prop_open_rec k x P)
+    | ? [] z → P => ? [] z → (proc_prop_open_rec k x P)
+    | p_send z A P => p_send z (open A) (proc_prop_open_rec k x P)
+    | p_recv z P => p_recv z (proc_prop_open_rec (S k) x P)
+    | ⟨⟩ z → P => ⟨⟩ z → (proc_prop_open_rec k x P)
+    | _ => p
+    end.
+
+Definition open_proc_prop P x := proc_prop_open_rec 0 x P.
+Notation "P '^^p' x" := (open_proc_prop P x) (at level 68) : cp_scope.
 
 Fixpoint fv_proc (p : proc) : atoms :=
   let
@@ -430,6 +500,12 @@ where "{ a <~> b } P" := (swap_binders a b P).
 (** Environments for the process calculus are mappings of atoms to
     propositions. *)
 Definition penv := list (atom * prop).
+
+Fixpoint fv_env (xs:penv) : atoms :=
+  match xs with
+  | nil => empty
+  | x :: xs' => let (_,a) := x in fv_prop a `union` fv_env xs'
+  end.
 
 (** Encoding an environment as all requests; for the server accept process
     rule. *)
@@ -591,7 +667,8 @@ Ltac gather_atoms ::=
   let B := gather_atoms_with (fun x : atom => singleton x) in
   let C := gather_atoms_with (fun x : list (atom * prop) => dom x) in
   let D := gather_atoms_with (fun x : proc => fv_proc x) in
-  constr:(A `union` B `union` C `union` D).
+  let E := gather_atoms_with (fun x : list (atom * prop) => fv_env x) in
+  constr:(A `union` B `union` C `union` D `union` E).
 
 Section SublistProperties.
   Variable A : Type.
@@ -1863,7 +1940,25 @@ Inductive proc_red : proc -> proc -> Prop :=
         ν ! A → ! ⟨A⟩0 → P ‖ ? [] 0 → Q
       ==>cp
         weakenv (elements (remove y (fv_proc (P ^^ y)))) Q
+  | red_exp :
+      forall P Q A B x
+             (NFV: x `notin` fv_proc Q `union` fv_prop B),
+        ν B → p_send 0 A P ‖ p_recv 0 Q
+      ==>cp
+        ν {{ A // x }}(open_prop B x) → P ‖ [x ~>p A](Q ^^p x)
+  | red_unit :
+      forall P,
+        ν pp_one → (0 → 0) ‖ ⟨⟩0 → P
+      ==>cp
+        P
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
+
+(* Find co-finitely quantified hypotheses to specialise. *)
+Ltac find_specializes :=
+  repeat match goal with
+         | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
+           => specializes H H1
+         end.
 
 Lemma assoc:
   forall P Q R A B Γ
@@ -1875,9 +1970,7 @@ Proof.
   specializes CPP Fr.
   specializes CPQ Fr.
   inverts CPQ.
-  pick fresh y; destruct_notin.
-  specializes CPP0 NotInTac5.
-  specializes CPQ0 NotInTac5.
+  pick fresh y; destruct_notin; find_specializes.
   forwards UN1: uniq_perm PER0 UN0.
   eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
   extract_bnd x (¬A).
@@ -1913,7 +2006,7 @@ Lemma reduce_axcut:
     P ^^ w ⊢cp Γ.
 Proof.
   ii; inversion WT; subst.
-  pick fresh y; destruct_notin; specializes CPP Fr.
+  pick fresh y; destruct_notin; find_specializes.
   rewrite /open_proc in CPP; simpl in CPP.
   inverts keep CPP; rewrite !cons_app_one in *.
   forwards UN1: uniq_perm PER0 UN0.
@@ -1941,8 +2034,7 @@ Proof.
                => specializes H H1; rewrite /open_proc in H; s in H
                   ; inverts keep H; simpl_env in *
            end.
-  pick fresh z; destruct_notin.
-  specializes CPP0 NotInTac5; specializes CPP1 NotInTac6.
+  pick fresh z; destruct_notin; find_specializes.
 
   forwards UNP: uniq_perm PER0 UN0.
   eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
@@ -2089,8 +2181,7 @@ Proof.
                => specializes H H1; rewrite /open_proc in H; s in H
                   ; inverts keep H; simpl_env in *
            end.
-  pick fresh z; destruct_notin.
-  specializes CPP0 NotInTac4; specializes CPP1 NotInTac5.
+  pick fresh z; destruct_notin; find_specializes.
 
   forwards UNQ: uniq_perm PER0 UN0.
   eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
@@ -2129,7 +2220,7 @@ Lemma reduce_gc:
     weakenv (elements (remove y (fv_proc (P ^^ y)))) Q ⊢cp Γ.
 Proof.
   ii; forwards LC: cp_implies_lc WT; inversion WT; inverts LC; subst.
-  pick fresh z; destruct_notin; specializes CPP Fr.
+  pick fresh z; destruct_notin; find_specializes.
   rewrite /open_proc in CPP; simpl in CPP.
   inverts keep CPP; rewrite !cons_app_one in *.
   forwards UN1: uniq_perm PER0 UN0.
@@ -2144,7 +2235,7 @@ Proof.
   apply Permutation_sym in PER; forwards UN2: uniq_perm PER UN.
   rewrite <-app_nil_r,<-app_assoc; apply typing_weaken; simpl_env
   ; try solve_uniq; auto using elements_3w.
-  - specializes CPQ Fr; rewrite /open_proc in CPQ; s in CPQ.
+  - rewrite /open_proc in CPQ; s in CPQ.
     inverts keep CPQ; simpl_env in *.
     forwards UN4: uniq_perm PER1 UN3.
     eapply Permutation_trans in PER1; [|apply Permutation_app_comm].
@@ -2153,14 +2244,14 @@ Proof.
     apply perm_dom_uniq in PER1; [|solve_uniq]; rewrite app_nil_l in PER1.
     apply Permutation_sym in PER1; apply (ignore_env_order PER1) in CPP1.
     applys wt_nin_proc NotInTac4 CPP1.
-  - pick fresh w; destruct_notin; specializes CPP0 NotInTac8.
+  - pick fresh w; destruct_notin; find_specializes.
     rewrite /open_proc in CPP0; rewrite~ open_rec_comm in CPP0.
     forwards PER1: Permutation_app_head (w~A) PER0.
     apply Permutation_sym in PER1; apply (ignore_env_order PER1) in CPP0.
     apply wt_nin_proc in CPP0; [|ss;fsetdec].
     eapply ignore_env_order in CPP0; [|apply Permutation_app_comm].
     forwards UN3: cp_implies_uniq CPP0.
-    forwards EQ: remove_nfv_proc_eq NF NotInTac17.
+    forwards EQ: remove_nfv_proc_eq NF NotInTac20.
     split; ii.
     + apply InA_iff_In; applys eq_InA_elements EQ.
       apply Permutation_sym in PER0; forwards IN: Perm_in PER0 H.
@@ -2174,11 +2265,84 @@ Proof.
       apply elements_iff,remove_iff in H; des.
       apply in_env_fv with (x:=x) in CPP0; des; rewrite !dom_app in *.
       applys Perm_in PER0.
-      apply CPP2 in H0; destruct_in; ss; fsetdec.
+      apply CPP2 in H0; ss; destruct_in; tryfalse; auto.
+Qed.
+
+Lemma reduce_exp:
+  forall P Q A B Γ x
+         (NFV: x `notin` fv_proc Q `union` fv_prop B)
+         (WT: ν pp_exists B → p_send 0 A P ‖ p_recv 0 Q ⊢cp Γ),
+    ν {{ A // x }}(open_prop B x) → P ‖ [x ~>p A](Q ^^p x) ⊢cp Γ.
+Proof.
+  ii; inversion WT; subst.
+  pick fresh y; destruct_notin
+  ; repeat match goal with
+             | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
+               => specializes H H1; rewrite /open_proc in H; s in H
+                  ; inverts keep H; simpl_env in *
+           end.
+  pick fresh z; destruct_notin; find_specializes.
+
+  forwards UNQ: cp_implies_uniq CPQ.
+  forwards UNΔ: uniq_perm PER0; [solve_uniq|].
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER0; forwards EQC: perm_cod_uniq PER0
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq]; rewrite app_nil_l in PER0.
+
+  forwards UNP: cp_implies_uniq CPP.
+  forwards UNΔ0: uniq_perm PER1; [solve_uniq|].
+  eapply Permutation_trans in PER1; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER1; forwards EQC: perm_cod_uniq PER1
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER1; [|solve_uniq]; rewrite app_nil_l in PER1.
+
+  eapply Permutation_sym,Permutation_trans in PER
+  ; [|apply Permutation_app; apply Permutation_sym; eassumption].
+  apply Permutation_sym in PER; forwards UNG: uniq_perm PER UN
+  ; apply Permutation_sym in PER.
+  applys ignore_env_order PER; simpl_env.
+
+  forwards NINP: Perm_notin PER1 NotInTac2.
+  forwards NINQ: Perm_notin PER0 NotInTac3.
+  pick fresh w and apply cp_cut; destruct_notin; auto.
+  apply typing_rename with (x:=y); try by solve_notin.
+  admit (* Rename x to z in cod of env pair. *).
+
+  apply typing_rename with (x:=y).
+  admit (* fv_proc [x ~>p A](Q ^^p x) = ... *).
+  admit (* fv_proc [x ~>p A](Q ^^p x) = ... *).
+  rewrite prop_dual_preserves_subst; rewrite prop_dual_open_prop.
+  admit (* Rename x to z in cod of env pair. *).
+Admitted.
+
+Lemma reduce_unit:
+  forall P Γ
+         (WT: ν pp_one → (0 → 0) ‖ ⟨⟩0 → P ⊢cp Γ),
+    P ⊢cp Γ.
+Proof.
+  ii; inversion WT; subst.
+  pick fresh y; destruct_notin
+  ; repeat match goal with
+             | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
+               => specializes H H1; rewrite /open_proc in H; s in H
+                  ; inverts keep H; simpl_env in *
+           end.
+
+  forwards UNP: uniq_perm PER0 UN0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  rewrite <-app_nil_l in PER0; forwards EQC: perm_cod_uniq PER0
+  ; [solve_uniq|]; inverts EQC; substs~.
+  apply perm_dom_uniq in PER0; [|solve_uniq]; rewrite app_nil_l in PER0.
+
+  forwards NIN: Perm_notin PER0 NotInTac1.
+  apply wt_nin_proc in CPP0; auto.
+  forwards PER2: Permutation_sym (Permutation_trans PER PER0).
+  applys~ ignore_env_order PER2.
 Qed.
 
 Hint Resolve reduce_axcut reduce_multi reduce_add_inl reduce_add_inr
-     reduce_spawn reduce_gc.
+     reduce_spawn reduce_gc reduce_exp reduce_unit.
 
 Theorem proc_sub_red: forall Γ P Q
     (WT: P ⊢cp Γ)
