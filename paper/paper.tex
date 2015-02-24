@@ -1,7 +1,6 @@
 \documentclass{mpaper}
 
 \usepackage{macros}
-\usepackage{hyperref}
 \usepackage{comment}
 \usepackage{listings}
 \usepackage{lstcoq}
@@ -509,7 +508,8 @@ do so without mentioning the actual variable name as follows:
 \begin{coq}
 Ltac my_tactic :=
   match goal with
-  | [v: var |- _] => ... tactics here possibly mentioning `v' hypothesis ...
+  | [v: var |- _] =>
+    ... tactics here possibly mentioning `v' hypothesis ...
   end.
 \end{coq}
 
@@ -546,6 +546,8 @@ pen-and-paper presentation and avoid questions of adequacy of the
 representation. Some changes were made to ease the mechanisation and are
 highlighted where they occur.
 
+\subsection{Preliminaries}\label{sec:approach}
+
 The locally nameless first-order representation for binders and free variables
 was adopted for both GV and CP, following
 \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM}. This first-order
@@ -559,37 +561,68 @@ approach. However, it was less clear how to handle linearity using this
 approach and has the disadvantage of being able to represent terms not valid
 in the language being mechanised (so called ``exotic'' terms). Further, a
 higher-order approach would prevent the use of the Metatheory library which
-provides a number of useful tactics for manipulating typing contexts. Previous
-efforts to mechanise \fpop~\cite{Park:2014:MMW} illustrate how to handle a
-language containing both linear and non-linear contexts. However, to stay true
-to CP/GV, I maintained a single context. Interestingly, it became clear that
-the mechanised version of CP required explicit weakening and contraction to
-facilitate the reduction rules.
+provides a number of useful tactics for manipulating typing contexts.
+
+Previous efforts to mechanise \fpop~\cite{Park:2014:MMW} illustrate how to
+handle a language containing both linear and non-linear contexts. However, to
+stay true to CP/GV, I maintained a single context. Interestingly, it became
+clear that the mechanised version of CP required explicit weakening and
+contraction to facilitate the reduction rules (\S~\ref{sec:cp}).
+
+\input{with-connect-rule}
 
 For handling binder freshness, I chose to adopt the cofinite quantification
-approach described by~\cite{Aydemir:2008:EFM}, which excludes a finite set of
-variables from being considered as the binder. In contrast, the traditional
-``exists-fresh'' approach, where the binder is only required to be fresh
-within the abstraction's body, does not produce strong enough induction
+approach described by~\citeauthor{Aydemir:2008:EFM}, which excludes a finite
+set of variables from being considered as the binder. In contrast, the
+traditional ``exists-fresh'' approach, where the binder is only required to be
+fresh within the abstraction's body, does not produce strong enough induction
 principles in some cases. This change will necessitate changes to the typing
-rules of GV and CP. Consider for instance the Connect rule in
-GV~\cite{Wadler:2014} (C) and its corresponding cofinite quantification
-version (CCO): \input{with-connect-rule}
+rules of GV and CP. Consider for instance the Connect rule in GV (C) and its
+corresponding cofinite quantification version (CCO) in
+Figure~\ref{fig:connect}. The conclusion specifies a variable in (C) but a
+type in (CCO) (de Bruijn index rather than a name). Thus, in the premise for
+(CCO) one can choose a suitably fresh $x$ in each premise. Note that, $L$ can
+be chosen such that $\Psi \cup \Phi \cup \fv(M) \cup \fv(N) \subseteq L$,
+where $\fv(M)$ are the set of free variables in term $M$, and $x$ can be the
+same in both premises. Similar changes are made to the rules for CP. These
+changes do not alter the typing of processes nor the semantics of the
+translation from GV to CP. An equivalence between ``exists-fresh'' and
+cofinite quantification definitions of the simply-typed $\lambda$-calculus is
+given by \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM}, and I suspect
+a similar result could be derived straightforwardly (but tediously) for the
+CP/GV system.
 
-The conclusion specifies a variable in (C) but a type in (CCO) (de Bruijn
-index rather than a name). Thus, in the premise for (CCO) one can choose a
-suitably fresh $x$ in each premise. Note that, $L$ can be chosen such that
-$\Psi \cup \Phi \cup \fv(M) \cup \fv(N) \subseteq L$, where $\fv(M)$ are the
-set of free variables in term $M$, and $x$ can be the same in both
-premises. Similar changes are made to the rules for CP (see
-\S~\ref{sec:cp}). These changes do not alter the typing of processes nor the
-semantics of the translation from GV to CP. An equivalence between
-``exists-fresh'' and cofinite quantification definitions of the simply-typed
-$\lambda$-calculus is given by
-\citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM}, and I suspect a similar
-result could be derived straightforwardly (but tediously) for the CP/GV
-system.
+Another aspect of the encoding is how to define terms. The intrinsic encoding
+described by~\citeauthor{Benton:2012:STT}~\cite{Benton:2012:STT} is one
+approach, indexing terms by their type so as to prevent ill-formed terms from
+being constructed. However, in the encoding for GV there are issues with using
+this encoding: $(1)$ it is not immediately clear how to handle linear contexts
+using the de Bruijn variable encoding, since in the intrinsic setting the
+environment supports weakening; $(2)$ an intrinsic encoding of terms would be
+complicated by the need to enforce that session types occur in certain
+instances (by use of a predicate); and $(3)$ well-typed terms require extra
+assumptions about binder freshness which cannot reasonably be expressed as a
+function type. For these reasons, an intrinsic approach does not offer much
+benefit since a well-typed term relation would still need to be
+defined. Therefore, I chose an extrinsic encoding for terms and define
+well-typed terms as a separate inductive type.
 
+\citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM} note that the size of
+their language proof infrastructure is proportional to the number of binding
+constructs. In the case of a simply typed lambda calculus this is not onerous,
+but GV has four binding constructs, CP has six and propositions have two. It
+may be true that this approach results in too many auxiliary definitions and
+operations not relevant to the actual properties one wishes to prove. However,
+I believe that once this infrastructure has been defined, the system can be
+extended without concern for these binding constructs.
+
+\citeauthor{Park:2014:MMW} describe a technique for
+removing nonlinear contexts from typing judgements. While their work extended
+to \fpop it is not clear how to handle an environment containing both
+non-linear and linear types as in GV. I wish to maintain as close a
+relationship as possible to the paper system presented by
+\citeauthor{Wadler:2014}, so separating out the non-linear and linear
+components (as in \fpop) is not an option at this stage.
 
 \begin{comment}
 \section{Issues}
@@ -628,12 +661,21 @@ Formalising the process calculus CP provided many challenges for the
 metatheory library since to my knowledge, the library has never been applied
 to a process calculus before. So for instance, in the lambda calculus one
 typically does not work up to permutation of binders, whereas in a process
-calculus these kinds of structural equivalences are standard.
+calculus these kinds of structural equivalences are standard. Additionally,
+substitution and opening are only defined on processes for names. In other
+words, one cannot substitute an arbitrary process term for a name, unlike in
+the lambda calculus. Thus frameworks which assume a lambda calculus style
+substitution operation are not immediately amenable to the CP
+setting~\cite{Lee:2012}.
 
 Note that the rules for polymorphism, $\exists$ and $\forall$, are defined but
 cut elimination on them is not. Since GV (\S~\ref{sec:gv}) does not support
 polymorphism the reduction rules are unnecessary for the translation. Future
 work is to support reduction under these terms.
+
+Explicit weakening and contraction were required to differentiate the
+reduction rules for servers and clients. In contrast, \citeauthor{Wadler:2014}
+defines these operations explicitly.
 
 \subsection{The functional language GV}\label{sec:gv}
 
@@ -646,6 +688,22 @@ terms
 
 typing judgements
 \end{comment}
+
+While the aim is to be faithful to \citeauthor{Wadler:2014}'s description, I
+may need to alter the approach slightly to avoid tricky formulations. For
+instance, instead of providing $n$-ary branch and choice in GV, I provide
+only binary versions of these operators to simplify the development. This
+change is not restrictive however, since CP itself provides only binary
+versions of plus ($\oplus$) and with ($\with$) constructs. Likewise, on a more
+technical note, I amalgamate all types into one inductive definition and
+provide a predicate for restricting typing rules to consider only valid
+session types. \citeauthor{Wadler:2014} defines GV types as a set of mutually
+recursive definitions; session types are types which may contain types as
+subcomponents (arguments to send, for example). Unfortunately, handling
+mutually inductive definitions in Coq can be quite involved; requiring one to
+either rely on the Coq system to provide a stronger mutual induction principle
+or defining one manually. Such a definition is possible, but it complicates
+elimination via the induction principle.
 
 \subsection{CPS translation GV to CP}
 
@@ -664,60 +722,7 @@ hope to be able to generalise as much as possible with the help of the
 Metatheory library. say something about gmeta here and its automatic
 generation of these infrastructure lemmas
 
-While the aim is to be faithful to \citeauthor{Wadler:2014}'s description, I
-may need to alter the approach slightly to avoid tricky formulations. For
-instance, instead of providing $n$-ary branch and choice in GV, I provide
-only binary versions of these operators to simplify the development. This
-change is not restrictive however, since CP itself provides only binary
-versions of plus ($\oplus$) and with ($\with$) constructs. Likewise, on a more
-technical note, I amalgamate all types into one inductive definition and
-provide a predicate for restricting typing rules to consider only valid
-session types. \citeauthor{Wadler:2014} defines GV types as a set of mutually
-recursive definitions; session types are types which may contain types as
-subcomponents (arguments to send, for example). Unfortunately, handling
-mutually inductive definitions in Coq can be quite involved; requiring one to
-either rely on the Coq system to provide a stronger mutual induction principle
-or defining one manually. Such a definition is possible, but it complicates
-elimination via the induction principle.
-
-Another aspect of the encoding is how to define terms. The intrinsic encoding
-described by~\citeauthor{Benton:2012:STT}~\cite{Benton:2012:STT} is one
-approach, indexing terms by their type so as to prevent ill-formed terms from
-being constructed. However, in the encoding for GV there are issues with using
-this encoding: $(1)$ it is not immediately clear how to handle linear contexts
-using the de Bruijn variable encoding, since in the intrinsic setting the
-environment supports weakening; $(2)$ an intrinsic encoding of terms would be
-complicated by the need to enforce that session types occur in certain
-instances (by use of a predicate); and $(3)$ well-typed terms require extra
-assumptions about binder freshness which cannot reasonably be expressed as a
-function type. For these reasons, an intrinsic approach does not offer much
-benefit since a well-typed term relation would still need to be
-defined. Therefore, I chose an extrinsic encoding for terms and define
-well-typed terms as a separate inductive type.
-
-\citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM} note that the size of
-their language proof infrastructure is proportional to the number of binding
-constructs. In the case of a simply typed lambda calculus this is not onerous,
-but GV has four binding constructs, CP has six and propositions have two. It
-may be true that this approach results in too many auxiliary definitions and
-operations not relevant to the actual properties one wishes to prove. However,
-I believe that once this infrastructure has been defined, the system can be
-extended without concern for these binding constructs.
-
-\citeauthor{Park:2014:MMW} describe a technique for
-removing nonlinear contexts from typing judgements. While their work extended
-to \fpop it is not clear how to handle an environment containing both
-non-linear and linear types as in GV. I wish to maintain as close a
-relationship as possible to the paper system presented by
-\citeauthor{Wadler:2014}, so separating out the non-linear and linear
-components (as in \fpop) is not an option at this stage.
-
-
-I describe the formalisation as it currently stands in this section. The use
-of the metatheory library from UPenn provided useful tactics and properties
-regarding freshness of free variables and environments.
-
-\subsection{Future Work}
+\section{Future Work}
 
 In addition to that already mentioned: there remains much to be done.
 
@@ -727,6 +732,6 @@ In addition to that already mentioned: there remains much to be done.
 {\bf Acknowledgments.}
 This is optional; it is a location for you to thank people
 
-\printbibliography
+%\printbibliography
 
 \end{document}
