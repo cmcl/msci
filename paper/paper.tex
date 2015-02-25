@@ -595,26 +595,26 @@ CP/GV system.
 Another aspect of the encoding is how to define terms. The intrinsic encoding
 described by~\citeauthor{Benton:2012:STT}~\cite{Benton:2012:STT} is one
 approach, indexing terms by their type so as to prevent ill-formed terms from
-being constructed. However, in the encoding for GV there are issues with using
-this encoding: $(1)$ it is not immediately clear how to handle linear contexts
-using the de Bruijn variable encoding, since in the intrinsic setting the
-environment supports weakening; $(2)$ an intrinsic encoding of terms would be
-complicated by the need to enforce that session types occur in certain
-instances (by use of a predicate); and $(3)$ well-typed terms require extra
-assumptions about binder freshness which cannot reasonably be expressed as a
-function type. For these reasons, an intrinsic approach does not offer much
-benefit since a well-typed term relation would still need to be
+being constructed. However, in the encoding for CP/GV there are issues with
+using this encoding: $(1)$ it is not immediately clear how to handle linear
+contexts using the de Bruijn variable encoding, since in the intrinsic setting
+the environment automatically supports weakening; $(2)$ an intrinsic encoding
+of GV terms would be complicated by the need to enforce that session types
+occur in certain instances (by use of a predicate); and $(3)$ well-typed terms
+require extra assumptions about binder freshness which cannot reasonably be
+expressed as a function type. For these reasons, an intrinsic approach does
+not offer much benefit since a well-typed term relation would still need to be
 defined. Therefore, I chose an extrinsic encoding for terms and define
 well-typed terms as a separate inductive type.
 
 \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM} note that the size of
 their language proof infrastructure is proportional to the number of binding
 constructs. In the case of a simply typed lambda calculus this is not onerous,
-but GV has four binding constructs, CP has six and propositions have two. It
-may be true that this approach results in too many auxiliary definitions and
-operations not relevant to the actual properties one wishes to prove. However,
-I believe that once this infrastructure has been defined, the system can be
-extended without concern for these binding constructs.
+but GV has four binding constructs, CP has six and propositions have
+two. Indeed, a lot of effort was expended setting up this
+infrastructure. However, I believe one of the contributions of this work is to
+articulate what one needs from state of the art metatheory libraries in order
+to handle session-based languages, and more generally, linear type systems.
 
 \citeauthor{Park:2014:MMW} describe a technique for
 removing nonlinear contexts from typing judgements. While their work extended
@@ -664,7 +664,7 @@ typically does not work up to permutation of binders, whereas in a process
 calculus these kinds of structural equivalences are standard. Additionally,
 substitution and opening are only defined on processes for names. In other
 words, one cannot substitute an arbitrary process term for a name, unlike in
-the lambda calculus. Thus frameworks which assume a lambda calculus style
+the lambda calculus. Thus frameworks which assume a lambda calculi style
 substitution operation are not immediately amenable to the CP
 setting~\cite{Lee:2012}.
 
@@ -673,9 +673,31 @@ cut elimination on them is not. Since GV (\S~\ref{sec:gv}) does not support
 polymorphism the reduction rules are unnecessary for the translation. Future
 work is to support reduction under these terms.
 
-Explicit weakening and contraction were required to differentiate the
-reduction rules for servers and clients. In contrast, \citeauthor{Wadler:2014}
-defines these operations explicitly.
+Initially, an implicit notion of weakening and contraction were chosen so as
+to be in line with \citeauthor{Wadler:2014}'s definitions. However, explicit
+weakening and contraction were required to differentiate the reduction rules
+for the various interactions between servers and clients.
+
+Ordering in environments is ignored and the development required lemmas
+allowing the permutation of environments. Support for permutating environments
+is not currently supported in the Metatheory library but some general lemmas
+were added as a result of this work. Additionally, custom tactics were
+developed to automatatically solve some simple permutation goals. However,
+these tactics are not a ``catch all'' and some generalising still needs to be
+done.
+
+The paper presentation omits details: the principal cut rules do not specify
+weakening could occur: since weakening is implicit is tacitly assumed
+weakening can always be pushed further up the derivation tree e.g. AxCut rule
+
+another interesting aspect which the formalism reveal is the rule for
+associativity is constructed in a way to permit associativity in a certain way
+pre-determined
+
+metatheory library and the library of tactics from software foundations are
+used extensively: metatheory does not handle multiple binders (check this?)
+maybe add a generic tactic to handle multiple binders... or perhaps add a
+lemmas for handling binders
 
 \subsection{The functional language GV}\label{sec:gv}
 
@@ -709,19 +731,6 @@ elimination via the induction principle.
 
 Currently the formalisation does not handle this. Future work.
 
-for an unbound index so this decision is sound. A consequence is that I must
-define a notion of opening language terms involving binders as described
-by~\citeauthor{Aydemir:2008:EFM}. For example, an abstraction with body term
-$t$ which is well-typed if $t$ is well-typed when its unbound index,
-representing the argument to the abstraction, is replaced by some fresh
-variable $x$, written $t^x$. Some terms in GV require multiple binders but I
-believe it will be straightforward to extend this notion. Unfortunately, I
-must define similar operations on CP terms and handle substitution and opening
-on them as well as propositions which can accept propositional variables. I
-hope to be able to generalise as much as possible with the help of the
-Metatheory library. say something about gmeta here and its automatic
-generation of these infrastructure lemmas
-
 \section{Future Work}
 
 In addition to that already mentioned: there remains much to be done.
@@ -732,6 +741,7 @@ In addition to that already mentioned: there remains much to be done.
 {\bf Acknowledgments.}
 This is optional; it is a location for you to thank people
 
-%\printbibliography
+\sloppy
+\printbibliography
 
 \end{document}
