@@ -9,6 +9,17 @@
 Require Import Metatheory.Metatheory Tactics.
 Require Import List Coq.Sorting.Permutation.
 
+(** Exporting required entities from AtomSetImpl, AtomSetFacts and
+    AtomSetProperties. *)
+Definition elements := Metatheory.elements.
+Definition elements_3w := AtomSetImpl.elements_3w.
+Definition elements_iff := AtomSetFacts.elements_iff.
+Definition equal_sym := AtomSetProperties.equal_sym.
+Definition remove := Metatheory.remove.
+Definition remove_iff := AtomSetFacts.remove_iff.
+Definition union_2 := AtomSetImpl.union_2.
+Definition union_3 := AtomSetImpl.union_3.
+
 Set Implicit Arguments.
 
 (** Propositional variables are represented as natural numbers (bound) or
@@ -1018,16 +1029,6 @@ Proof.
       ; s; fsetdec.
 Qed.
 
-(** Exporting required entities from AtomSetImpl, AtomSetFacts and
-    AtomSetProperties. *)
-Definition elements := Metatheory.elements.
-Definition elements_3w := AtomSetImpl.elements_3w.
-Definition elements_iff := AtomSetFacts.elements_iff.
-Definition equal_sym := AtomSetProperties.equal_sym.
-Definition remove := Metatheory.remove.
-Definition remove_iff := AtomSetFacts.remove_iff.
-Definition union_2 := AtomSetImpl.union_2.
-
 Lemma remove_union:
   forall x s s',
     remove x (union s s')[=]union (remove x s) (remove x s').
@@ -1276,7 +1277,7 @@ Section CPBasicSubstOpenProperties.
       [x ~> x]t = t.
   Proof.
     induction t; ss; try (destruct_all pname; des; substs; f_equal
-                                     ; solve [auto | fsetdec]).
+                          ; solve [auto | fsetdec]).
   Qed.
 
   Ltac subst_lc_tac Constructor :=

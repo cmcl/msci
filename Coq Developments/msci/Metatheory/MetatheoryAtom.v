@@ -123,8 +123,6 @@ Module Import AtomSetImpl : FSetExtra.WSfun AtomDT :=
 Notation atoms :=
   AtomSetImpl.t.
 
-Notation elems := AtomSetImpl.elements.
-
 (** The [AtomSetDecide] module provides the [fsetdec] tactic for
     solving facts about finite sets of atoms. *)
 
