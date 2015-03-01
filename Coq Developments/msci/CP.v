@@ -1941,12 +1941,6 @@ Inductive proc_red : proc -> proc -> Prop :=
         ν ! A → ! ⟨A⟩0 → P ‖ ? [] 0 → Q
       ==>cp
         weakenv (elements (remove y (fv_proc (P ^^ y)))) Q
-  | red_exp :
-      forall P Q A B x
-             (NFV: x `notin` fv_proc Q `union` fv_prop B),
-        ν B → p_send 0 A P ‖ p_recv 0 Q
-      ==>cp
-        ν {{ A // x }}(open_prop B x) → P ‖ [x ~>p A](Q ^^p x)
   | red_unit :
       forall P,
         ν pp_one → (0 → 0) ‖ ⟨⟩0 → P
@@ -2268,54 +2262,6 @@ Proof.
       applys Perm_in PER0.
       apply CPP2 in H0; ss; destruct_in; tryfalse; auto.
 Qed.
-
-Lemma reduce_exp:
-  forall P Q A B Γ x
-         (NFV: x `notin` fv_proc Q `union` fv_prop B)
-         (WT: ν pp_exists B → p_send 0 A P ‖ p_recv 0 Q ⊢cp Γ),
-    ν {{ A // x }}(open_prop B x) → P ‖ [x ~>p A](Q ^^p x) ⊢cp Γ.
-Proof.
-  ii; inversion WT; subst.
-  pick fresh y; destruct_notin
-  ; repeat match goal with
-             | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
-               => specializes H H1; rewrite /open_proc in H; s in H
-                  ; inverts keep H; simpl_env in *
-           end.
-  pick fresh z; destruct_notin; find_specializes.
-
-  forwards UNQ: cp_implies_uniq CPQ.
-  forwards UNΔ: uniq_perm PER0; [solve_uniq|].
-  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
-  rewrite <-app_nil_l in PER0; forwards EQC: perm_cod_uniq PER0
-  ; [solve_uniq|]; inverts EQC; substs~.
-  apply perm_dom_uniq in PER0; [|solve_uniq]; rewrite app_nil_l in PER0.
-
-  forwards UNP: cp_implies_uniq CPP.
-  forwards UNΔ0: uniq_perm PER1; [solve_uniq|].
-  eapply Permutation_trans in PER1; [|apply Permutation_app_comm].
-  rewrite <-app_nil_l in PER1; forwards EQC: perm_cod_uniq PER1
-  ; [solve_uniq|]; inverts EQC; substs~.
-  apply perm_dom_uniq in PER1; [|solve_uniq]; rewrite app_nil_l in PER1.
-
-  eapply Permutation_sym,Permutation_trans in PER
-  ; [|apply Permutation_app; apply Permutation_sym; eassumption].
-  apply Permutation_sym in PER; forwards UNG: uniq_perm PER UN
-  ; apply Permutation_sym in PER.
-  applys ignore_env_order PER; simpl_env.
-
-  forwards NINP: Perm_notin PER1 NotInTac2.
-  forwards NINQ: Perm_notin PER0 NotInTac3.
-  pick fresh w and apply cp_cut; destruct_notin; auto.
-  apply typing_rename with (x:=y); try by solve_notin.
-  admit (* Rename x to z in cod of env pair. *).
-
-  apply typing_rename with (x:=y).
-  admit (* fv_proc [x ~>p A](Q ^^p x) = ... *).
-  admit (* fv_proc [x ~>p A](Q ^^p x) = ... *).
-  rewrite prop_dual_preserves_subst; rewrite prop_dual_open_prop.
-  admit (* Rename x to z in cod of env pair. *).
-Admitted.
 
 Lemma reduce_unit:
   forall P Γ
