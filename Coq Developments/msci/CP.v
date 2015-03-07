@@ -6,12 +6,13 @@
     http://doi.acm.org/10.1145/2364527.2364568
 
 *)
-Require Import Metatheory.Metatheory Tactics.
+Require Import Metatheory.Metatheory Tactics ssrfun.
 Require Import List Coq.Sorting.Permutation.
+Export ListNotations.
 
 (** Exporting required entities from AtomSetImpl, AtomSetFacts and
     AtomSetProperties. *)
-Definition elements := Metatheory.elements.
+Definition elements := AtomSetImpl.elements.
 Definition elements_3w := AtomSetImpl.elements_3w.
 Definition elements_iff := AtomSetFacts.elements_iff.
 Definition equal_sym := AtomSetProperties.equal_sym.
@@ -2255,7 +2256,7 @@ Proof.
       split; auto.
       apply open_fv_proc_2.
       apply in_env_fv with (x:=x) in CPP0; des; rewrite !dom_app in *.
-      specialize (CPP1 (union_2 _ IN)); apply open_fv_proc_1 in CPP1; auto.
+      by specialize (CPP1 (union_2 _ _ _ IN)); apply open_fv_proc_1 in CPP1.
     + apply equal_sym in EQ; apply InA_iff_In,(eq_InA_elements EQ) in H.
       apply elements_iff,remove_iff in H; des.
       apply in_env_fv with (x:=x) in CPP0; des; rewrite !dom_app in *.
@@ -2288,8 +2289,56 @@ Proof.
   applys~ ignore_env_order PER2.
 Qed.
 
+(** Commuting conversion *)
+
+Ltac spec_wt WT Fr :=
+  specializes WT Fr; rewrite /open_proc in WT; s in WT; simpl_env in *.
+
+Lemma comm_mult:
+  forall P Q R (x:atom) A B Γ
+         (WT: ν A → ([B] x → P ‖ Q) ‖ R ⊢cp Γ),
+    [B] x → (ν A → {0 <~> 1}P ‖ R) ‖ Q ⊢cp Γ
+            \/
+    [B] x → {0 <~> 1}P ‖ (ν A → Q ‖ R) ⊢cp Γ.
+Proof.
+  ii; inverts WT; substs.
+  pick fresh y; destruct_notin; spec_wt CPQ Fr
+  ; spec_wt CPP Fr; inverts keep CPP.
+  pick fresh z; destruct_notin; spec_wt CPP0 NotInTac10.
+  forwards UNP: uniq_perm PER0 UN0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  extract_bnd y A; simpl_env in *.
+  - rewrite app_assoc in PER0; apply perm_dom_uniq in PER0; [|solve_uniq].
+    eapply Permutation_sym,Permutation_trans in PER
+    ; [|apply Permutation_app]; [|apply Permutation_sym|]; eauto.
+    left; applys ignore_env_order PER; simpl_env in *.
+    apply Permutation_sym in PER; forwards UNA: uniq_perm PER UN.
+    rewrite !app_assoc.
+    apply wt_nin_proc in CPQ0; auto.
+    obtain atoms L' as LEQ
+    ; eapply cp_output with (L:=L')(ΔQ:=ΔQ0)(ΔP:=E1++E2++ΔQ); simpl_env
+    ; first (by solve_perm); auto; i; substs; destruct_notin.
+    apply typing_rename with (x:=z)
+    ; try by (simpl_env; simpl fv_proc; rewrite swap_binders_fv; solve_notin).
+    clears y0.
+    rewrite <-(swap_binders_fv _ 0 1) in NotInTac4.
+    apply (@open_nfv_proc_1 _ z 0) in NotInTac4; [|auto].
+    forwards NIN2: Perm_notin PER0 NotInTac2; s; simpl_env in *
+    ; rewrite !app_assoc.
+    obtain atoms L' as LEQ; eapply cp_cut with (L:=L')(ΔQ:=ΔQ)
+    ; auto; simpl_env; first solve_uniq; i; substs; destruct_notin
+    ; apply typing_rename with (x:=y); try by solve_notin.
+    + rewrite <-(swap_binders_fv _ 0 1) in NotInTac42.
+      apply (@open_nfv_proc_1 _ z 1) in NotInTac42; [|auto].
+      simpl_env; solve_notin.
+    + rewrite swap_binders_open; rewrite~ open_rec_comm.
+      applys ignore_env_order CPP0; solve_perm.
+    + rewrite open_rec_comm,lc_no_bvar; eauto using cp_implies_lc.
+Admitted.
+
+
 Hint Resolve reduce_axcut reduce_multi reduce_add_inl reduce_add_inr
-     reduce_spawn reduce_gc reduce_exp reduce_unit.
+     reduce_spawn reduce_gc reduce_unit.
 
 Theorem proc_sub_red: forall Γ P Q
     (WT: P ⊢cp Γ)
