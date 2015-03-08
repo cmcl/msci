@@ -80,32 +80,23 @@ endif
 #                    #
 ######################
 
-VFILES:=Metatheory/STLC.v\
-  Metatheory/STLCsol.v\
+VFILES:=Metatheory/Tactics.v\
+  Metatheory/SFLibTactics.v\
   Metatheory/Metatheory.v\
   Metatheory/MetatheoryAtom.v\
-  Metatheory/MetatheoryAlt.v\
   Metatheory/LibTactics.v\
-  Metatheory/LibLNgen.v\
-  Metatheory/LibDefaultSimp.v\
-  Metatheory/Fsub_LetSum_Soundness.v\
-  Metatheory/Fsub_LetSum_Lemmas.v\
-  Metatheory/Fsub_LetSum_Infrastructure.v\
-  Metatheory/Fsub_LetSum_Definitions.v\
   Metatheory/FSetWeakNotin.v\
   Metatheory/FSetExtra.v\
   Metatheory/CoqUniquenessTac.v\
-  Metatheory/CoqUniquenessTacEx.v\
   Metatheory/CoqListFacts.v\
-  Metatheory/CoqIntro.v\
   Metatheory/CoqFSetInterface.v\
   Metatheory/CoqFSetDecide.v\
   Metatheory/CoqEqDec.v\
-  Metatheory/AssumeList.v\
   Metatheory/AssocList.v\
-  Tactics.v\
-  CP.v\
-  GV.v
+  CP_Reduction.v\
+  CP_Typing.v\
+  CP_Infrastructure.v\
+  CP_Definitions.v
 
 -include $(addsuffix .d,$(VFILES))
 .SECONDARY: $(addsuffix .d,$(VFILES))

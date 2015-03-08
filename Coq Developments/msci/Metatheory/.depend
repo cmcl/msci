@@ -1,4 +1,4 @@
-AssocList.vo AssocList.glob AssocList.v.beautified: AssocList.v CoqFSetDecide.vo CoqListFacts.vo LibTactics.vo
+AssocList.vo AssocList.glob AssocList.v.beautified: AssocList.v CoqFSetDecide.vo CoqListFacts.vo FSetWeakNotin.vo LibTactics.vo
 CoqEqDec.vo CoqEqDec.glob CoqEqDec.v.beautified: CoqEqDec.v
 CoqFSetDecide.vo CoqFSetDecide.glob CoqFSetDecide.v.beautified: CoqFSetDecide.v
 CoqFSetInterface.vo CoqFSetInterface.glob CoqFSetInterface.v.beautified: CoqFSetInterface.v

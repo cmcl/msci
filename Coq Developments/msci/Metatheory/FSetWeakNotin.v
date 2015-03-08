@@ -14,7 +14,7 @@
 
 Require Import Coq.FSets.FSetInterface.
 
-Require Import CoqFSetDecide.
+Require Import CoqFSetDecide Tactics.
 
 
 (* *********************************************************************** *)
@@ -27,7 +27,8 @@ Module Import D := CoqFSetDecide.WDecide_fun E X.
 
 
 (* *********************************************************************** *)
-(** * Facts about set non-membership *)
+(** * Facts about set non-membership and equivalences provable using
+      [fsetdec]. *)
 
 Section Lemmas.
 
@@ -140,6 +141,10 @@ Lemma notin_diff_3 :
   ~ In x (diff s s').
 Proof. fsetdec. Qed.
 
+Lemma remove_union:
+  remove x (union s s')[=]union (remove x s) (remove x s').
+Proof. fsetdec. Qed.
+
 End Lemmas.
 
 
@@ -151,6 +156,8 @@ Hint Resolve
   @notin_remove_3 @notin_remove_3' @notin_union_3 @notin_inter_2
   @notin_inter_3 @notin_diff_2 @notin_diff_3.
 
+Hint Resolve
+  @remove_union.
 
 (* *********************************************************************** *)
 (** * Tactics for non-membership *)

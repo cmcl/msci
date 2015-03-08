@@ -15,7 +15,7 @@ Require Export CoqEqDec.
 Require Export CoqListFacts.
 Require Export LibTactics.
 Require Export MetatheoryAtom.
-
+Require Export Tactics.
 
 (* ********************************************************************** *)
 (** * Decidable equality *)
@@ -23,7 +23,7 @@ Require Export MetatheoryAtom.
 (** We prefer that "==" refer to decidable equality at [eq], as
     defined by the [EqDec_eq] class from the CoqEqDec library. *)
 
-Notation " x  == y " := (eq_dec x y) (at level 70) : coqeqdec_scope.
+Notation " x == y " := (eq_dec x y) (at level 70) : coqeqdec_scope.
 
 Open Scope coqeqdec_scope.
 
@@ -300,3 +300,53 @@ Ltac apply_fresh_base H gather_vars atom_name :=
 Set Implicit Arguments.
 Definition union_map (A:Set) (f:A -> vars) (l:list A) := 
  (List.fold_right (fun t acc => f t \u acc) {}) l.
+
+(** This tactic is somewhat fragile when destructing matches. Destructing
+    if-then-else's as a subject of a match results in unprovable subgoals;
+    one requires to destruct all pnames in the context first.
+
+    Needs to be defined when we have the correct interpretation for == i.e.
+    equality on atoms. *)
+Ltac des :=
+  repeat
+    match goal with
+      | [H: ?P /\ ?Q |- _] =>
+          let HP := fresh H in
+          let HQ := fresh H in
+          destruct H as [HP HQ]
+      | [H: ?P \/ ?Q |- _] =>
+          let HP := fresh H in
+          let HQ := fresh H in
+          destruct H as [HP|HQ]
+      | |- context[?X == ?Y] => des_goal (X == Y)
+      | [H: context[?X == ?Y] |- _] => desT (X == Y)
+      | |- context[match ?X with _ => _ end] => destruct X; subst
+      | [H: context[match ?X with _ => _ end] |- _] => destruct X; subst
+      | [H: ?P <-> ?Q |- _] =>
+        let HP := fresh H in
+        let HQ := fresh H in destruct H as [HP HQ]
+      | |- ?P <-> ?Q => split
+      | _ => idtac
+    end.
+
+(* Destruct some `in` equations in similar style to the [destruct_notin]
+   tactic. *)
+Ltac destruct_in :=
+  match goal with
+    | H :  _ `in` empty |- _ =>
+      apply AtomSetFacts.empty_iff in H; inv H
+    | H : ?y `in` (add ?x ?s) |- _ =>
+      apply AtomSetFacts.add_iff in H; des; destruct_in
+    | H : ?y `in` (singleton ?x) |- _ =>
+      apply AtomSetFacts.singleton_iff in H; destruct_in
+    | H : ?y `in` (remove ?x ?s) |- _ =>
+      apply AtomSetFacts.remove_iff in H; des; destruct_in
+    | H : ?x `in` (union ?s ?s') |- _ =>
+      apply AtomSetFacts.union_iff in H; des; destruct_in
+    | H : ?x `in` (inter ?s ?s') |- _ =>
+      apply AtomSetFacts.inter_iff in H; des; destruct_in
+    | H : ?x `in` (AtomSetImpl.diff ?s ?s') |- _ =>
+      apply AtomSetFacts.diff_iff in H; des; destruct_in
+    | _ =>
+      idtac
+  end.

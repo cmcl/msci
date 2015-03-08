@@ -28,6 +28,8 @@ Require Import CoqListFacts.
 Require Import FSetWeakNotin.
 Require Import LibTactics.
 
+(* It is extremely annoying to have to write out all the underscores. *)
+Set Implicit Arguments.
 
 (* *********************************************************************** *)
 (** * Implementation *)
@@ -79,10 +81,6 @@ Module KeySetFacts := FSetFacts.WFacts_fun X KeySet.
 
 (* *********************************************************************** *)
 (** * Basic definitions *)
-
-(** Implicit arguments are enabled for the following definitions. *)
-
-Set Implicit Arguments.
 
 (** [one] constructs an association list consisting of exactly one
     binding.  We define an infix notation for it and ensure that the
@@ -166,12 +164,6 @@ Inductive uniq (A : Type) : list (X.t*A) -> Prop :=
       uniq E ->
       ~ In x (dom E) ->
       uniq (x ~ a ++ E).
-
-(** Unless stated otherwise, in the remainder of this file, implicit
-    arguments will not be declared by default. *)
-
-Unset Implicit Arguments.
-
 
 (* *********************************************************************** *)
 (** * List properties *)
@@ -354,7 +346,7 @@ Tactic Notation "alist" "induction" ident(E) :=
   let T := type of E in
   let T := eval compute in T in
   match T with
-    | list (?key * ?A) => induction E using (alist_ind A)
+    | list (?key * ?A) => induction E using alist_ind
   end.
 
 Tactic Notation "alist" "induction" ident(E) "as" simple_intropattern(P) :=
@@ -362,7 +354,7 @@ Tactic Notation "alist" "induction" ident(E) "as" simple_intropattern(P) :=
   let T := type of E in
   let T := eval compute in T in
   match T with
-    | list (?key * ?A) => induction E as P using (alist_ind A)
+    | list (?key * ?A) => induction E as P using alist_ind
   end.
 
 

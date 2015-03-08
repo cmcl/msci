@@ -10,7 +10,7 @@
 Require Import Coq.Lists.List.
 Require Import Coq.Lists.SetoidList.
 
-Require Import CoqUniquenessTac.
+Require Import CoqEqDec CoqUniquenessTac Tactics.
 
 Open Scope list_scope.
 
@@ -107,6 +107,64 @@ Lemma elim_incl_app : forall (A : Type) (xs ys zs : list A),
   incl (xs ++ ys) zs ->
   incl xs zs /\ incl ys zs.
 Proof. unfold incl. auto with datatypes. Qed.
+
+(* ********************************************************************** *)
+(* * Sublist definition and properties *)
+
+
+Section SublistProperties.
+  Variable A : Type.
+  Variable X : EqDec_eq A.
+
+  Inductive sublist: list A -> list A -> Prop :=
+    | sublist_nil: sublist nil nil
+    | sublist_cons: forall z xs ys,
+                      sublist xs ys -> sublist (z :: xs) (z :: ys)
+    | sublist_sub: forall y xs ys, sublist xs ys -> sublist xs (y :: ys).
+
+  Hint Constructors sublist.
+
+  Lemma sublist_id:
+    forall (xs:list A),
+      sublist xs xs.
+  Proof. induction xs; auto. Qed.
+
+  Lemma sublist_empty:
+    forall (xs:list A),
+      sublist nil xs.
+  Proof. induction xs; auto. Qed.
+
+  Lemma sublist_trans:
+    forall (xs ys zs: list A)
+           (SUB1: sublist xs ys)
+           (SUB2: sublist ys zs),
+      sublist xs zs.
+  Proof. ii; gen xs; induction SUB2; ii; inv SUB1; auto. Qed.
+
+  Lemma sublist_app:
+    forall (xs1 xs2 ys1 ys2: list A)
+           (SUB1: sublist xs1 ys1)
+           (SUB2: sublist xs2 ys2),
+      sublist (xs1++xs2) (ys1++ys2).
+  Proof. ii; gen xs1; induction ys1; ii; inv SUB1; auto. Qed.
+
+  Lemma sublist_app_l:
+    forall (xs ys zs: list A)
+           (SUB: sublist xs ys),
+      sublist xs (ys++zs).
+  Proof.
+    i; rewrite <-(app_nil_r xs); apply sublist_app; auto using sublist_empty.
+  Qed.
+
+  Lemma sublist_app_r:
+    forall (xs ys zs: list A)
+           (SUB: sublist xs ys),
+      sublist xs (zs++ys).
+  Proof.
+    i; rewrite <-(app_nil_l xs); apply sublist_app; auto using sublist_empty.
+  Qed.
+
+End SublistProperties.
 
 
 (* ********************************************************************** *)

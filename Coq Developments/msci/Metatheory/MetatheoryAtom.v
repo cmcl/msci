@@ -10,6 +10,7 @@ Require Import Coq.Arith.Arith.
 Require Import Coq.Arith.Max.
 Require Import Coq.Classes.EquivDec.
 Require Import Coq.Lists.List.
+Require Import Coq.Lists.SetoidList.
 Require Import Coq.Structures.DecidableTypeEx.
 
 Require Import CoqFSetDecide.
@@ -17,7 +18,7 @@ Require Import CoqListFacts.
 Require Import FSetExtra.
 Require Import FSetWeakNotin.
 Require Import LibTactics.
-
+Require Import Tactics.
 
 (* ********************************************************************** *)
 (** * Defining atoms *)
@@ -159,6 +160,17 @@ Proof.
   rewrite <- CoqListFacts.InA_iff_In. auto using @elements_1.
 Qed.
 
+Lemma eq_InA_elements:
+  forall x s s'
+         (EQ: s[=]s')
+         (IN: InA Logic.eq x (elements s)),
+  InA Logic.eq x (elements s').
+Proof.
+  ii; apply AtomSetFacts.elements_iff in IN
+  ; apply AtomSetFacts.elements_iff; fsetdec.
+Qed.
+
+Arguments eq_InA_elements : default implicits.
 
 (* ********************************************************************** *)
 (** * Tactic support for picking fresh atoms *)
