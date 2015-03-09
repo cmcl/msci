@@ -399,8 +399,93 @@ Proof.
     + rewrite open_rec_comm,lc_no_bvar; eauto using cp_implies_lc.
 Admitted.
 
+Section CPCommutingConversions.
+
+  Lemma reduce_cc_multi_one:
+    forall P Q R (x:atom) A B Γ
+           (WT: ν A → ([B] x → P ‖ Q) ‖ R ⊢cp Γ),
+      [B] x → (ν A → {0 <~> 1}P ‖ R) ‖ Q ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_multi_two:
+    forall P Q R (x:atom) A B Γ
+           (WT: ν A → ([B] x → P ‖ Q) ‖ R ⊢cp Γ),
+      [B] x → {0 <~> 1}P ‖ (ν A → Q ‖ R) ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_input:
+    forall P Q (x:atom) A B Γ
+           (WT: ν A → (⟨B⟩ x → P) ‖ Q ⊢cp Γ),
+      ⟨B⟩x → ν A → ({0 <~> 1}P) ‖ Q ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_add_inl:
+      forall P Q (x:atom) A Γ
+             (WT: ν A → (x[inl] → P) ‖ Q ⊢cp Γ),
+        x[inl] → (ν A → P ‖ Q) ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_add_inr:
+    forall P Q (x:atom) A Γ
+           (WT: ν A → (x[inr] → P) ‖ Q ⊢cp Γ),
+      x[inr] → (ν A → P ‖ Q) ⊢cp Γ.
+ Proof.
+ Admitted.
+
+ Lemma reduce_cc_choice:
+   forall P Q R (x:atom) A Γ
+          (WT: ν A → (x CASE P OR Q) ‖ R ⊢cp Γ),
+     x CASE (ν A → P ‖ R) OR (ν A → Q ‖ R) ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_accept:
+    forall P Q (x:atom) A B Γ
+           (WT: ν A → (! ⟨B⟩x → P) ‖ Q ⊢cp Γ),
+      ! ⟨B⟩x → (ν A → P ‖ Q) ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_request:
+    forall P Q (x:atom) A B Γ
+           (WT: ν A → (? [B]x → P) ‖ Q ⊢cp Γ),
+      ? [B]x → (ν A → P ‖ Q) ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_weaken:
+    forall P Q (x:atom) A Γ
+           (WT: ν A → (? []x → P) ‖ Q ⊢cp Γ),
+      ? []x → (ν A → {0 <~> 1}P ‖ Q) ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_empin:
+    forall P Q (x:atom) A Γ
+           (WT: ν A → (⟨⟩x → P) ‖ Q ⊢cp Γ),
+      ⟨⟩x → (ν A → P ‖ Q) ⊢cp Γ.
+  Proof.
+  Admitted.
+
+  Lemma reduce_cc_empcho:
+    forall Q (x:atom) A Γ
+           (WT: ν A → (x CASE 0) ‖ Q ⊢cp Γ),
+      x CASE 0 ⊢cp Γ.
+  Proof.
+  Admitted.
+
+End CPCommutingConversions.
+
 Hint Resolve reduce_axcut reduce_multi reduce_add_inl reduce_add_inr
      reduce_spawn reduce_gc reduce_unit.
+
+Hint Resolve reduce_cc_multi_one reduce_cc_multi_two reduce_cc_input
+     reduce_cc_add_inl reduce_cc_add_inr reduce_cc_choice reduce_cc_accept
+     reduce_cc_request reduce_cc_weaken reduce_cc_empin reduce_cc_empcho.
 
 Theorem proc_sub_red: forall Γ P Q
     (WT: P ⊢cp Γ)
