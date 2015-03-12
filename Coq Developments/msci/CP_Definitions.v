@@ -285,7 +285,7 @@ Fixpoint proc_open_rec (k: nat) (x: atom) (p: proc) :=
     | ν A → P ‖ Q
       => ν A → (proc_open_rec (S k) x P) ‖ (proc_open_rec (S k) x Q)
     | [A] z → P ‖ Q
-      => [A] (sub z) → (proc_open_rec (S k) x P) ‖ (proc_open_rec (S k) x Q)
+      => [A] (sub z) → (proc_open_rec (S k) x P) ‖ (proc_open_rec k x Q)
     | ⟨A⟩ z → P => ⟨A⟩ (sub z) → (proc_open_rec (S k) x P)
     | z [inl] → P => (sub z) [inl] → (proc_open_rec k x P)
     | z [inr] → P => (sub z) [inr] → (proc_open_rec k x P)
@@ -346,7 +346,7 @@ Fixpoint swap_binders (a b:nat) (Q:proc) : proc :=
     | ν A → P ‖ R
       => ν A → ({S a <~> S b} P) ‖ ({S a <~> S b} R)
     | [A] z → P ‖ R
-      => [A] (swap z) → ({S a <~> S b} P) ‖ ({S a <~> S b}R)
+      => [A] (swap z) → ({S a <~> S b} P) ‖ ({a <~> b}R)
     | ⟨A⟩ z → P => ⟨A⟩ (swap z) → ({S a <~> S b} P)
     | z [inl] → P => (swap z) [inl] → ({a <~> b} P)
     | z [inr] → P => (swap z) [inr] → ({a <~> b} P)
@@ -546,12 +546,14 @@ Inductive proc_red : proc -> proc -> Prop :=
         P
   (** Commuting conversions *)
   | red_cc_multi_one:
-      forall P Q R (x:atom) A B,
+      forall P Q R (x:atom) A B
+             (LCQ: lc_proc Q),
         ν A → ([B] x → P ‖ Q) ‖ R
       ==>cp
         [B] x → (ν A → {0 <~> 1}P ‖ R) ‖ Q
   | red_cc_multi_two:
-      forall P Q R (x:atom) A B,
+      forall P Q R (x:atom) A B
+             (LCP: forall x, lc_proc (P ^^ x)),
         ν A → ([B] x → P ‖ Q) ‖ R
       ==>cp
         [B] x → {0 <~> 1}P ‖ (ν A → Q ‖ R)
@@ -602,8 +604,8 @@ Inductive proc_red : proc -> proc -> Prop :=
         x CASE 0
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
 
-Definition is_cut (P:proc) : bool :=
+Definition is_cut (P:proc) : Prop :=
   match P with
-  | ν _ → _ ‖ _ => true
-  | _ => false
+  | ν _ → _ ‖ _ => True
+  | _ => False
   end.

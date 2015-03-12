@@ -204,6 +204,13 @@ Section CPSwapBinders.
     intro; induction P; i; ss; destruct_all pname; des; substs; f_equal; auto.
   Qed.
 
+  Lemma swap_binders_comm:
+    forall P i j,
+      {i <~> j}P = {j <~> i}P.
+  Proof.
+    induction P; ii; destruct_all pname; des; substs; tryfalse; f_equal; auto.
+  Qed.
+
   Lemma swap_binders_fv:
     forall P i j,
       fv_proc ({i <~> j}P) = fv_proc P.
@@ -427,7 +434,7 @@ Section CPFVProperties.
     - rewrite !remove_union; rewrite~ (IHP1 (S k) x y)
       ; rewrite~ (IHP2 (S k) y x); fsetdec.
     - destruct_all pname; des; destruct_notin; rewrite !remove_union
-      ; rewrite~ (IHP1 (S k) x y); rewrite~ (IHP2 (S k) y x); fsetdec.
+      ; rewrite~ (IHP1 (S k) x y); rewrite~ (IHP2 k y x); fsetdec.
     - destruct_all pname; des; destruct_notin; rewrite !remove_union
       ; rewrite~ (IHP (S k) x y); fsetdec.
     - destruct_all pname; des; destruct_notin; rewrite !remove_union

@@ -38,6 +38,15 @@ Ltac simpl_existT :=
              => apply inj_pair2_eq_dec in H; auto
          end.
 
+Ltac injs :=
+  match goal with
+    | [H: ?F _ = ?F _ |- _] => injects H
+    | [H: ?F _ _ = ?F _ _ |- _] => injects H
+    | [H: ?F _ _ _ = ?F _ _ _ |- _] => injects H
+    | [H: ?F _ _ _ _ = ?F _ _ _ _ |- _] => injects H
+    | [H: ?F _ _ _ _ _ = ?F _ _ _ _ _ |- _] => injects H
+  end.
+
 Tactic Notation "dup" hyp(H) := let H' := fresh H in assert (H' := H).
 
 Tactic Notation "s" "in" hyp(H) := simpl in H.
