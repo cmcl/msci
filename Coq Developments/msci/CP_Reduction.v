@@ -553,33 +553,27 @@ Section CPCommutingConversions.
   Qed.
 
   Lemma reduce_cc_accept:
-    forall P Q (x:atom) A B Γ Δ
-           (PER: Permutation Γ (x~! B++Δ))
-           (REQS: all_requests Δ)
+    forall P Q (x:atom) A B Γ
+             (REQS: forall Γ Δ
+                           (PER: Permutation Γ (x~! B++Δ))
+                           (WT: ν A → (! ⟨B⟩x → P) ‖ Q ⊢cp Γ),
+                      all_requests Δ)
            (WT: ν A → (! ⟨B⟩x → P) ‖ Q ⊢cp Γ),
       ! ⟨B⟩x → (ν A → {0 <~> 1}P ‖ Q) ⊢cp Γ.
   Proof.
-    ii; inverts WT; substs.
-    pick fresh y; destruct_notin; spec_wt CPQ Fr
-    ; spec_wt CPP Fr; inverts keep CPP.
-    pick fresh z; destruct_notin; spec_wt CPP0 NotInTac7.
-    dup PER.
-    eapply Permutation_trans in PER; [| apply Permutation_sym; exact PER0].
-    forwards UN1: uniq_perm (Permutation_trans PER0 PER) UN.    
-    forwards UNP: uniq_perm PER1 UN0.
-    eapply Permutation_trans in PER1; [|apply Permutation_app_comm].
+    ii; inverts keep WT; substs.
+    pick fresh y; destruct_notin; find_specializes; inverts keep CPP.
+    pick fresh z; destruct_notin; find_specializes.
+    forwards UNP: uniq_perm PER UN.
+    eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
     extract_bnd y A; simpl_env in *.
-    rewrite <-app_assoc in PER1;apply perm_dom_uniq in PER1;[|solve_uniq].
-    eapply Permutation_trans in PER
+    rewrite <-app_assoc in PER0;apply perm_dom_uniq in PER0;[|solve_uniq].
+    eapply Permutation_sym,Permutation_trans in PER
     ; [|apply Permutation_app]; [|apply Permutation_sym|]; eauto.
     simpl_env in *.
-    apply Permutation_sym in PER; forwards UNA: uniq_perm PER UN1.
-    eapply Permutation_trans in PER; [|apply Permutation_app_comm].
-    rewrite <-app_nil_l in PER; apply perm_dom_uniq in PER; [|solve_uniq].
-    eapply Permutation_sym,Permutation_trans in PER2
-    ; [|apply Permutation_app]; [| |apply Permutation_sym]; [|auto|exact PER].
-    applys ignore_env_order PER2; simpl_env.
-    forwards~ REQSQ: requests_perm PER; des_reqs. clear REQSQ0 REQSQ1 REQSQ2.
+    apply Permutation_sym in PER; forwards UNA: uniq_perm PER UN.
+    specialize (REQS _ _ PER WT); des_reqs. clear REQS0 REQS2.
+    apply Permutation_sym in PER; applys ignore_env_order PER.
     obtain atoms L' as LEQ; eapply cp_accept with (L:=L'); eauto; i; substs
     ; destruct_notin.
     apply typing_rename with (x:=z)
@@ -589,10 +583,10 @@ Section CPCommutingConversions.
     obtain atoms L' as LEQ
     ; eapply cp_cut with (L:=L')(ΔP:=z~B++E1++E2)(ΔQ:=ΔQ)
     ; [solve_perm|destruct_uniq;solve_uniq| |]; i; substs; destruct_notin.
-    - rewrite <-(swap_binders_fv _ 0 1) in NotInTac5.
-      apply (@open_nfv_proc_1 _ z 1) in NotInTac5; [|auto].
-      rewrite <-(swap_binders_fv _ 0 1) in NotInTac33.
-      apply (@open_nfv_proc_1 _ z 1) in NotInTac33; [|auto].
+    - rewrite <-(swap_binders_fv _ 0 1) in NotInTac4.
+      apply (@open_nfv_proc_1 _ z 1) in NotInTac4; [|auto].
+      rewrite <-(swap_binders_fv _ 0 1) in NotInTac30.
+      apply (@open_nfv_proc_1 _ z 1) in NotInTac30; [|auto].
       apply typing_rename with (x:=y)
       ; try (by simpl_env; destruct_uniq; solve_notin).
       rewrite swap_binders_open; rewrite~ open_rec_comm.
@@ -655,13 +649,40 @@ Section CPCommutingConversions.
   Qed.
   
   Lemma reduce_cc_empcho:
-    forall Q (x:atom) A Γ
-           (WT: ν A → (x CASE 0) ‖ Q ⊢cp Γ),
-      x CASE 0 ⊢cp Γ.
+    forall Q (x y:atom) A Γ
+           (REQS: forall Γ Δ
+                         (PER: Permutation Γ (x~pp_top ++ Δ))
+                         (WT: ν A → (? []0 → x CASE 0) ‖ Q ⊢cp Γ),
+                    all_requests Δ)
+           (NF: y `notin` fv_proc Q)
+           (WT: ν A → (? []0 → x CASE 0) ‖ Q ⊢cp Γ),
+      weakenv (elements (remove y (fv_proc (Q ^^ y)))) (x CASE 0) ⊢cp Γ.
   Proof.
-    ii; inversion WT; subst.
-    pick fresh y; destruct_notin; spec_wt CPP Fr; spec_wt CPQ Fr; inverts CPP.
-    fsetdec (*false!*).
+    ii; inverts keep WT; subst.
+    pick fresh z; destruct_notin; find_specializes.
+    inverts CPP; inverts CPP0.
+    eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+    rewrite <-app_nil_l in PER0.
+    extract_bnd z A; apply perm_dom_uniq in PER0; [|solve_uniq]
+    ; simpl_env in *.
+    eapply Permutation_sym,Permutation_trans in PER
+    ; [|apply Permutation_app]; [|apply Permutation_sym|];[|eassumption|auto].
+    specialize (REQS _ _ (Permutation_sym PER) WT).
+    applys ignore_env_order PER.
+    forwards UN2: uniq_perm (Permutation_sym PER) UN; simpl_env in *.
+    rewrite <-app_nil_r,app_assoc; apply typing_weaken; simpl_env
+    ; try solve_uniq; auto using elements_3w.
+    forwards UN3: cp_implies_uniq CPQ.
+    forwards EQ: remove_nfv_proc_eq NF NotInTac6.
+    split; i.
+    + apply InA_iff_In; applys eq_InA_elements EQ.
+      apply elements_iff,remove_iff; analyze_in x0; split; auto.
+      apply in_env_fv with (x:=x0) in CPQ; des; simpl_env in *.
+      apply~ CPQ0.
+    + apply equal_sym in EQ; apply InA_iff_In,(eq_InA_elements EQ) in H1.
+      apply elements_iff,remove_iff in H1; des.
+      apply in_env_fv with (x:=x0) in CPQ; des; simpl_env in *.
+      apply CPQ1 in H2; ss; destruct_in; tryfalse; auto.
   Qed.
   
 End CPCommutingConversions.

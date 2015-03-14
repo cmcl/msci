@@ -517,7 +517,7 @@ Inductive proc_red : proc -> proc -> Prop :=
       forall P Q R A dA B (DUA: dual_props A dA),
         ν A ⨂ B → ([A]0 → P ‖ Q) ‖ ⟨dA⟩ 0 → R
       ==>cp
-        ν A → P ‖ (ν B → {0 <~> 1}Q ‖ {0 <~> 1}R)
+        ν A → P ‖ (ν B → Q ‖ {0 <~> 1}R)
   | red_add_inl :
       forall P Q R A B,
         ν A ⨁ B → (0[inl] → P) ‖ 0 CASE Q OR R
@@ -556,7 +556,7 @@ Inductive proc_red : proc -> proc -> Prop :=
              (LCP: forall x, lc_proc (P ^^ x)),
         ν A → ([B] x → P ‖ Q) ‖ R
       ==>cp
-        [B] x → {0 <~> 1}P ‖ (ν A → Q ‖ R)
+        [B] x → P ‖ (ν A → Q ‖ R)
   | red_cc_input:
       forall P Q (x:atom) A B,
         ν A → (⟨B⟩ x → P) ‖ Q
@@ -578,10 +578,14 @@ Inductive proc_red : proc -> proc -> Prop :=
       ==>cp
         x CASE (ν A → P ‖ R) OR (ν A → Q ‖ R)
   | red_cc_accept:
-      forall P Q (x:atom) A B,
+      forall P Q (x:atom) A B
+             (REQS: forall Γ Δ
+                           (PER: Permutation Γ (x~! B++Δ))
+                           (WT: ν A → (! ⟨B⟩x → P) ‖ Q ⊢cp Γ),
+                      all_requests Δ),
         ν A → (! ⟨B⟩x → P) ‖ Q
       ==>cp
-        ! ⟨B⟩x → (ν A → P ‖ Q)
+        ! ⟨B⟩x → (ν A → {0 <~> 1}P ‖ Q)
   | red_cc_request:
       forall P Q (x:atom) A B,
         ν A → (? [B]x → P) ‖ Q
@@ -591,17 +595,22 @@ Inductive proc_red : proc -> proc -> Prop :=
       forall P Q (x:atom) A,
         ν A → (? []x → P) ‖ Q
       ==>cp
-        ? []x → (ν A → {0 <~> 1}P ‖ Q)
+        ? []x → (ν A → P ‖ Q)
   | red_cc_empin:
       forall P Q (x:atom) A,
         ν A → (⟨⟩x → P) ‖ Q
       ==>cp
         ⟨⟩x → (ν A → P ‖ Q)
   | red_cc_empcho:
-      forall Q (x:atom) A,
-        ν A → (x CASE 0) ‖ Q
+      forall Q (x y:atom) A
+           (REQS: forall Γ Δ
+                         (PER: Permutation Γ (x~pp_top ++ Δ))
+                         (WT: ν A → (? []0 → x CASE 0) ‖ Q ⊢cp Γ),
+                    all_requests Δ)
+             (NF: y `notin` fv_proc Q),
+        ν A → (? []0 → x CASE 0) ‖ Q
       ==>cp
-        x CASE 0
+        weakenv (elements (remove y (fv_proc (Q ^^ y)))) (x CASE 0)
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
 
 Definition is_cut (P:proc) : Prop :=
