@@ -590,7 +590,7 @@ Inductive proc_red : proc -> proc -> Prop :=
       forall P Q (x:atom) A B,
         ν A → (? [B]x → P) ‖ Q
       ==>cp
-        ? [B]x → (ν A → P ‖ Q)
+        ? [B]x → (ν A → {0 <~> 1}P ‖ Q)
   | red_cc_weaken:
       forall P Q (x:atom) A,
         ν A → (? []x → P) ‖ Q
