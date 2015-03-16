@@ -503,6 +503,11 @@ Fixpoint weakenv (xs:list atom) (P:proc) : proc :=
   | x :: xs' => ? [] x → (weakenv xs' P)
   end.
 
+(* Structural equivalences *)
+
+Definition proc_equiv (P Q:proc) := forall Γ, P ⊢cp Γ <-> Q ⊢cp Γ.
+Notation "P =p= Q" := (proc_equiv P Q) (at level 69) : cp_scope.
+
 Reserved Notation "P '==>cp' Q" (at level 69, right associativity).
 
 (** Principal cut reductions and commuting conversions. *)
@@ -611,6 +616,28 @@ Inductive proc_red : proc -> proc -> Prop :=
         ν A → (? []0 → x CASE 0) ‖ Q
       ==>cp
         weakenv (elements (remove y (fv_proc (Q ^^ y)))) (x CASE 0)
+  | red_equiv:
+      forall P Q R S
+             (EQPQ: P =p= Q)
+             (RED: Q ==>cp R)
+             (EQRS: R =p= S),
+        P
+      ==>cp
+        S
+  | red_congr_cut_l:
+      forall P Q R A
+             (REDL: forall x (NFV: x `notin` fv_proc P `union` fv_proc R),
+                      P ^^ x ==>cp R ^^ x),
+        ν A → P ‖ Q
+      ==>cp
+        ν A → R ‖ Q
+  | red_congr_cut_r:
+      forall P Q R A
+             (REDR: forall x (NFV: x `notin` fv_proc Q `union` fv_proc R),
+                      Q ^^ x ==>cp R ^^ x),
+        ν A → P ‖ Q
+      ==>cp
+        ν A → P ‖ R
 where "P '==>cp' Q" := (proc_red P Q) : cp_scope.
 
 Definition is_cut (P:proc) : Prop :=

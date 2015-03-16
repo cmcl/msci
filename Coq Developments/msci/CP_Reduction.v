@@ -19,11 +19,54 @@ Ltac find_specializes :=
            => specializes H H1
          end.
 
-Lemma assoc:
+Lemma assoc_1:
+  forall P Q R A B Γ
+         (LCP: forall x, lc_proc (P ^^ x))
+         (WT: ν B → ν A → P ‖ Q ‖ R ⊢cp Γ),
+    ν A → P ‖ ν B → {0 <~> 1}Q ‖ R ⊢cp Γ.
+Proof.
+  ii; inverts WT.
+  pick fresh x; destruct_notin; find_specializes; inverts CPP.
+  pick fresh y; destruct_notin; find_specializes.
+  forwards UN1: uniq_perm PER0 UN0.
+  eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+  specializes LCP y; rewrite /open_proc in CPP0.
+  rewrite open_rec_comm,lc_no_bvar in CPP0; auto.
+  apply (@open_nfv_proc_1 _ y 0) in NotInTac2; auto.
+  apply (nfv_env_proc_2 CPP0) in NotInTac2.
+  extract_bnd x B; simpl_env in *; [solve_notin|].
+  rewrite <-app_assoc in PER0; apply perm_dom_uniq in PER0; [|solve_uniq].
+  eapply Permutation_sym,Permutation_trans,Permutation_sym in PER
+  ; [|apply Permutation_app]; [|apply Permutation_sym; exact PER0|auto].
+  simpl_env in PER.
+  forwards UN2: uniq_perm PER UN.
+  obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); try exact PER; auto
+  ; i; substs; destruct_notin
+  ; apply typing_rename with (x:=y)
+  ; try by (simpl_env; simpl fv_proc; try rewrite swap_binders_fv
+            ; solve_notin).
+  s; simpl_env.
+  rewrite <-!app_assoc.
+  rewrite <-(swap_binders_fv _ 0 1) in NotInTac3.
+  apply (@open_nfv_proc_1 _ y 1) in NotInTac3; [|auto].
+  forwards NIN: Perm_notin PER0 NotInTac0; simpl_env in NIN.
+  obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); auto
+  ; first (simpl_env; destruct_uniq; solve_uniq); i; substs; destruct_notin
+  ; apply typing_rename with (x:=x); try (by solve_notin).
+  - rewrite <-(swap_binders_fv _ 0 1) in NotInTac49.
+    apply (@open_nfv_proc_1 _ y 1) in NotInTac49; [|auto].
+    simpl_env; solve_notin.
+  - rewrite swap_binders_open,open_rec_comm; auto.
+    applys ignore_env_order CPQ0; solve_perm.
+  - rewrite /open_proc; rewrite~ open_rec_comm.
+    rewrite lc_no_bvar; eauto using cp_implies_lc.
+Qed.
+
+Lemma assoc_2:
   forall P Q R A B Γ
          (LCR: forall x, lc_proc (R ^^ x))
-         (WT: ν A → P ‖ ν B → Q ‖ R ⊢cp Γ),
-    ν B → ν A → P ‖ {0 <~> 1}Q ‖ R ⊢cp Γ.
+         (WT: ν A → P ‖ ν B → {0 <~> 1}Q ‖ R ⊢cp Γ),
+    ν B → ν A → P ‖ Q ‖ R ⊢cp Γ.
 Proof.
   ii; inverts WT.
   pick fresh x; destruct_notin; find_specializes; inverts CPQ.
@@ -40,27 +83,31 @@ Proof.
   ; [|apply Permutation_app]; [|auto|apply Permutation_sym; exact PER0].
   rewrite <-!app_assoc in PER.
   forwards UN2: uniq_perm PER UN.
+  rewrite /open_proc in CPP0; rewrite swap_binders_open in CPP0.
   obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); try exact PER; auto
-  ; i; substs; destruct_notin.
-  - forwards NIN: Perm_notin PER0 NotInTac1; simpl_env in *.
-    apply typing_rename with (x:=y)
-    ; try by (simpl_env; simpl fv_proc; try rewrite swap_binders_fv
-              ; solve_notin).
-    s; simpl_env.
-    eapply ignore_env_order; [apply Permutation_app_comm|].
-    rewrite <-(swap_binders_fv _ 0 1) in NotInTac3.
-    apply (@open_nfv_proc_1 _ y 1) in NotInTac3; [|auto].
-    simpl_env; obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); auto
-    ; first (destruct_uniq; solve_uniq); i; substs; destruct_notin
-    ; apply typing_rename with (x:=x); try (by solve_notin).
-    + rewrite /open_proc; rewrite~ open_rec_comm.
-      rewrite lc_no_bvar; eauto using cp_implies_lc.
-    + rewrite <-(swap_binders_fv _ 0 1) in NotInTac49.
-      apply (@open_nfv_proc_1 _ y 1) in NotInTac49; [|auto].
-      simpl_env; solve_notin.
-    + rewrite swap_binders_open,open_rec_comm; auto.
-      applys ignore_env_order CPP0; solve_perm.
-    + apply typing_rename with (x:=y); try solve_notin.
+  ; i; substs; destruct_notin
+  ; apply typing_rename with (x:=y); try (by solve_notin).
+  s; simpl_env.
+  forwards NIN: Perm_notin PER0 NotInTac1; simpl_env in *.
+  rewrite <-app_assoc.
+  eapply ignore_env_order
+  ; [apply Permutation_app|]; [apply Permutation_app_comm|auto|].
+  simpl_env; obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); auto
+  ; first (destruct_uniq; solve_uniq); i; substs; destruct_notin
+  ; apply typing_rename with (x:=x); try (by solve_notin).
+  - rewrite~ open_rec_comm.
+    rewrite lc_no_bvar; eauto using cp_implies_lc.
+  - rewrite~ open_rec_comm.
+    applys ignore_env_order CPP0; solve_perm.
+Qed.
+
+Lemma assoc_equiv:
+  forall P Q R A B
+         (LCP: forall x, lc_proc (P ^^ x))
+         (LCR: forall x, lc_proc (R ^^ x)),
+    ν B → ν A → P ‖ Q ‖ R =p= ν A → P ‖ ν B → {0 <~> 1}Q ‖ R.
+Proof.
+  unfold proc_equiv; split; intros WT; eauto using assoc_1,assoc_2.
 Qed.
 
 Lemma swap:
@@ -79,6 +126,57 @@ Proof.
   ; apply typing_rename with (x:=y); try by solve_notin.
   - apply prop_dual_iff in DUA; substs; auto.
   - apply prop_dual_iff in DUA; substs; rewrite~ <-prop_dual_involutive.
+Qed.
+
+Lemma swap_equiv:
+  forall P Q A dA
+         (DUA: dual_props A dA),
+    ν A → P ‖ Q =p= ν dA → Q ‖ P.
+Proof.
+  unfold proc_equiv; ii; split; intros WT; eauto using swap.
+Qed.
+
+Lemma reduce_equiv:
+  forall P Q R S Γ
+         (EQPQ: P =p= Q)
+         (RED: forall Γ, Q ⊢cp Γ -> R ⊢cp Γ)
+         (EQRS: R =p= S)
+         (WT: P ⊢cp Γ),
+    S ⊢cp Γ.
+Proof. firstorder. Qed.
+
+Lemma reduce_congr_cut_l:
+  forall P Q R A Γ
+         (IHWT: forall x Γ (NFV: x `notin` fv_proc P `union` fv_proc R),
+                  P ^^ x ⊢cp Γ -> R ^^ x ⊢cp Γ)
+         (WT: ν A → P ‖ Q ⊢cp Γ),
+    ν A → R ‖ Q ⊢cp Γ.
+Proof.
+  ii; inverts WT; substs.
+  pick fresh y; destruct_notin; find_specializes.
+  forwards UN1: uniq_perm PER UN.
+  applys ignore_env_order (Permutation_sym PER).
+  obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); [auto|solve_uniq| |]
+  ; i; substs; destruct_notin
+  ; apply typing_rename with (x:=y); try by solve_notin.
+  apply~ IHWT; []; destruct_notin; solve_notin.
+Qed.
+
+Lemma reduce_congr_cut_r:
+  forall P Q R A Γ
+         (IHWT: forall x Γ (NFV: x `notin` fv_proc Q `union` fv_proc R),
+                  Q ^^ x ⊢cp Γ -> R ^^ x ⊢cp Γ)
+         (WT: ν A → P ‖ Q ⊢cp Γ),
+    ν A → P ‖ R ⊢cp Γ.
+Proof.
+  ii; inverts WT; substs.
+  pick fresh y; destruct_notin; find_specializes.
+  forwards UN1: uniq_perm PER UN.
+  applys ignore_env_order (Permutation_sym PER).
+  obtain atoms L' as LEQ; eapply cp_cut with (L:=L'); [auto|solve_uniq| |]
+  ; i; substs; destruct_notin
+  ; apply typing_rename with (x:=y); try by solve_notin.
+  apply~ IHWT; []; destruct_notin; solve_notin.
 Qed.
 
 (** Lemmas for proving well-typedness of reduction rules. *)
@@ -750,15 +848,16 @@ Hint Resolve reduce_cc_multi_one reduce_cc_multi_two reduce_cc_input
      reduce_cc_add_inl reduce_cc_add_inr reduce_cc_choice reduce_cc_accept
      reduce_cc_request reduce_cc_weaken reduce_cc_empin reduce_cc_empcho.
 
+Hint Resolve reduce_equiv reduce_congr_cut_l reduce_congr_cut_r.
+
 Theorem proc_sub_red: forall Γ P Q
     (WT: P ⊢cp Γ)
     (RED: P ==>cp Q),
   Q ⊢cp Γ.
-Proof. ii; induction RED; subst; eauto. Admitted.
+Proof. ii; gen Γ; induction RED; subst; eauto. Qed.
 
 Theorem proc_cut_elim:
   forall P Γ
-         (WT: P ⊢cp Γ),
-    exists Q, P ==>cp Q /\ ~ is_cut Q.
+         (WT: P ⊢cp Γ),    exists Q, P ==>cp Q /\ ~ is_cut Q.
 Proof.
 Admitted.
