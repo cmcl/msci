@@ -3,6 +3,9 @@
 ./CP_Infrastructure.v
 ./CP_Typing.v
 ./CP_Reduction.v
+./GV_Definitions.v
+./GV_Infrastructure.v
+./GV_Typing.v
 ./Metatheory/AssocList.v
 ./Metatheory/CoqEqDec.v
 ./Metatheory/CoqFSetDecide.v

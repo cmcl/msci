@@ -1,4 +1,4 @@
-(** Beginning of the file for GV mechanisation as described in
+(** Beginning of the file for GV definitions as described in
 
     Philip Wadler. 2012. Propositions as sessions. In Proceedings of the 17th
     ACM SIGPLAN international conference on Functional programming (ICFP '12).
@@ -12,8 +12,7 @@
     DOI=10.1017/S0956796809990268 http://dx.doi.org/10.1017/S0956796809990268
 
 *)
-Require Import Metatheory List Coq.Program.Tactics Program.Equality.
-Require Import MetatheoryAtom Tactics.
+Require Import Metatheory Coq.Program.Tactics Program.Equality.
 Set Implicit Arguments.
 
 (** The notion of kind is borrowed from
@@ -33,14 +32,6 @@ Set Implicit Arguments.
 Inductive kind : Set :=
   | lin : kind (* linear *)
   | un : kind (* unlimited *).
-
-Lemma eq_kind_dec: forall (x y : kind), {x = y} + {x <> y}.
-Proof. decide equality. Qed.
-
-Hint Resolve eq_kind_dec.
-
-Instance EqDec_kind : @EqDec_eq kind.
-Proof. exact eq_kind_dec. Defined.
 
 (** [typ] is ranged over by T, U and V. It differs slightly from the
     definition given in Wadler's paper in the following ways:
@@ -65,62 +56,6 @@ Inductive typ : kind -> Set :=
   | typ_labs : forall kt ku, typ kt -> typ ku -> typ lin
   | typ_abs : forall kt ku, typ kt -> typ ku -> typ un
   | typ_unit : typ un.
-
-(** Uses heterogeneous equality but I believe this to be sound. *)
-Lemma eq_typ_dec: forall {k} (x y : typ k),
-  {x = y} + {x <> y}.
-Proof. 
-  ii; generalize dependent y; dependent induction x
-  ; dependent destruction y; auto; try (by right; ii; discriminate).
-  - destruct (k == k0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; simpl_existT; congruence).
-    left; f_equal; subst; reflexivity.
-  - destruct (k == k0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; simpl_existT; congruence).
-    left; f_equal; subst; reflexivity.
-  - specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; simpl_existT; congruence).
-    left; f_equal; subst; reflexivity.
-  - specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; simpl_existT; congruence).
-    left; f_equal; subst; reflexivity.
-  - destruct (kt == kt0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    destruct (ku == ku0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; simpl_existT; congruence).
-    left; f_equal; subst; reflexivity.
-  - destruct (kt == kt0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    destruct (ku == ku0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; simpl_existT; congruence).
-    left; f_equal; subst; reflexivity.
-  - destruct (kt == kt0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    destruct (ku == ku0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; simpl_existT; congruence).
-    left; f_equal; subst; reflexivity.
-Qed.
-
-Instance EqDec_typ {k}: @EqDec_eq (typ k).
-Proof. exact eq_typ_dec. Defined.
 
 (** The notation for sessions has been altered from the standard presentation
     to fit within allowable notations in Coq.
@@ -237,17 +172,22 @@ Inductive label : Set :=
   | lb_inr : label
   | lb_inl : label.
 
+Inductive var : Set :=
+  | bvar : nat -> var
+  | fvar : atom -> var.
+
+Coercion bvar : nat >-> var.
+Coercion fvar : atom >-> var.
+
 (** Define the terms of GV. We follow the approach in the UPenn Metatheory
     library, defining free variables as atoms and bound variables as de
     Bruijn indices.
 
 *)
 Inductive term : Set :=
-(* Rule for bound variables *)
-  | tm_bvar : nat -> term
-(* Rules representing those in the paper: *)
-  | tm_id : atom -> term
+  | tm_var : var -> term
   | tm_unit : term
+  | tm_weak : var -> term -> term
   | tm_abs : forall k, typ k -> term -> term
   | tm_app : term -> term -> term
   | tm_pair : term -> term -> term
@@ -259,8 +199,7 @@ Inductive term : Set :=
   | tm_connect : typ lin -> term -> term -> term
   | tm_end : term -> term.
 
-Coercion tm_bvar : nat >-> term.
-Coercion tm_id : atom >-> term.
+Coercion tm_var : var >-> term.
 
 (** In the style of ``Engineering Formal Metatheory'' we define
     substitution of expressions for atoms and opening of expressions with
@@ -273,7 +212,8 @@ Coercion tm_id : atom >-> term.
 *)
 Fixpoint subst (x: atom) (u: term) (t: term) : term :=
   match t with
-  | tm_id y => if x == y then u else (tm_id y)
+  | tm_var (fvar y) => if x == y then u else (tm_var y)
+  | tm_weak v m => tm_weak v (subst x u m)
   | tm_abs k T b => tm_abs T (subst x u b)
   | tm_app m n => tm_app (subst x u m) (subst x u n)
   | tm_pair p q => tm_pair (subst x u p) (subst x u q)
@@ -296,7 +236,8 @@ Notation "[ x ~> u ] t" := (subst x u t) (at level 68) : gv_scope.
 *)
 Fixpoint open_rec (k: nat) (u: term) (t: term) :=
   match t with
-  | tm_bvar n => if k == n then u else (tm_bvar n)
+  | tm_var (bvar n) => if k == n then u else (tm_var n)
+  | tm_weak v m => tm_weak v (open_rec k u m)
   | tm_abs k' T b => tm_abs T (open_rec (S k) u b)
   | tm_app m n => tm_app (open_rec k u m) (open_rec k u n)
   | tm_pair p q => tm_pair (open_rec k u p) (open_rec k u q)
@@ -326,7 +267,9 @@ Hint Unfold open.
 
 Fixpoint GVFV (t: term) :=
   match t with
-  | tm_id v => singleton v
+  | tm_var (fvar y) => singleton y
+  | tm_weak (fvar y) m => singleton y `union` GVFV m
+  | tm_weak _ m => GVFV m
   | tm_abs k' T b => GVFV b
   | tm_app m n => GVFV m `union` GVFV n
   | tm_pair p q => GVFV p `union` GVFV q
@@ -343,8 +286,9 @@ Fixpoint GVFV (t: term) :=
 (** A locally closed term has no unbounded variables. Note also using
     cofinite quantification with binding constructs. *)
 Inductive lc : term -> Prop :=
-  | lc_id : forall (x:atom), lc (tm_id x)
+  | lc_var : forall (x:atom), lc (tm_var x)
   | lc_unit : lc tm_unit
+  | lc_weak : forall (x:atom) M (MLC: lc M), lc (tm_weak x M)
   | lc_abs : forall (L:atoms) k (T:typ k) M
                     (CO: forall (x:atom), x `notin` L -> lc (open M x)),
                lc (tm_abs T M)
@@ -375,9 +319,8 @@ Hint Constructors lc.
 (** Typing environments are lists of (atom,typ) pairs. *)
 Definition tenv := list (atom * (typ lin + typ un)).
 
-Definition un_env (G : tenv) : Prop := forall x (T : typ un)
-                                              (IN: x `in` dom G),
-                                         binds x (inr T) G.
+Definition un_env (G : tenv) : Prop := forall x (IN: x `in` dom G),
+                                         exists (T:typ un), binds x (inr T) G.
 
 (** To get Coq to accept the '~' notation used here, we need to make sure t
     and T are parsed as identifiers.
@@ -415,11 +358,7 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
   | wt_tm_unit : nil ⊢ tm_unit ∈ typ_unit
   | wt_tm_weaken : forall Φ x N k (U: typ k) T (UN: uniq (Φ ++ x ~ inr T))
                           (WT: Φ ⊢ N ∈ U),
-                     Φ ++ x ~ inr T ⊢ N ∈ U
-  | wt_tm_contract : forall Φ x x' (T: typ un) N k (U:typ k)
-                            (UN: uniq (Φ ++ x ~ inr T ++ x' ~ inr T))
-                            (WT: Φ ++ x ~ inr T ++ x' ~ inr T ⊢ N ∈ U),
-                       Φ ++ x ~ inr T ⊢ (subst x' x N) ∈ U
+                     Φ ++ x ~ inr T ⊢ (tm_weak x N) ∈ U
   | wt_tm_labs : forall (L: atoms) Φ kt ku (T: typ kt) (U: typ ku) M
                         (UN: uniq Φ)
                         (WT: forall (x:atom),
@@ -488,142 +427,3 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
 where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
 
 Hint Constructors wt_tm.
-
-Lemma unlimited_env_typing:
-  forall Φ t (T: typ un)
-         (WT: Φ ⊢ t ∈ T),
-    un_env Φ.
-Proof.
-Admitted.
-
-(** Following ``Engineering Formal Metatheory'', we need some properties
-    regarding opening and substitution w.r.t locally closed terms.
-*)
-Section GVBasicSubstOpenProperties.
-
-  Lemma open_rec_same :
-    forall t j v i u
-           (NEQ: i <> j)
-           (EQ: {i ~> u}({j ~> v} t) = {j ~> v} t),
-      {i ~> u} t = t.
-  Proof.
-    induction t; ii; ss; auto
-    ; try (by f_equal; inversion EQ; firstorder)
-    ; des; auto.
-    - subst n; exfalso; auto.
-    - subst n; ss; destruct (i == i); auto; []; exfalso; auto.
-  Qed.
-
-  Lemma lc_no_bvar:
-    forall t u k
-           (LC: lc t),
-      {k ~> u}t = t.
-  Proof.
-    ii; generalize dependent k; induction LC; s; ii; f_equal; auto
-    ; try (by unfold open in *; pick fresh x for L
-           ; apply open_rec_same with (j := 0)(v := x); auto).
-    Case "let".
-      unfold open in *; pick fresh x for L; pick fresh y for L'.
-      apply open_rec_same with (j := 0)(v := y); auto.
-      apply open_rec_same with (j := 1)(v := x); auto.
-  Qed.
-
-  Lemma lc_open_subst:
-    forall t u (x y: atom) k
-           (NEQ: x <> y)
-           (LCU: lc u),
-      {k ~> y} ([x ~> u]t) = [x ~> u]({k ~> y} t).
-  Proof.
-    ii; unfold open; generalize dependent k.
-    induction t; ii; f_equal; auto.
-    Case "bound var".
-      destruct (k == n); ss; destruct (x == y); easy.
-    Case "free var".
-      destruct (x == a); auto using lc_no_bvar.
-  Qed.
-
-  Lemma subst_eq_var:
-    forall (x : atom) u,
-      [x ~> u]x = u.
-  Proof.
-    ii; des; auto.
-  Qed.
-
-  Lemma subst_neq_var :
-    forall (x y : atom) u,
-      y <> x -> [x ~> u]y = y.
-  Proof.
-    ii; des; auto; []; exfalso; auto.
-  Qed.
-
-  Lemma subst_open_rec :
-    forall t1 t2 u (x : atom) k,
-      lc u ->
-      [x ~> u] ({k ~> t2} t1) = {k ~> [x ~> u] t2} ([x ~> u] t1).
-  Proof.
-    induction t1; ii; try (by f_equal; eauto); des; s; auto.
-    symmetry; auto using lc_no_bvar.
-  Qed.
-
-  Lemma subst_open_var :
-    forall (x y : atom) u t
-           (NEQ: y <> x)
-           (LC: lc u),
-      open ([x ~> u] t) y = [x ~> u] (open t y).
-  Proof.
-    ii; unfold open; auto using lc_open_subst.
-  Qed.
-
-  Lemma subst_intro :
-    forall (x : atom) u t
-           (NIN: x `notin` (GVFV t)),
-      open t u = [x ~> u](open t x).
-  Proof.
-    ii; unfold open; generalize 0.
-    induction t; intros bv; ss; try (solve [f_equal; eauto]).
-    - destruct (bv == n); auto using subst_eq_var.
-    - apply notin_singleton_1 in NIN; destruct (x == a); auto; []; congruence.
-  Qed.
-
-  Lemma subst_lc :
-    forall t u x
-           (LCT: lc t)
-           (LC: lc u),
-      lc ([ x ~> u ] t).
-  Proof.
-    ii; induction LCT; simpl; auto.
-    Case "lc_id".
-    ss; destruct (x == x0); subst; eauto.
-    Case "lc_abs".
-    pick fresh y and apply lc_abs.
-    unfold open in *; rewrite lc_open_subst; auto.
-    Case "let".
-      (* TODO: tactic for introducing list of fresh variables. *)
-      apply lc_let with (L' := L `union` L' `union` singleton x)
-                          (L := L `union` L' `union` singleton x); ii; auto.
-      unfold open in *; rewrite !lc_open_subst; auto.
-    Case "case".
-      pick fresh y and apply lc_case; auto
-      ; by unfold open in *; rewrite lc_open_subst; auto.
-    Case "connect".
-      pick fresh y and apply lc_connect; unfold open in *
-      ; rewrite lc_open_subst; auto.
-  Qed.
-
-  Lemma typing_subst:
-    forall Φ Ψ k (T: typ k) (U: typ un) z t u
-           (WTT: Φ ++ (z ~ inr U) ++ Ψ ⊢ t ∈ T)
-           (WTU: Φ ⊢ u ∈ U),
-      Φ ++ Ψ ⊢ [z ~> u]t ∈ T.
-  Proof.
-    ii; assert (UNENV: un_env Φ) by eauto using unlimited_env_typing.
-    induction WTT.
-    - 
-End GVBasicSubstOpenProperties.
-
-Lemma wt_tm_is_lc : forall Φ t k (T: typ k)
-    (WT: Φ ⊢ t ∈ T),
-  lc t.
-Proof.
-  ii; induction WT; eauto using subst_lc.
-Qed.
