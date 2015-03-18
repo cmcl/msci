@@ -72,7 +72,7 @@ Notation "T ⊸ U" := (typ_labs T U) (at level 68, right associativity)
                                    : gv_scope.
 Notation "T → U" := (typ_abs T U) (at level 68, right associativity)
                                   : gv_scope.
-Notation "T ⨂ U" := (typ_tensor T U) (at level 68, right associativity)
+Notation "T <x> U" := (typ_tensor T U) (at level 68, right associativity)
                                      : gv_scope.
 Delimit Scope gv_scope with gv.
 Open Scope gv_scope.
@@ -132,13 +132,10 @@ Definition dual_session (S : {T : typ lin | is_session T}) :=
     | exist dual pf => dual
   end.
 
-Notation "'¬' S" := (dual_session (exist _ S _)) (at level 69,
-                                                   right associativity)
-                                                  : gv_scope.
 (** FIXME: Unfortunately the definition does not prevent placing non-session
     [typ] constructors within the continuation part of a session:
 
-    Eval compute in ¬(! typ_unit # (typ_tensor typ_unit typ_unit)).
+    Eval compute in dual_session(! typ_unit # (typ_tensor typ_unit typ_unit)).
 
     In the inductive hypothesis is it assumed the continuation is a session
     so perhaps if this isn't true we can conclude the dual is a session
@@ -255,7 +252,8 @@ Fixpoint open_rec (k: nat) (u: term) (t: term) :=
   | _ => t
   end.
 
-Notation "{ k ~> u } t" := (open_rec k u t) (at level 68) : gv_scope.
+Notation "{ k ~> u } t" := (open_rec k u t) (at level 68,
+                                             right associativity) : gv_scope.
 
 (** Opening a term t is replacing the unbound variable with index 0 with term
     u. Assume u is locally closed and is only substituted once if it contains
@@ -378,12 +376,12 @@ Inductive wt_tm : tenv -> term -> forall k, typ k -> Prop :=
   | wt_tm_pair : forall Φ Ψ kt ku (T: typ kt) (U: typ ku) M N
                         (UN: uniq (Φ ++ Ψ))
                         (WTM: Φ ⊢ M ∈ T) (WTN: Ψ ⊢ N ∈ U),
-                   Φ ++ Ψ ⊢ (tm_pair M N) ∈ T ⨂ U
+                   Φ ++ Ψ ⊢ (tm_pair M N) ∈ T <x> U
   | wt_tm_let :
       forall (L L':atoms) Φ Ψ kt ku kv
              (T:typ kt) (U:typ ku) (V: typ kv) M N
              (UN: uniq (Φ ++ Ψ))
-             (WTM: Φ ⊢ M ∈ T ⨂ U)
+             (WTM: Φ ⊢ M ∈ T <x> U)
              (WTN: forall (x y:atom)
                           (XL: x `notin` L)
                           (YL: y `notin` L'),
