@@ -3,38 +3,42 @@ Require Import Metatheory.
 Require Import GV_Definitions GV_Infrastructure.
 Set Implicit Arguments.
 
-Lemma elab_inl: forall (T: typ lin), ⟪T⟫ = inl T.
-Proof. auto. Qed.
+(* Destruct compound well-formed type assumptions. *)
+Ltac des_wfs :=
+  match goal with
+    | [H: wf_typ (! _ # _) _ |- _] => inverts H
+    | [H: wf_typ (? _ # _) _ |- _] => inverts H
+    | [H: wf_typ (_ <+> _) _ |- _] => inverts H
+    | [H: wf_typ (_ <&> _) _ |- _] => inverts H
+    | [H: wf_typ (_ <x> _) _ |- _] => inverts H
+    | [H: wf_typ (_ ⊸ _) _ |- _] => inverts H
+    | [H: wf_typ (_ → _) _ |- _] => inverts H
+    | |- _ => idtac
+  end.
 
-Lemma elab_inr: forall (T: typ un), ⟪T⟫ = inr T.
-Proof. auto. Qed.
+Lemma duals_are_sessions:
+  forall S dS (DU: are_dual S dS),
+    is_session S /\ is_session dS.
+Proof. ii; induction DU; des; split; auto. Qed.
 
-Lemma unlimited_env_typing:
-  forall Φ t (T: typ un)
-         (WT: Φ ⊢ t ∈ T),
-    un_env Φ.
+Lemma duals_are_wf:
+  forall S dS (DU: are_dual S dS),
+    wf_typ S lin /\ wf_typ dS lin.
 Proof.
-  ii; inversion WT; repeat simpl_existT; substs; auto; unfold un_env; i
-  ; simpl_env in *.
-  - rewrite elab_inr in *; destruct_in; substs; eauto.
-  - fsetdec.
-  - destruct_in. admit (* analyze_in x0 IN0 *). substs; eauto.
-  - destruct_in. admit (* analyze_in x IN0 *). admit (*analyze_in x IN1*).
-Admitted.
+  ii; induction DU; des; split; auto; econstructor; eauto
+  ; by repeat match goal with
+                | [H: are_dual ?S ?dS |- _] =>
+                  apply duals_are_sessions in H; des; auto
+              end.
+Qed.
 
-Lemma typing_subst:
-  forall Φ Ψ k (T: typ k) (U: typ un) z t u
-         (WTT: Φ ++ (z ~ inr U) ++ Ψ ⊢ t ∈ T)
-         (WTU: Φ ⊢ u ∈ U),
-    Φ ++ Ψ ⊢ [z ~> u]t ∈ T.
-Proof.
-  ii; assert (UNENV: un_env Φ) by eauto using unlimited_env_typing.
-  induction WTT.
-Admitted.
-
-Lemma wt_tm_is_lc : forall Φ t k (T: typ k)
+Lemma wt_tm_is_lc : forall Φ t T
     (WT: Φ ⊢ t ∈ T),
   lc t.
 Proof.
-  ii; induction WT; eauto using subst_lc.
+  ii; induction WT; des_wfs; match goal with
+                               | [H: are_dual ?S ?dS |- _] =>
+                                 apply duals_are_wf in H; des
+                               | |- _ => idtac
+                             end; eauto using subst_lc.
 Qed.

@@ -315,19 +315,7 @@ Ltac solve_perm :=
                        |- Permutation (?x ++ _) _ => bring_to_start x
                    end].
 
-(** Helpful tactics for handling In predicate destruction. *)
-
-Ltac analyze_in x :=
-  match goal with
-    | [H: x `in` dom ?E |- _] =>
-      let a := fresh "a" in
-      let E1 := fresh "E1" in
-      let E2 := fresh "E2" in
-      let EQ := fresh "EQ" in
-      apply in_env_split in H
-      ; inversion_clear H as (a & E1 & E2 & EQ)
-      ; substs~; des_reqs
-  end.
+(* Extract a binding from a permutation. *)
 
 Ltac extract_bnd x A :=
   match goal with

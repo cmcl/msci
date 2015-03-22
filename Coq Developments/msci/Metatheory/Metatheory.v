@@ -350,3 +350,17 @@ Ltac destruct_in :=
     | _ =>
       idtac
   end.
+
+(** Helpful tactic for handling In predicate destruction. *)
+
+Ltac analyze_in x :=
+  match goal with
+    | [H: x `in` dom ?E |- _] =>
+      let a := fresh "a" in
+      let E1 := fresh "E1" in
+      let E2 := fresh "E2" in
+      let EQ := fresh "EQ" in
+      apply in_env_split in H
+      ; inversion_clear H as (a & E1 & E2 & EQ)
+      ; substs~
+  end.

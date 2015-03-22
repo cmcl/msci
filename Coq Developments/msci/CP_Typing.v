@@ -56,7 +56,7 @@ Proof.
   i; gen Γ Δ E P; induction xs as [|x xs]; ii.
   - destruct Δ; auto; destruct p as [y a]; specializes FVC y; des;ss;fsetdec.
   - forwards FVX: FVC x; des; exploit FVX1; auto; ii.
-    analyze_in x.
+    analyze_in x; des_reqs.
     rewrite <-!app_assoc,app_assoc.
     eapply ignore_env_order
     ; [apply Permutation_app_head; apply Permutation_app_comm|].
@@ -65,7 +65,7 @@ Proof.
     ; [solve_perm|applys uniq_perm UN;solve_perm|].
     rewrite <-(app_assoc E1); apply~ IHxs; [| |solve_uniq]; inv NDUP; auto.
     ii; simpl_env in *; specializes FVC x0; rewrite !dom_app in *; des; ii.
-    + destruct_in; analyze_in x0; rewrite !dom_app in *; ss.
+    + destruct_in; analyze_in x0; des_reqs; rewrite !dom_app in *; ss.
       { exploit FVC0; [fsetdec|].
         ii; destruct_in; auto; []
         ; subst; destruct_uniq; solve_notin; solve_uniq. }

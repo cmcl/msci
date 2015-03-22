@@ -12,60 +12,10 @@ Hint Resolve eq_kind_dec.
 Instance EqDec_kind : @EqDec_eq kind.
 Proof. exact eq_kind_dec. Defined.
 
-(** Uses heterogeneous equality but I believe this to be sound. *)
-Lemma eq_typ_dec: forall {k} (x y : typ k),
-  sumbool (x = y) (x <> y).
-Proof. 
-  ii; generalize dependent y; dependent induction x
-  ; dependent destruction y; auto; try (by right; ii; discriminate).
-  - destruct (k == k0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; repeat simpl_existT; congruence).
-    left; congruence.
-  - destruct (k == k0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; repeat simpl_existT; congruence).
-    left; congruence.
-  - specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; repeat simpl_existT; congruence).
-    left; congruence.
-  - specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; repeat simpl_existT; congruence).
-    left; congruence.
-  - destruct (kt == kt0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    destruct (ku == ku0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; repeat simpl_existT; congruence).
-    left; congruence.
-  - destruct (kt == kt0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    destruct (ku == ku0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; repeat simpl_existT; congruence).
-    left; congruence.
-  - destruct (kt == kt0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    destruct (ku == ku0) as [KEQ|]
-    ; [symmetry in KEQ; subst
-      |right; ii; inversion H; inversion H2; congruence].
-    specialize (IHx1 y1); specialize (IHx2 y2); destruct IHx1; destruct IHx2
-    ; try (by right; ii; inversion H; repeat simpl_existT; congruence).
-    left; congruence.
-Qed.
+Lemma eq_typ_dec: forall (x y : typ), sumbool (x = y) (x <> y).
+Proof. decide equality. Qed.
 
-Instance EqDec_typ {k}: @EqDec_eq (typ k).
+Instance EqDec_typ : @EqDec_eq typ.
 Proof. exact eq_typ_dec. Defined.
 
 (** Following ``Engineering Formal Metatheory'', we need some properties
@@ -168,7 +118,7 @@ Section GVBasicSubstOpenProperties.
     Case "lc_id".
       ss; destruct (x == x0); subst; eauto.
     Case "lc_abs".
-      pick fresh y and apply lc_abs.
+      pick fresh y and apply lc_abs; eauto.
       unfold open in *; rewrite lc_open_subst; auto.
     Case "let".
       (* TODO: tactic for introducing list of fresh variables. *)
@@ -179,7 +129,7 @@ Section GVBasicSubstOpenProperties.
       pick fresh y and apply lc_case; auto
       ; by unfold open in *; rewrite lc_open_subst; auto.
     Case "connect".
-      pick fresh y and apply lc_connect; unfold open in *
+      pick fresh y and apply lc_connect; auto; unfold open in *
       ; rewrite lc_open_subst; auto.
   Qed.
 
