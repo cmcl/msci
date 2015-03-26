@@ -93,6 +93,7 @@ VFILES:=Metatheory/Tactics.v\
   Metatheory/CoqFSetDecide.v\
   Metatheory/CoqEqDec.v\
   Metatheory/AssocList.v\
+  CPS_Translation.v\
   GV_Typing.v\
   GV_Infrastructure.v\
   GV_Definitions.v\

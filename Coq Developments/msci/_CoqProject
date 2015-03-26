@@ -6,6 +6,7 @@
 ./GV_Definitions.v
 ./GV_Infrastructure.v
 ./GV_Typing.v
+./CPS_Translation.v
 ./Metatheory/AssocList.v
 ./Metatheory/CoqEqDec.v
 ./Metatheory/CoqFSetDecide.v
