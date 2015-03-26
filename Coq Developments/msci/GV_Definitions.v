@@ -152,6 +152,18 @@ Inductive are_dual : typ -> typ -> Prop :=
 
 Hint Constructors are_dual.
 
+(** Only called on a session type. *)
+Fixpoint dual_session (T:typ) :=
+  match T with
+    | ! A # B => ? A # (dual_session B)
+    | ? A # B => ! A # (dual_session B)
+    | A <+> B => (dual_session A) <&> (dual_session B)
+    | A <&> B => (dual_session A) <+> (dual_session B)
+    | typ_iend => typ_oend
+    | typ_oend => typ_iend
+    | _ => T
+  end.
+
 (** Define a label type for binary branch and choice. *)
 Inductive label : Set :=
   | lb_inr : label
@@ -174,17 +186,22 @@ Inductive term : Set :=
   | tm_unit : term
   | tm_weak : var -> term -> term
   | tm_abs : typ -> term -> term
+  | tm_iabs : term -> term (* introduction rule for unlimited abstraction. *)
+  | tm_eabs : term -> term (* elimination rule for unlimited abstraction. *)
   | tm_app : term -> term -> term
   | tm_pair : term -> term -> term
   | tm_let : typ -> typ -> term -> term -> term
   | tm_send : term -> term -> term
   | tm_recv : term -> term
   | tm_select : label -> term -> term
-  | tm_case : term -> label -> term -> label -> term -> term
+  | tm_case : term -> term -> term -> term
   | tm_connect : typ -> term -> term -> term
   | tm_end : term -> term.
 
 Coercion tm_var : var >-> term.
+
+Notation "λ! M" := (tm_iabs M) (at level 68, right associativity) : gv_scope.
+Notation "λ? M" := (tm_eabs M) (at level 68, right associativity) : gv_scope.
 
 (** In the style of ``Engineering Formal Metatheory'' we define
     substitution of expressions for atoms and opening of expressions with
@@ -200,14 +217,16 @@ Fixpoint subst (x: atom) (u: term) (t: term) : term :=
   | tm_var (fvar y) => if x == y then u else (tm_var y)
   | tm_weak v m => tm_weak v (subst x u m)
   | tm_abs T b => tm_abs T (subst x u b)
+  | tm_iabs M => tm_iabs (subst x u M)
+  | tm_eabs M => tm_eabs (subst x u M)
   | tm_app m n => tm_app (subst x u m) (subst x u n)
   | tm_pair p q => tm_pair (subst x u p) (subst x u q)
   | tm_let T U m n => tm_let T U (subst x u m) (subst x u n)
   | tm_send m n => tm_send (subst x u m) (subst x u n)
   | tm_recv m => tm_recv (subst x u m)
   | tm_select l m => tm_select l (subst x u m)
-  | tm_case m ll nl lr nr
-    => tm_case (subst x u m) ll (subst x u nl) lr (subst x u nr)
+  | tm_case m nl nr
+    => tm_case (subst x u m) (subst x u nl) (subst x u nr)
   | tm_connect T m n => tm_connect T (subst x u m) (subst x u n)
   | tm_end m => tm_end (subst x u m)
   | _ => t
@@ -224,6 +243,8 @@ Fixpoint open_rec (k: nat) (u: term) (t: term) :=
   | tm_var (bvar n) => if k == n then u else (tm_var n)
   | tm_weak v m => tm_weak v (open_rec k u m)
   | tm_abs T b => tm_abs T (open_rec (S k) u b)
+  | tm_iabs M => tm_iabs (open_rec k u M)
+  | tm_eabs M => tm_eabs (open_rec k u M)
   | tm_app m n => tm_app (open_rec k u m) (open_rec k u n)
   | tm_pair p q => tm_pair (open_rec k u p) (open_rec k u q)
   | tm_let T U m n
@@ -231,9 +252,8 @@ Fixpoint open_rec (k: nat) (u: term) (t: term) :=
   | tm_send m n => tm_send (open_rec k u m) (open_rec k u n)
   | tm_recv m => tm_recv (open_rec k u m)
   | tm_select l m => tm_select l (open_rec k u m)
-  | tm_case m ll nl lr nr
-    => tm_case (open_rec k u m)
-               ll (open_rec (S k) u nl) lr (open_rec (S k) u nr)
+  | tm_case m nl nr
+    => tm_case (open_rec k u m) (open_rec (S k) u nl) (open_rec (S k) u nr)
   | tm_connect T m n
     => tm_connect T (open_rec (S k) u m) (open_rec (S k) u n)
   | tm_end m => tm_end (open_rec k u m)
@@ -257,13 +277,15 @@ Fixpoint GVFV (t: term) :=
   | tm_weak (fvar y) m => singleton y `union` GVFV m
   | tm_weak _ m => GVFV m
   | tm_abs T b => GVFV b
+  | tm_iabs m => GVFV m
+  | tm_eabs m => GVFV m
   | tm_app m n => GVFV m `union` GVFV n
   | tm_pair p q => GVFV p `union` GVFV q
   | tm_let T U m n => GVFV m `union` GVFV n
   | tm_send m n => GVFV m `union` GVFV n
   | tm_recv m => GVFV m
   | tm_select l m => GVFV m
-  | tm_case m ll nl lr nr => GVFV m `union` GVFV nl `union` GVFV nr
+  | tm_case m nl nr => GVFV m `union` GVFV nl `union` GVFV nr
   | tm_connect T m n => GVFV m `union` GVFV n
   | tm_end m => GVFV m
   | _ => empty
@@ -280,6 +302,8 @@ Inductive lc : term -> Prop :=
                     (CO: forall (x:atom), x `notin` L -> lc (open M x)),
                lc (tm_abs T M)
   | lc_app : forall M N (MLC: lc M) (NLC: lc N), lc (tm_app M N)
+  | lc_iabs : forall M (MLC: lc M), lc (λ! M)
+  | lc_eabs : forall M (MLC: lc M), lc (λ? M)
   | lc_pair : forall M N (MLC: lc M) (NLC: lc N), lc (tm_pair M N)
   | lc_let : forall (L L':atoms) T U M N
                     (WF: wf_typ (T <x> U) lin)
@@ -295,7 +319,7 @@ Inductive lc : term -> Prop :=
   | lc_case : forall (L:atoms) M NL NR (MLC: lc M)
                      (NLCO: forall (x:atom), x `notin` L -> lc (open NL x))
                      (NRCO: forall (x:atom), x `notin` L -> lc (open NR x)),
-                lc (tm_case M lb_inl NL lb_inr NR)
+                lc (tm_case M NL NR)
   | lc_connect : forall (L:atoms) T M N
                         (WFT: wf_typ T lin)
                         (MCO: forall (x:atom), x `notin` L -> lc (open M x))
@@ -346,16 +370,16 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
                         (UN: uniq (Φ ++ Ψ))
                         (WTM: Φ ⊢ M ∈ T ⊸ U) (WTN: Ψ ⊢ N ∈ T),
                    Φ ++ Ψ ⊢ (tm_app M N) ∈ U
-  | wt_tm_abs : forall Φ T U M
+  | wt_tm_iabs : forall Φ T U M
                        (WF: wf_typ (T → U) un)
                        (UN: uniq Φ)
                        (WT: Φ ⊢ M ∈ T ⊸ U) (UL: un_env Φ),
-                  Φ ⊢ M ∈ T → U
-  | wt_tm_app : forall Φ T U M
+                  Φ ⊢ λ! M ∈ T → U
+  | wt_tm_eabs : forall Φ T U M
                        (WF: wf_typ (T ⊸ U) lin)
                        (UN: uniq Φ)
                        (WT: Φ ⊢ M ∈ T → U),
-                  Φ ⊢ M ∈ T ⊸ U
+                  Φ ⊢ λ? M ∈ T ⊸ U
   | wt_tm_pair : forall Φ Ψ T U M N
                         (WF: wf_typ (T <x> U) lin)
                         (UN: uniq (Φ ++ Ψ))
@@ -399,7 +423,7 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
                                  Ψ ++ x ~ S1 ⊢ (open NL x) ∈ T)
                         (WTNR: forall (x:atom) (NL: x `notin` L),
                                  Ψ ++ x ~ S2 ⊢ (open NR x) ∈ T),
-                   Φ ++ Ψ ⊢ (tm_case M lb_inl NL lb_inr NR) ∈ T
+                   Φ ++ Ψ ⊢ (tm_case M NL NR) ∈ T
   | wt_tm_connect : forall (L:atoms) Φ Ψ M N S S' kt T
                            (UN: uniq (Φ ++ Ψ))
                            (DU: are_dual S S')
@@ -409,11 +433,10 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
                            (WTN: forall (x:atom) (NL: x `notin` L),
                                    Ψ ++ x ~ S' ⊢ (open N x) ∈ T),
                       Φ ++ Ψ ⊢ (tm_connect S M N) ∈ T
-  | wt_tm_end : forall Φ M T
-                       (WF: wf_typ (T <x> typ_iend) lin)
+  | wt_tm_end : forall Φ M
                        (UN: uniq Φ)
-                       (WT: Φ ⊢ M ∈ typ_tensor T typ_iend),
-                  Φ ⊢ tm_end M ∈ T
+                       (WT: Φ ⊢ M ∈ typ_iend),
+                  Φ ⊢ tm_end M ∈ typ_unit
 where "Φ ⊢ t ∈ T" := (wt_tm Φ t T) : gv_scope.
 
 Hint Constructors wt_tm.
