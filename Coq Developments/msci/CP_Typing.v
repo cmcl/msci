@@ -18,14 +18,6 @@ Ltac gather_atoms ::=
   let D := gather_atoms_with (fun x : proc => fv_proc x) in
   constr:(A `union` B `union` C `union` D).
 
-(** Helper tactic to obtain all the atoms in the context of a goal. *)
-Tactic Notation
-  "obtain" "atoms" ident(atoms_name) "as" ident(H)
-   :=    
-     let L := gather_atoms in
-     let L := beautify_fset L in
-     set (atoms_name:=L); def_to_eq atoms_name H L.
-
 Lemma cp_implies_uniq: forall Γ P
     (CP: P ⊢cp Γ),
   uniq Γ.

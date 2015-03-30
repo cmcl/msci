@@ -9,17 +9,6 @@
 Require Import Metatheory.Metatheory.
 Require Import Coq.Sorting.Permutation.
 
-(** Exporting required entities from AtomSetImpl, AtomSetFacts and
-    AtomSetProperties. *)
-Definition elements := AtomSetImpl.elements.
-Definition elements_3w := AtomSetImpl.elements_3w.
-Definition elements_iff := AtomSetFacts.elements_iff.
-Definition equal_sym := AtomSetProperties.equal_sym.
-Definition remove := Metatheory.remove.
-Definition remove_iff := AtomSetFacts.remove_iff.
-Definition union_2 := AtomSetImpl.union_2.
-Definition union_3 := AtomSetImpl.union_3.
-
 Set Implicit Arguments.
 
 (** Propositional variables are represented as natural numbers (bound) or

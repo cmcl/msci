@@ -203,6 +203,15 @@ Notation notin_add := notin_add_3.
 Notation notin_singleton := notin_singleton_2.
 Notation notin_union := notin_union_3.
 
+(** Exporting required entities from AtomSetImpl, AtomSetFacts and
+    AtomSetProperties. *)
+Definition elements := AtomSetImpl.elements.
+Definition elements_3w := AtomSetImpl.elements_3w.
+Definition elements_iff := AtomSetFacts.elements_iff.
+Definition equal_sym := AtomSetProperties.equal_sym.
+Definition remove_iff := AtomSetFacts.remove_iff.
+Definition union_2 := AtomSetImpl.union_2.
+Definition union_3 := AtomSetImpl.union_3.
 
 (* ********************************************************************** *)
 (** * Hints *)
@@ -296,6 +305,14 @@ Ltac apply_fresh_base H gather_vars atom_name :=
   let L := beautify_fset L in
   pick fresh x excluding L and apply H.
 
+(** Helper tactic to obtain all the atoms in the context of a goal. *)
+Tactic Notation
+  "obtain" "atoms" ident(atoms_name) "as" ident(H)
+   :=
+     let L := gather_atoms in
+     let L := beautify_fset L in
+     set (atoms_name:=L); def_to_eq atoms_name H L.
+
 (* SCW added this one for list support *)
 Set Implicit Arguments.
 Definition union_map (A:Set) (f:A -> vars) (l:list A) := 
@@ -364,3 +381,10 @@ Ltac analyze_in x :=
       ; inversion_clear H as (a & E1 & E2 & EQ)
       ; substs~
   end.
+
+(* Find co-finitely quantified hypotheses to specialise. *)
+Ltac find_specializes :=
+  repeat match goal with
+         | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
+           => specializes H H1
+         end.

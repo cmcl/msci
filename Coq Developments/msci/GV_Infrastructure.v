@@ -49,7 +49,7 @@ Section GVBasicSubstOpenProperties.
     ; try (by unfold open in *; pick fresh x for L
            ; apply open_rec_same with (j := 0)(v := x); auto).
     Case "let".
-      unfold open in *; pick fresh x for L; pick fresh y for L'.
+      unfold open in *; pick fresh x for L; pick fresh y.
       apply open_rec_same with (j := 0)(v := y); auto.
       apply open_rec_same with (j := 1)(v := x); auto.
   Qed.
@@ -121,10 +121,10 @@ Section GVBasicSubstOpenProperties.
       pick fresh y and apply lc_abs; eauto.
       unfold open in *; rewrite lc_open_subst; auto.
     Case "let".
-      (* TODO: tactic for introducing list of fresh variables. *)
-      apply lc_let with (L' := L `union` L' `union` singleton x)
-                          (L := L `union` L' `union` singleton x); ii; auto.
+      obtain atoms L' as LEQ.
+      apply lc_let with (L:=L'); ii; substs; destruct_notin; auto.
       unfold open in *; rewrite !lc_open_subst; auto.
+      apply H; fsetdec.
     Case "case".
       pick fresh y and apply lc_case; auto
       ; by unfold open in *; rewrite lc_open_subst; auto.
@@ -134,3 +134,43 @@ Section GVBasicSubstOpenProperties.
   Qed.
 
 End GVBasicSubstOpenProperties.
+
+Section GVFVProperties.
+
+  Lemma open_fv_proc_1:
+    forall x y k M
+           (NEQ: x <> y)
+           (FV: x `in` GVFV ({k ~> y}M)),
+      x `in` GVFV M.
+  Proof.
+    i; gen k; induction M; ii; destruct_all var; des; ss; destruct_in
+    ; tryfalse; eauto.
+  Qed.
+
+  Lemma open_fv_proc_2:
+    forall x y k M
+           (FV: x `in` GVFV M),
+      x `in` GVFV ({k ~> y}M).
+  Proof.
+    i; gen k; induction M; ii; destruct_all var; des; ss; destruct_in
+    ; eauto.
+  Qed.
+
+  Lemma open_nfv_proc_1:
+    forall x y k M
+           (NEQ: x <> y)
+           (NFV: x `notin` GVFV M),
+      x `notin` GVFV ({k ~> y}M).
+  Proof.
+    i; gen k; induction M; ii; destruct_all var; des; ss; destruct_in; eauto.
+  Qed.
+
+  Lemma open_nfv_proc_2:
+    forall x y k M
+           (NFV: x `notin` GVFV ({k ~> y}M)),
+      x `notin` GVFV M.
+  Proof.
+    i; gen k; induction M; ii; destruct_all var; des; ss; destruct_in; eauto.
+  Qed.
+
+End GVFVProperties.

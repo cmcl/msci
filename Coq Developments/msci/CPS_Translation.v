@@ -1,11 +1,12 @@
 (** Beginning of the file defining the translation from GV to CP. *)
 Require Import Metatheory.
-Require Import CP_Definitions GV_Definitions.
+Require Import CP_Definitions CP_Typing GV_Definitions.
 Require Import ExtLib.Structures.Applicative.
 Require Import ExtLib.Structures.Functor.
 Require Import ExtLib.Structures.Monad.
 Require Import ExtLib.Data.Option.
 Require Import ExtLib.Data.Monads.OptionMonad.
+Require Import Coq.Sorting.Permutation.
 Import ApplicativeNotation FunctorNotation MonadNotation.
 Set Implicit Arguments.
 
@@ -161,3 +162,31 @@ Fixpoint trans_tm' (tm:term) (G:tenv) (xs:list typ) (z:pname) : option proc :=
 
 (** Translation of terms. *)
 Definition trans_tm M G z := trans_tm' M G nil z.
+
+(** Translation of environments. *)
+Fixpoint trans_env (Φ:tenv) : penv :=
+  match Φ with
+    | nil => nil
+    | (x,a) :: Φ' => (x,¬⟦a⟧t) :: trans_env Φ'
+  end.
+
+Theorem cps_trans_wt:
+  forall Φ M T z P Γ Δ
+         (WT: Φ ⊢ M ∈ T)
+         (NIN: z `notin` GVFV M)
+         (ENV: trans_env Φ = Δ)
+         (PER: Permutation Γ (Δ ++ z ~ ⟦T⟧t))
+         (CP: trans_tm M Φ z = Some P),
+    P ⊢cp Γ.
+Proof.
+  introv WT; gen z P Γ Δ; induction WT; ii; unfold trans_tm in CP; ss
+  ; unfold apply in CP; substs; destruct_notin; des; tryfalse; repeat injs
+  ; auto.
+  - apply Permutation_sym in PER; applys ignore_env_order PER.
+    simpl_env; eauto.
+  - apply Permutation_sym in PER; applys ignore_env_order PER.
+    simpl_env.
+    pick fresh y and apply cp_accept; eauto.
+    rewrite /open_proc; s; simpl_env; eauto.
+  -
+Admitted.

@@ -305,12 +305,12 @@ Inductive lc : term -> Prop :=
   | lc_iabs : forall M (MLC: lc M), lc (λ! M)
   | lc_eabs : forall M (MLC: lc M), lc (λ? M)
   | lc_pair : forall M N (MLC: lc M) (NLC: lc N), lc (tm_pair M N)
-  | lc_let : forall (L L':atoms) T U M N
+  | lc_let : forall (L:atoms) T U M N
                     (WF: wf_typ (T <x> U) lin)
                     (MLC: lc M)
                     (NCO: forall (x y:atom)
                                  (XL: x `notin` L)
-                                 (YL: y `notin` L'),
+                                 (YL: y `notin` L `union` singleton x),
                             lc ({1 ~> x} (open N y))),
                lc (tm_let T U M N)
   | lc_send : forall M N (MLC: lc M) (NLC: lc N), lc (tm_send M N)
@@ -355,15 +355,15 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
   | wt_tm_unit : nil ⊢ tm_unit ∈ typ_unit
   | wt_tm_weaken : forall Φ x N k T U
                           (WFT: wf_typ T un) (WFU: wf_typ U k)
-                          (UN: uniq (Φ ++ x ~ T))
+                          (UN: uniq (x ~ T ++ Φ))
                           (WT: Φ ⊢ N ∈ U),
-                     Φ ++ x ~ T ⊢ (tm_weak x N) ∈ U
+                     x ~ T ++ Φ ⊢ (tm_weak x N) ∈ U
   | wt_tm_labs : forall (L: atoms) Φ T U M
                         (WF: wf_typ (T ⊸ U) lin)
                         (UN: uniq Φ)
                         (WT: forall (x:atom),
                                x `notin` L ->
-                               Φ ++ x ~ T ⊢ (open M x) ∈ U),
+                               x ~ T ++ Φ ⊢ (open M x) ∈ U),
                    Φ ⊢ tm_abs T M ∈ T ⊸ U
   | wt_tm_lapp : forall Φ Ψ T U M N
                         (WF: wf_typ (T ⊸ U) lin)
@@ -386,14 +386,14 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
                         (WTM: Φ ⊢ M ∈ T) (WTN: Ψ ⊢ N ∈ U),
                    Φ ++ Ψ ⊢ (tm_pair M N) ∈ T <x> U
   | wt_tm_let :
-      forall (L L':atoms) Φ Ψ kv T U V M N
+      forall (L:atoms) Φ Ψ kv T U V M N
              (WF: wf_typ (T <x> U) lin) (WFV: wf_typ V kv)
              (UN: uniq (Φ ++ Ψ))
              (WTM: Φ ⊢ M ∈ T <x> U)
              (WTN: forall (x y:atom)
                           (XL: x `notin` L)
-                          (YL: y `notin` L'),
-                     Ψ ++ x ~ T ++ y ~ U ⊢ ({1 ~> x} (open N y)) ∈ V),
+                          (YL: y `notin` L `union` singleton x),
+                     y ~ U ++ x ~ T ++ Ψ ⊢ ({1 ~> x} (open N y)) ∈ V),
         Φ ++ Ψ ⊢ (tm_let T U M N) ∈ V
   | wt_tm_send : forall Φ Ψ M T N S
                         (WF: wf_typ (! T # S) lin)
@@ -420,18 +420,18 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
                         (WFT: wf_typ T kt)
                         (WTM: Φ ⊢ M ∈ (S1 <&> S2))
                         (WTNL: forall (x:atom) (NLH: x `notin` L),
-                                 Ψ ++ x ~ S1 ⊢ (open NL x) ∈ T)
+                                 x ~ S1 ++ Ψ ⊢ (open NL x) ∈ T)
                         (WTNR: forall (x:atom) (NL: x `notin` L),
-                                 Ψ ++ x ~ S2 ⊢ (open NR x) ∈ T),
+                                 x ~ S2 ++ Ψ ⊢ (open NR x) ∈ T),
                    Φ ++ Ψ ⊢ (tm_case M NL NR) ∈ T
   | wt_tm_connect : forall (L:atoms) Φ Ψ M N S S' kt T
                            (UN: uniq (Φ ++ Ψ))
                            (DU: are_dual S S')
                            (WF: wf_typ T kt)
                            (WTM: forall (x:atom) (NL: x `notin` L),
-                                   Φ ++ x ~ S ⊢ (open M x) ∈ typ_oend)
+                                   x ~ S ++ Φ ⊢ (open M x) ∈ typ_oend)
                            (WTN: forall (x:atom) (NL: x `notin` L),
-                                   Ψ ++ x ~ S' ⊢ (open N x) ∈ T),
+                                   x ~ S' ++ Ψ ⊢ (open N x) ∈ T),
                       Φ ++ Ψ ⊢ (tm_connect S M N) ∈ T
   | wt_tm_end : forall Φ M
                        (UN: uniq Φ)
