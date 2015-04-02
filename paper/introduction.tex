@@ -1,0 +1,62 @@
+\section{Introduction}\label{sec:intro}
+
+Distributed communication systems are becoming increasingly prevalent in
+modern society. To facilitate communication between concurrently executing
+agents requires complex network protocols to define the type and sequencing of
+messages. Typically these protocols are implemented in systems programming
+languages, such as C, which provide no correctness guarantees of the
+implementation. Furthermore, programming in these languages is often extremely
+error-prone, as one has a myriad of unsafe features at one's disposal. As more
+businesses begin to conduct transactions over the Web, it is imperative that
+they can reason about the communication protocols upon which they rely.
+
+Encoding communication protocols as \textit{session types} is one approach to
+achieve guarantees about correctness. One particular variant of session types
+are \textit{binary} session types~\footnote{There are also \textit{multiparty}
+ session types, but I do not discuss them here.}. A binary session type
+specifies communication between two agents, and it specifies the order and
+type of messages to be sent or received by an agent in the system. The two
+agents have dual session types such that, for example, when one is expecting
+to receive a message the other is expecting to send a message; both session
+types agree on the type of message to be exchanged. In this way, correctness
+of communication can be statically assured by providing communicating agents
+with a \textit{channel} whose endpoints have dual session types. A channel is
+defined as a bi-directional conduit for exchanging messages, not unlike a
+socket in network programming. In contrast to sockets, however, a channel is
+associated with an explicit type which provides a description of its
+protocol. Thus, in session-based systems a channel is usually provided as a
+primitive type.
+
+In programming language research, work on static type systems is usually
+presented on paper complete with informal proofs of correctness for the system
+properties. Most types systems in the session types community have been
+developed in this way. However, it is more difficult to extend work using this
+approach, as it may be unclear how changes affect proofs and one will
+typically have to re-consider all proofs to be convinced the properties still
+hold. More generally, unassisted formalisms are error-prone to develop and do
+not provide a firm basis upon which other researchers can experiment.
+
+Proof assistants such as Coq~\cite{Coq:manual} offer a platform on which to
+develop programming languages and type systems and associated proofs of
+properties with strong guarantees of correctness. Not only is proving with a
+proof assistant much less error-prone than the unaided approach, it also eases
+extension of the system since the proof assistant will highlight parts of
+proofs that have been affected by changes. On the other hand, one may have to
+prove more properties using this approach since this setting does not permit
+appealing to human intuition. For example, alpha-equivalence and freshness of
+binders are usually assumed in informal presentations, whereas in the
+mechanised setting one has to explicitly encode and reason about these
+properties~\cite{Aydemir:2005:MMM, Aydemir:2008:EFM}.
+
+This project describes work towards the development of a framework for
+formalising lambda calculus type systems with session types using interactive
+theorem proving (in particular, the system Coq). The framework should enable a
+whole class of related languages and type systems to be formalised with little
+extra proof effort. Inspired by previous work on a mechanised framework for
+$\pi$-calculus type systems~\cite{Gay:2001:FFP}, the current work focuses on
+the lambda calculus to provide a basis on which session types for mainstream
+programming languages can be studied, whilst taking advantage of previous
+proof effort and specialising only for those parts unique to the particular
+system. The starting point for the framework is the calculi developed by
+\citeauthor{Wadler:2014}~\cite{Wadler:2014} describing a relationship between
+classical linear logic (CP) and a functional language with session types (GV).

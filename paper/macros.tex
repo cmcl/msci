@@ -394,3 +394,123 @@
 \newcommand{\mysubsection}[1]{\paragraph*{#1.}}
 \newcommand{\typingRuleSkip}{0ex}
 
+\usepackage{stmaryrd}
+\usepackage{proof}
+\usepackage{amssymb}
+\usepackage{color}
+
+%%%%%%%%%%%%%%%%%%%%%% Wadler's CP/GV commands %%%%%%%%%%%%%%%%%%%%%%%%%
+
+% IMPORTANT!
+
+% To typeset this paper for color, use the first definition below.
+% To typeset this paper for black and white, use the second definition.
+
+\newcommand{\incolor}[1]{#1}    % Use to typeset in color
+%\newcommand{\incolor}[1]{}     % Use to typeset in black and white
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% color framework
+
+\newcommand{\judgecolor}{}
+\newcommand{\typecolor}{}
+\newcommand{\termcolor}{}
+\newcommand{\Typecolor}{}
+\newcommand{\Termcolor}{}
+
+\newcommand{\uncolored}{
+  \incolor{
+    \renewcommand{\judgecolor}{}
+    \renewcommand{\typecolor}{}
+    \renewcommand{\termcolor}{}
+    \renewcommand{\Typecolor}{}
+    \renewcommand{\Termcolor}{}
+  }
+}
+
+\newcommand{\colored}{
+  \incolor{
+    \renewcommand{\judgecolor}{\color{black}}
+    \renewcommand{\typecolor}{\color{blue}}
+    \renewcommand{\termcolor}{\color{red}}
+    \renewcommand{\Typecolor}{\color{cyan}}
+    \renewcommand{\Termcolor}{\color{magenta}}
+  }
+}
+
+\newcommand{\jd}[1]{{\judgecolor #1}}
+\newcommand{\tp}[1]{{\typecolor #1}}
+\newcommand{\tm}[1]{{\termcolor #1}}
+\newcommand{\Tp}[1]{{\Typecolor #1}}
+\newcommand{\Tm}[1]{{\Termcolor #1}}
+
+\newcommand{\tmof}[1]{\tm{#1:{}}}
+\newcommand{\Tmof}[1]{\Tm{#1:{}}}
+\newcommand{\tmsem}[1]{\tm{\sem{\Tm{#1}}}}
+\newcommand{\tpsem}[1]{\tp{\sem{\Tp{#1}}}}
+\newcommand{\tmSem}[1]{{\termcolor \left\llbracket
+                        \judgecolor #1
+                        \termcolor \right\rrbracket}}
+
+\newcommand{\tpvdash}{\tp{{} \vdash {}}}
+\newcommand{\Tpvdash}{\Tp{{} \vdash {}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{note}{\begin{trivlist} \item \textbf{Note. }}{\end{trivlist}}
+
+\newcommand{\etal}{\emph{et~al.}}
+
+\newcommand{\dualbt}[1]{#1^\bot}
+\newcommand{\of}[1]{\,{:}\,{#1}}
+% \newcommand{\Of}[1]{\of{#1}}
+\newcommand{\Of}[1]{}
+% \newcommand{\OF}[1]{\of{#1}}
+\newcommand{\OF}[1]{}
+\newcommand{\all}[1]{\forall #1.}
+\newcommand{\any}[1]{\exists #1.}
+%% \newcommand{\with}{\mathbin{\binampersand}}
+%% \newcommand{\parr}{\mathbin{\bindnasrepma}}
+\newcommand{\lolli}{\multimap}
+\newcommand{\link}{{\leftrightarrow}}
+\newcommand{\semi}{;\;}
+\newcommand{\comma}{,\,}
+\newcommand{\Ax}{\key{Ax}}
+\newcommand{\Cut}{\key{Cut}}
+\newcommand{\Weaken}{\key{Weaken}}
+\newcommand{\Contract}{\key{Contract}}
+\newcommand{\Swap}{\key{Swap}}
+\newcommand{\Assoc}{\key{Assoc}}
+\newcommand{\pwEnd}{\key{end}}
+\newcommand{\defeq}{\stackrel{\mathrm{def}}{=}}
+\newcommand{\app}{\:}
+\newcommand{\lam}[1]{\lambda #1.}
+\newcommand{\Lam}[1]{\Lambda #1.}
+\newcommand{\pwlin}{\key{lin}}
+\newcommand{\un}{\key{un}}
+\newcommand{\pwfn}{\key{fn}}
+\newcommand{\pwfv}{\key{fv}}
+\newcommand{\key}{\textsf}
+%\newcommand{\key}{\textrm}
+\newcommand{\becomes}{\Longrightarrow}
+\newcommand{\sem}[1]{\llbracket #1 \rrbracket}
+\newcommand{\Sem}[1]{\left\llbracket #1 \right\rrbracket}
+% \newcommand{\sem}[1]{{#1^\dagger}}
+% \newcommand{\Sem}[1]{{\left(#1\right)^\dagger}}
+% \newcommand{\sem}[1]{[\![#1]\!]}
+% \newcommand{\Sem}[1]{\left[\!\!\left[#1\right]\!\!\right]}
+\newcommand{\ang}[1]{\langle #1 \rangle}
+\newcommand{\set}[1]{\{ #1 \}}
+\newcommand{\sub}{\set}
+\newcommand{\intro}{\textsf{-I}}
+\newcommand{\elim}{\textsf{-E}}
+\newcommand{\pwoutp}[1]{{!#1}.}
+\newcommand{\pwinp}[1]{{?#1}.}
+\newcommand{\outend}{\key{end}_{!}}
+\newcommand{\inend}{\key{end}_{?}}
+\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
+\newcommand{\Inference}[3]{\infer=[\mathsf{#2}]{#3}{#1}}
+\newcommand{\spacer}{\quad\quad\quad\quad}
+\newcommand{\filler}{\hspace{0.9\textwidth}}
+\newcommand{\tighten}{\vspace{-1ex}}

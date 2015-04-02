@@ -1,8 +1,9 @@
 
 TEX:=paper.tex
 PROPDEPS:=with-connect-rule.tex focus-rule.tex propmacros.tex\
-macros.tex session-types.tex
-DEPS:=paper.bib
+session-types.tex
+DEPS:=abstract.tex introduction.tex background.tex formalisation.tex\
+futurework.tex conclusion.tex acknowledgements.tex macros.tex cp.tex paper.bib
 PROPDEPS:=$(PROPDEPS:%.tex=../proposal/%.tex)
 PDFS:=$(TEX:%.tex=%.pdf)
 

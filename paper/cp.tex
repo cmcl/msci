@@ -1,0 +1,139 @@
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\inference{
+}{Ax}{
+  \tm{w \link x} \tpvdash \tp{\tmof{w} \dualbt{A} \comma \tmof{x} A}
+}
+
+\quad\quad
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+  &
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dualbt{A}}
+}{Cut}{
+  \tm{\nu x \of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
+}
+
+\\~\\
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}  &
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+}{\otimes}{
+  \tm{x[y].(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}A
+    \otimes B}
+}
+
+\quad\quad
+
+\inference{
+  \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}A \comma \tmof{x}B}
+}{\parr}{
+  \tm{x(y).R} \tpvdash \tp{\Theta \comma \tmof{x}A \parr B}
+}
+
+\\~\\
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+}{\oplus_1}{
+  \tm{x[\inlterm].P} \tpvdash \tp{\Gamma \comma \tmof{x}A \oplus B}
+}
+
+\quad\quad
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B}
+}{\oplus_2}{
+  \tm{x[\inrterm].P} \tpvdash \tp{\Gamma \comma \tmof{x}A \oplus B}
+}
+
+\quad\quad
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}A}  &
+  \tm{R} \tpvdash \tp{\Delta \comma \tmof{x}B}
+}{\with}{
+  \tm{x.\caseterm(Q,R)} \tpvdash \tp{\Delta \comma \tmof{x}A \with B}
+}
+
+\\~\\
+
+\inference{
+  \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+}{!}{
+  \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
+}
+
+\quad\quad
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}A}
+}{?}{
+  \tm{?x[y].Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
+}
+
+\\~\\
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta}
+}{Weaken}{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
+}
+
+\quad\quad
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A} \comma \tmof{x'}{?A}}
+}{Contract}{
+  \tm{Q\sub{x/x'}} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
+}
+
+\\~\\
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X}}
+}{\exists}{
+  \tm{x[A].P} \tpvdash \tp{\Gamma \comma \tmof{x}\any{X}B}
+}
+
+\quad\quad
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+}{\forall~~\textrm{($X \not\in \fv(\Delta)$)}}{
+  \tm{x(X).Q} \tpvdash \tp{\Delta \comma \tmof{x}\all{X}B}
+}
+
+\\~\\
+
+\inference{}{1}{
+  \tm{x[\,].0} \tpvdash \tp{\tmof{x}1}
+}
+
+\quad\quad
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma}
+}{\bot}{
+  \tm{x().P} \tpvdash \tp{\Gamma \comma \tmof{x}\bot}
+}
+
+\quad\quad
+
+\textrm{(no rule for $0$)}
+
+\quad\quad
+
+\inference{}{\top}{
+  \tm{x.\caseterm()} \tpvdash \tp{\Gamma \comma \tmof{x}\top}
+}
+
+\end{array}
+\]
+\caption{CP, classical linear logic as a session-typed process calculus}
+\label{fig:cll}
+\end{figure*}
