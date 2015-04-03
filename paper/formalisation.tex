@@ -110,13 +110,7 @@ propositions
 
 processes
 
-typing judgements
-
 equivalences and axiomatic cut
-
-principal cut rules
-
-commuting conversions
 \end{comment}
 
 Formalising the process calculus CP provided many challenges for the
@@ -189,6 +183,7 @@ rule lending to the specific split of the linear environments. The reduction
 rules were complicated to prove due to being composed of multiple constructor
 instances and differed significantly to the standard operational semantics one
 typically deals with in lambda calculus formalisms.
+linear environments caused a problem with the splitting up of variables.
 
 % ...commuting conversions
 
@@ -196,12 +191,11 @@ typically deals with in lambda calculus formalisms.
 
 \input{commconvtwocp}
 
-% ...leading on to a discussion of further CP-specific issues encountered.
+The commuting conversions are shown in Figures~\ref{??} and~\ref{??}. Notice
+that permutating binders is essential to formulating the majority of these
+rules.
 
-metatheory library and the library of tactics from software foundations are
-used extensively: metatheory does not handle multiple binders (check this?)
-maybe add a generic tactic to handle multiple binders... or perhaps add a
-lemmas for handling binders
+% ...leading on to a discussion of further CP-specific issues encountered.
 
 \subsection{The functional language GV}\label{sec:gv}
 
@@ -211,40 +205,50 @@ FIGURES
 types
 
 terms
-
-typing judgements
 \end{comment}
 
 \input{gv}
 
-While the aim is to be faithful to \citeauthor{Wadler:2014}'s description, I
-may need to alter the approach slightly to avoid tricky formulations. For
-instance, instead of providing $n$-ary branch and choice in GV, I provide
-only binary versions of these operators to simplify the development. This
-change is not restrictive however, since CP itself provides only binary
-versions of plus ($\oplus$) and with ($\with$) constructs. Likewise, on a more
-technical note, I amalgamate all types into one inductive definition and
-provide a predicate for restricting typing rules to consider only valid
-session types. \citeauthor{Wadler:2014} defines GV types as a set of mutually
-recursive definitions; session types are types which may contain types as
-subcomponents (arguments to send, for example). Unfortunately, handling
-mutually inductive definitions in Coq can be quite involved; requiring one to
-either rely on the Coq system to provide a stronger mutual induction principle
-or defining one manually. Such a definition is possible, but it complicates
-elimination via the induction principle.
+The typing judgements for the functional language GV are shown in
+Figure~\ref{??}. Note that I have altered the $n$-ary branch and choice
+constructs to the restricted binary versions in order to avoid tricky
+formulations. The change is not restrictive however, since CP itself provides
+only binary versions of plus ($\oplus$) and with ($\with$) constructs.
 
-another issue is the way i tried to formulate types initially treating them as
-indexed families indexed by kinds. while this exploits the dependently typed
-approach it complicated later definitions and proofs. for instance decidablity
-of equality on types now relied on an axiom permitting heterogeneous
-equality. further when formulating the typing environment we must decide which
-kind each type had and most rules are polymorphic in that decision leading to
-the creation of an awkward inspection function. these issues highlighted that
-one should be careful and considerate how the representation will affect later
-expressiveness.
+On a more technical note, all types are amalgamated into one inductive
+definition and provide a predicate for restricting typing rules to consider
+only valid session types. \citeauthor{Wadler:2014} defines GV types as a set
+of mutually recursive definitions; session types are types which may contain
+types as subcomponents (arguments to send, for example). Unfortunately,
+handling mutually inductive definitions in Coq can be quite involved;
+requiring one to either rely on the Coq system to provide a stronger mutual
+induction principle or defining one manually. Such a definition is possible,
+but it complicates applications of the induction principle.
+
+Another issue related to types is how to representing type kinds (linearity or
+non-linearity). Initially the type definition was defined as an indexed
+family, indexed by the kind. While this definition has the advantage of
+preventing certain ill-formed types, such as a non-linear session type, it
+complicated later definitions and proofs. For instance, the decidability of
+equality on types now relied on an axiom permitting heterogeneous
+equality~\cite{??}. Generally, it is better to avoid unnecessary postulates if
+possible. Further, when formulating the typing judgements the kind must be
+given to each type hypothesised and most rules (e.g. ...) are polymorphic in
+the kind, motivating an awkward inspection function to be applied per
+application of a constructor \todo{clean this description up}. A solution to
+this was to define a well-formed type relation and do away with the type
+dependency. these issues highlighted that one should be careful and
+considerate regarding when to use dependent types. these issues highlighted
+that one should be careful and considerate how the representation will affect
+later expressiveness.
 
 explicit limiting and unlimiting of abstraction to ensure rules are syntax
 directed - permits inductive argument on terms when translating from gv to cp
+
+metatheory library and the library of tactics from software foundations are
+used extensively: metatheory does not handle multiple binders (check this?)
+maybe add a generic tactic to handle multiple binders... or perhaps add a
+lemmas for handling binders
 
 \subsection{CPS translation GV to CP}
 
