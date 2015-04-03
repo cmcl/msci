@@ -1,0 +1,212 @@
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\multicolumn{1}{l}{(\kappa_{\otimes1})}\filler \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+    }{\otimes}{
+      \tm{x[y].(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}A \otimes B \comma \tmof{z}C}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+\quad \becomes \hfill \\~\\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(P \mid R)} \tpvdash
+        \tp{\Gamma \comma \Theta \comma \tmof{y}A}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+  }{\otimes}{
+    \tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\otimes2})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B \comma \tmof{z}C}
+    }{\otimes}{
+      \tm{x[y].(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}A \otimes B \comma \tmof{z}C}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+\quad \becomes \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(Q \mid R)} \tpvdash
+        \tp{\Delta \comma \Theta \comma \tmof{x}B}
+    }
+  }{\otimes}{
+    \tm{x[y].(P \mid \nu z\Of{C}.(Q \mid R))} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\parr})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash
+        \tp{\Gamma \comma \tmof{y}A \comma \tmof{x}B \comma \tmof{z}C}
+    }{\parr}{
+      \tm{x(y).P} \tpvdash
+        \tp{\Gamma \comma \tmof{x}A \parr B \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x(y).P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}A \parr B}
+  }
+}
+\quad \becomes \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash
+        \tp{\Gamma \comma \tmof{y}A \comma \tmof{x}B \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{y}A \comma \tmof{x}B}
+    }
+  }{\parr}{
+    \tm{x(y).\nu z\Of{C}.(P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}A \parr B}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\with})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Gamma \comma \tmof{x}B \comma \tmof{z}C}
+    }{\with}{
+      \tm{x.\caseterm(P,Q)} \tpvdash
+        \tp{\Gamma \comma \tmof{x}A \with B \comma \tmof{z}C}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x.\caseterm(P,Q) \mid R)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}A \with B}
+  }
+}
+\quad \becomes \hfill \\~\\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(P \mid R)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}A}
+    }
+    &
+    \inference{ 
+      \tm{Q} \tpvdash \tp{\Gamma \comma \tmof{x}B \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(Q \mid R)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}B}
+    }
+  }{\with}{
+    \tm{x.\caseterm(\nu z\Of{C}.(P \mid R),\nu z\Of{C}.(Q \mid R))} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}A \with B}
+  }
+}
+
+\\~\\
+\multicolumn{1}{l}{(\kappa_{\oplus})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A \comma \tmof{z}C}
+    }{\oplus}{
+      \tm{x[\inlterm].P} \tpvdash
+        \tp{\Gamma \comma \tmof{x}A \oplus B \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+   \tm{\nu z \Of{C}.(x[\inlterm].P \mid Q)} \tpvdash
+     \tp{\Gamma \comma \Delta \comma \tmof{x}A \oplus B}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+     \tm{\nu z \Of{C}. (P \mid Q)} \tpvdash
+       \tp{\Gamma \comma \Delta \comma \tmof{x}A}
+    }
+  }{\oplus}{
+   \tm{x[\inlterm].\nu z \Of{C}. (P \mid Q)}
+     \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}A \oplus B}
+  }
+}
+
+\end{array}
+\]
+
+\caption{Commuting conversions for CP, Part I}
+\label{fig:commuteone}
+\end{figure*}

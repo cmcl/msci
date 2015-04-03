@@ -1,0 +1,147 @@
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\inference{}{Id}{
+  \Tp{\Tmof{x}T} \Tpvdash \Tmof{x}\Tp{T}
+}
+
+\quad\quad
+
+\inference{}{Unit}{
+  \Tpvdash \Tmof{\key{unit}}\Tp{\key{Unit}}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{N}\Tp{U}  &  \un(\Tp{T})
+}{Weaken}{
+  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N}\Tp{U}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi \comma \Tmof{x}T \comma \Tmof{x'}T} \Tpvdash \Tmof{N}\Tp{U}  &  \un(\Tp{T})
+}{Contract}{
+  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N\sub{x/x'}}\Tp{U}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N}\Tp{U}
+}{{\lolli}\intro}{
+  \Tp{\Phi} \Tpvdash \Tmof{\lam{x}N}\Tp{T \lolli U}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U} &
+  \Tp{\Psi} \Tpvdash \Tmof{M} \Tp{T}
+}{{\lolli}\elim}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{L \app M} \Tp{U}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U} & \un(\Tp{\Phi})
+}{{\to}\intro}{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \to U}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \to U}
+}{{\to}\elim}{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T} &
+  \Tp{\Psi} \Tpvdash \Tmof{N} \Tp{U}
+}{\otimes\intro}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{(M,N)} \Tp{T \otimes U}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T \otimes U} &
+  \Tp{\Psi \comma \Tmof{x}T \comma \Tmof{y}U} \Tpvdash \Tmof{N} \Tp{V}
+}{\otimes\elim}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{let}~(x,y) = M~\key{in}~N} \Tp{V}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T} &
+  \Tp{\Psi} \Tpvdash \Tmof{N} \Tp{\pwoutp{T}S}
+}{Send}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{send}~M~N} \Tp{S}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\pwinp{T}S}
+}{Receive}{
+  \Tp{\Phi} \Tpvdash \Tmof{\key{receive}~M} \Tp{T \otimes S}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\oplus \set{l_i : S_i}_{i \in I}}
+}{Select}{
+  \Tp{\Phi} \Tpvdash \Tmof{\key{select}~l_j~M} \Tp{S_j}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\with \set{l_i : S_i}_{i \in I}}  &
+  (\Tp{\Psi \comma \Tmof{x}S_i} \Tpvdash \Tmof{N_i} \Tp{T})_{\Tp{i \in I}}
+}{Case}{
+  \Tp{\Phi \comma \Psi} \Tpvdash
+    \Tmof{\key{case}~M~\key{of}~\set{ l_i : x . N_i }_{i \in I}} \Tp{T}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi \comma \Tmof{x}S} \Tpvdash \Tmof{M} \Tp{\key{end}_!} &
+  \Tp{\Psi \comma \Tmof{x}\overline{S}} \Tpvdash \Tmof{N} \Tp{T}
+}{Connect}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{with}~x~\key{connect}~M~\key{to}~N} \Tp{T}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\key{end}_?}
+}{Terminate}{
+  \Tp{\Phi} \Tpvdash \Tmof{\key{terminate}~M} \Tp{\key{Unit}}
+}
+
+% OLD VERSION OF TERMINATE
+% \inference{
+%   \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T \otimes \key{end}_?}
+% }{Terminate}{
+%   \Tp{\Phi} \Tpvdash \Tmof{\key{terminate}~M} \Tp{T}
+% }
+
+\end{array}
+\]
+
+\caption{GV, a session-typed functional language}
+\label{fig:gv}
+
+\end{figure*}

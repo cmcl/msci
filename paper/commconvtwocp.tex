@@ -1,0 +1,207 @@
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\multicolumn{1}{l}{(\kappa_{!})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A \comma \tmof{z}{?C}}
+    }{!}{
+      \tm{!x(y).P} \tpvdash
+        \tp{{?\Gamma} \comma \tmof{x}{!A} \comma \tmof{z}{?C}}
+    }
+    &
+    \tm{Q} \tpvdash \tp{{?\Delta} \comma \tmof{z}{!C^\bot}}
+  }{Cut}{
+   \tm{\nu z \Of{?C}.(!x(y).P \mid Q)} \tpvdash
+     \tp{{?\Gamma} \comma {?\Delta} \comma \tmof{x}{!A}}
+  }
+}
+\quad \becomes \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A \comma \tmof{z}{?C}}
+      &
+      \tm{Q} \tpvdash \tp{{?\Delta} \comma \tmof{z}{!C^\bot}}
+    }{Cut}{
+     \tm{\nu z \Of{?C}. (P \mid Q)} \tpvdash
+       \tp{{?\Gamma} \comma {?\Delta} \comma \tmof{y}A}
+    }
+  }{!}{
+   \tm{!x(y).\nu z \Of{?C}. (P \mid Q)}
+     \tpvdash \tp{{?\Gamma} \comma {?\Delta} \comma \tmof{x}{!A}}
+  }
+}
+
+\\~\\
+\multicolumn{1}{l}{(\kappa_{?})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+    }{?}{
+      \tm{?x(y).P} \tpvdash \tp{\Gamma \comma \tmof{x}{?A} \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+   \tm{\nu z \Of{C}.(?x(y).P \mid Q)} \tpvdash
+     \tp{\Gamma \comma \Delta \comma \tmof{x}{?A}}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+     \tm{\nu z \Of{C}. (P \mid Q)} \tpvdash
+       \tp{\Gamma \comma \Delta \comma \tmof{y}A}
+    }
+  }{?}{
+   \tm{?x(y).\nu z \Of{C}. (P \mid Q)}
+     \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}{?A}}
+  }
+}
+
+\\~\\
+\multicolumn{1}{l}{(\kappa_{\exists})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X} \comma \tmof{z}C}
+    }{\exists}{
+      \tm{x[A].P} \tpvdash
+        \tp{\Gamma \comma \tmof{x}\any{X}B \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z \Of{C}.(x[A].P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\any{X}B}
+  }
+}
+\quad \becomes \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X} \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z \Of{C}.(P \mid Q)} \tpvdash 
+        \tp{\Gamma \comma \Delta \comma \tmof{x}B\sub{A/X}}
+    }
+  }{\exists}{
+    \tm{x[A].\nu z \Of{C}.(P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\any{X}B}
+  }
+}
+
+\\~\\
+\multicolumn{1}{l}{(\kappa_{\forall})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B \comma \tmof{z}C}
+    }{\forall}{
+      \tm{x(X).P} \tpvdash
+        \tp{\Gamma \comma \tmof{x}\all{X}B \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z \Of{C}.(x(X).P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\all{X}B}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z \Of{C}.(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}B}
+    }
+  }{\forall}{
+    \tm{x(X).\nu z \Of{C}.(P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\all{X}B}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\bot})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{z}C}
+    }{\bot}{
+      \tm{x().P} \tpvdash \tp{\Gamma \comma \tmof{x}\bot \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z \Of{C}.(x().P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\bot}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z \Of{C}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
+    }
+  }{\bot}{
+      \tm{x().\nu z \Of{C}.(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}\bot}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\top})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{}{\top}{
+      \tm{x.\caseterm()} \tpvdash
+        \tp{\Gamma \comma \tmof{x}\top \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z \Of{C}.(x.\caseterm() \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\bot}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{}{\top}{
+    \tm{x} \tpvdash \tp{\Gamma \comma \Delta \comma x:\top}
+  }
+}
+
+\end{array}
+\]
+\caption{Commutative conversions for CP, Part II}
+\label{fig:commutetwo}
+\end{figure*}

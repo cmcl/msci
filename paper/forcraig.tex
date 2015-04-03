@@ -1,0 +1,1687 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass{mpaper}
+\usepackage[round]{natbib}
+\usepackage{stmaryrd}
+\usepackage{proof}
+%\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+%\usepackage{mathpartir}
+%\usepackage{prooftree}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% IMPORTANT!
+
+% To typeset this paper for color, use the first definition below.
+% To typeset this paper for black and white, use the second definition.
+
+\newcommand{\incolor}[1]{#1}    % Use to typeset in color
+%\newcommand{\incolor}[1]{}     % Use to typeset in black and white
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% color framework
+
+\newcommand{\judgecolor}{}
+\newcommand{\typecolor}{}
+\newcommand{\termcolor}{}
+\newcommand{\Typecolor}{}
+\newcommand{\Termcolor}{}
+
+\newcommand{\uncolored}{
+  \incolor{
+    \renewcommand{\judgecolor}{}
+    \renewcommand{\typecolor}{}
+    \renewcommand{\termcolor}{}
+    \renewcommand{\Typecolor}{}
+    \renewcommand{\Termcolor}{}
+  }
+}
+
+\newcommand{\colored}{
+  \incolor{
+    \renewcommand{\judgecolor}{\color{black}}
+    \renewcommand{\typecolor}{\color{blue}}
+    \renewcommand{\termcolor}{\color{red}}
+    \renewcommand{\Typecolor}{\color{cyan}}
+    \renewcommand{\Termcolor}{\color{magenta}}
+  }
+}
+
+\newcommand{\jd}[1]{{\judgecolor #1}}
+\newcommand{\tp}[1]{{\typecolor #1}}
+\newcommand{\tm}[1]{{\termcolor #1}}
+\newcommand{\Tp}[1]{{\Typecolor #1}}
+\newcommand{\Tm}[1]{{\Termcolor #1}}
+
+\newcommand{\tmof}[1]{\tm{#1:{}}}
+\newcommand{\Tmof}[1]{\Tm{#1:{}}}
+\newcommand{\tmsem}[1]{\tm{\sem{\Tm{#1}}}}
+\newcommand{\tpsem}[1]{\tp{\sem{\Tp{#1}}}}
+\newcommand{\tmSem}[1]{{\termcolor \left\llbracket
+                        \judgecolor #1
+                        \termcolor \right\rrbracket}}
+
+\newcommand{\tpvdash}{\tp{{} \vdash {}}}
+\newcommand{\Tpvdash}{\Tp{{} \vdash {}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{note}{\begin{trivlist} \item \textbf{Note. }}{\end{trivlist}}
+
+\newcommand{\todo}[1]{\textbf{#1}}
+\newcommand{\etal}{\emph{et~al.}}
+
+\newcommand{\dual}[1]{#1^\bot}
+\newcommand{\of}[1]{\,{:}\,{#1}}
+% \newcommand{\Of}[1]{\of{#1}}
+\newcommand{\Of}[1]{}
+% \newcommand{\OF}[1]{\of{#1}}
+\newcommand{\OF}[1]{}
+\newcommand{\all}[1]{\forall #1.}
+\newcommand{\any}[1]{\exists #1.}
+\newcommand{\with}{\mathbin{\binampersand}}
+\newcommand{\parr}{\mathbin{\bindnasrepma}}
+\newcommand{\lolli}{\multimap}
+\newcommand{\link}{{\leftrightarrow}}
+\newcommand{\semi}{;\;}
+\newcommand{\comma}{,\,}
+\newcommand{\inl}{\key{inl}}
+\newcommand{\inr}{\key{inr}}
+\newcommand{\case}{\key{case}}
+\newcommand{\Ax}{\key{Ax}}
+\newcommand{\Cut}{\key{Cut}}
+\newcommand{\Weaken}{\key{Weaken}}
+\newcommand{\Contract}{\key{Contract}}
+\newcommand{\Swap}{\key{Swap}}
+\newcommand{\Assoc}{\key{Assoc}}
+\newcommand{\End}{\key{end}}
+\newcommand{\defeq}{\stackrel{\mathrm{def}}{=}}
+\newcommand{\app}{\:}
+\newcommand{\lam}[1]{\lambda #1.}
+\newcommand{\Lam}[1]{\Lambda #1.}
+\newcommand{\lin}{\key{lin}}
+\newcommand{\un}{\key{un}}
+\newcommand{\fn}{\key{fn}}
+\newcommand{\fv}{\key{fv}}
+\newcommand{\key}{\textsf}
+%\newcommand{\key}{\textrm}
+\newcommand{\becomes}{\Longrightarrow}
+\newcommand{\sem}[1]{\llbracket #1 \rrbracket}
+\newcommand{\Sem}[1]{\left\llbracket #1 \right\rrbracket}
+% \newcommand{\sem}[1]{{#1^\dagger}}
+% \newcommand{\Sem}[1]{{\left(#1\right)^\dagger}}
+% \newcommand{\sem}[1]{[\![#1]\!]}
+% \newcommand{\Sem}[1]{\left[\!\!\left[#1\right]\!\!\right]}
+\newcommand{\ang}[1]{\langle #1 \rangle}
+\newcommand{\set}[1]{\{ #1 \}}
+\newcommand{\sub}{\set}
+\newcommand{\intro}{\textsf{-I}}
+\newcommand{\elim}{\textsf{-E}}
+\newcommand{\outp}[1]{{!#1}.}
+\newcommand{\inp}[1]{{?#1}.}
+\newcommand{\outend}{\key{end}_{!}}
+\newcommand{\inend}{\key{end}_{?}}
+\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
+\newcommand{\Inference}[3]{\infer=[\mathsf{#2}]{#3}{#1}}
+\newcommand{\spacer}{\quad\quad\quad\quad}
+\newcommand{\filler}{\hspace{0.9\textwidth}}
+\newcommand{\tighten}{\vspace{-1ex}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+
+%\newcommand{\infer}[2]{\prooftree #1 \justifies #2 \endprooftree}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\figcll}{
+
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\inference{
+}{Ax}{
+  \tm{w \link x} \tpvdash \tp{\tmof{w} \dual{A} \comma \tmof{x} A}
+}
+
+\quad\quad
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+  &
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dual{A}}
+}{Cut}{
+  \tm{\nu x \of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
+}
+
+\\~\\
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}  &
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+}{\otimes}{
+  \tm{x[y].(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}A \otimes B}
+}
+
+\quad\quad
+
+\inference{
+  \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}A \comma \tmof{x}B}
+}{\parr}{
+  \tm{x(y).R} \tpvdash \tp{\Theta \comma \tmof{x}A \parr B}
+}
+
+\\~\\
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+}{\oplus_1}{
+  \tm{x[\inl].P} \tpvdash \tp{\Gamma \comma \tmof{x}A \oplus B}
+}
+
+\quad\quad
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B}
+}{\oplus_2}{
+  \tm{x[\inr].P} \tpvdash \tp{\Gamma \comma \tmof{x}A \oplus B}
+}
+
+\quad\quad
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}A}  &
+  \tm{R} \tpvdash \tp{\Delta \comma \tmof{x}B}
+}{\with}{
+  \tm{x.\case(Q,R)} \tpvdash \tp{\Delta \comma \tmof{x}A \with B}
+}
+
+\\~\\
+
+\inference{
+  \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+}{!}{
+  \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
+}
+
+\quad\quad
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}A}
+}{?}{
+  \tm{?x[y].Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
+}
+
+\\~\\
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta}
+}{Weaken}{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
+}
+
+\quad\quad
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A} \comma \tmof{x'}{?A}}
+}{Contract}{
+  \tm{Q\sub{x/x'}} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
+}
+
+\\~\\
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X}}
+}{\exists}{
+  \tm{x[A].P} \tpvdash \tp{\Gamma \comma \tmof{x}\any{X}B}
+}
+
+\quad\quad
+
+\inference{
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+}{\forall~~\textrm{($X \not\in \fv(\Delta)$)}}{
+  \tm{x(X).Q} \tpvdash \tp{\Delta \comma \tmof{x}\all{X}B}
+}
+
+\\~\\
+
+\inference{}{1}{
+  \tm{x[\,].0} \tpvdash \tp{\tmof{x}1}
+}
+
+\quad\quad
+
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma}
+}{\bot}{
+  \tm{x().P} \tpvdash \tp{\Gamma \comma \tmof{x}\bot}
+}
+
+\quad\quad
+
+\textrm{(no rule for $0$)}
+
+\quad\quad
+
+\inference{}{\top}{
+  \tm{x.\case()} \tpvdash \tp{\Gamma \comma \tmof{x}\top}
+}
+
+\end{array}
+\]
+\caption{CP, classical linear logic as a session-typed process calculus}
+\label{fig:cll}
+\end{figure*}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\figstructural}{
+
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+\multicolumn{1}{l}{(\Swap)}\filler \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dual{A}}
+  }{Cut}{
+    \tm{\nu x \of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
+  }
+}
+\quad \equiv \quad
+\vcenter{
+  \inference{
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dual{A}}
+    &
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+  }{Cut}{
+    \tm{\nu x \of{A^\bot}.(Q \mid P)} \tpvdash \tp{\Gamma \comma \Delta}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\Assoc)} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+      &
+      \tm{Q} \tpvdash \Delta \comma \tp{\tmof{x}A^\bot \comma \tmof{y}B}
+    }{Cut}{
+      \tm{\nu x \Of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{y}B}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}B^\bot}
+  }{Cut}{
+    \tm{\nu y \Of{B}.(\nu x \Of{A}.(P \mid Q) \mid R)} \tpvdash 
+      \tp{\Gamma \comma \Delta \comma \Theta}
+  }
+}
+\quad \equiv \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}A^\bot \comma \tmof{y}B}
+      &
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}B^\bot}
+    }{Cut}{
+      \tm{\nu y \Of{B}.(Q \mid R)} \tpvdash \tp{\Delta \comma \Theta \comma \tmof{x}A^\bot}
+    }
+  }{Cut}{
+    \tm{\nu x \Of{A}.(P \mid \nu y \Of{B}.(Q \mid R))} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\Ax\Cut)} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+    }{Ax}{
+      \tm{w \link x} \tpvdash \tp{\tmof{w}A^\bot \comma \tmof{x}A}
+    }
+    &
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A^\bot}
+  }{Cut}{
+   \tm{\nu x \Of{A}.(w \link x \mid P)} \tpvdash \tp{\Gamma \comma \tmof{w}A^\bot}
+ }
+}
+\quad \becomes \quad
+\tm{P\sub{w/x}} \tpvdash  \tp{\Gamma \comma \tmof{w}A^\bot}
+
+\end{array}
+\]
+\caption{Structural cut equivalences and reduction for CP}
+\label{fig:structural}
+\end{figure*}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\figprincipal}{
+
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+\multicolumn{1}{l}{(\beta_{\otimes\parr})}\filler \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+    }{\otimes}{
+      \tm{x[y].(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}A \otimes B}
+    } 
+    &
+    \inference{
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}\dual{A} \comma \tmof{x}\dual{B}}
+    }{\parr}{
+      \tm{x(y).R} \tpvdash \tp{\Theta \comma \tmof{x}\dual{A} \parr \dual{B}}
+    } 
+  }{Cut}{
+    \tm{\nu x\Of{A \otimes B}.(x[y].(P \mid Q) \mid x(y).R)} \tpvdash
+       \tp{\Gamma \comma \Delta \comma \Theta}
+  }
+}  \quad \becomes \hfill
+\\
+\hfill
+\vcenter{
+  \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}
+      &
+      \inference{
+        \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+        &
+        \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}\dual{A} \comma \tmof{x}\dual{B}}
+      }{Cut}{
+        \tm{\nu x \Of{B}.(Q \mid R)} \tpvdash
+          \tp{\Delta \comma \Theta \comma \tmof{y}\dual{A}}
+      }
+    }{Cut}{
+      \tm{\nu y \Of{A}.(P \mid \nu x.(Q \mid R))} \tpvdash
+         \tp{\Gamma \comma \Delta \comma \Theta}
+    }
+  }
+\\
+\multicolumn{1}{l}{(\beta_{\oplus\with})} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+    }{\oplus_1}{
+      \tm{x[\inl].P} \tpvdash \tp{\Gamma \comma \tmof{x}A \oplus B}
+    } 
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dual{A}}
+      &
+      \tm{R} \tpvdash \tp{\Delta \comma \tmof{x}\dual{B}}
+    }{\with}{
+      \tm{x.\case(Q,R)} \tpvdash \tp{\Delta \comma \tmof{x}\dual{A} \with \dual{B}}
+    } 
+  }{Cut}{
+    \tm{\nu x \Of{A \oplus B}.(x[\inl].P \mid x.\case(Q,R))}
+      \tpvdash \tp{\Gamma \comma \Delta}
+  }
+}
+\quad \becomes \hfill
+\\
+\hfill
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dual{A}}
+  }{Cut}{
+    \tm{\nu x \Of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
+  }
+}
+\\
+\multicolumn{1}{l}{(\beta_{!?})} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+    }{!}{
+      \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
+    }
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}\dual{A}}
+    }{?}{
+      \tm{?x[y].Q} \tpvdash \tp{\Delta \comma \tmof{x}{?\dual{A}}}
+    }
+  }{Cut}{
+    \tm{\nu x \Of{!A}.(!x(y).P \mid {?x[y].Q})} \tpvdash \tp{{?\Gamma} \comma \Delta}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}\dual{A}}
+  }{Cut}{
+    \tm{\nu y\Of{A}.(P \mid Q)} \tpvdash \tp{{?\Gamma} \comma \Delta}
+  }
+}
+\\~\\
+\multicolumn{1}{l}{(\beta_{!W})} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+    }{!}{
+      \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
+    }
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta}
+    }{Weaken}{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?\dual{A}}}
+    }
+  }{Cut}{
+    \tm{\nu x\Of{!A}.(!x(y).P \mid Q)} \tpvdash \tp{{?\Gamma} \comma \Delta}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \Inference{
+    \tm{Q} \tpvdash \tp{\Delta}
+  }{Weaken}{
+    \tm{Q} \tpvdash \tp{{?\Gamma} \comma \Delta}
+  }
+}
+\\~\\
+\multicolumn{1}{l}{(\beta_{!C})} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+    }{!}{
+      \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
+    }
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A} \comma \tmof{x'}{?A}}
+    }{Contract}{
+      \tm{Q\sub{x/x'}} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
+    }
+  }{Cut}{
+    \tm{\nu x\Of{!A}.(!x(y).P \mid Q\sub{x/x'})} \tpvdash
+      \tp{{?\Gamma} \comma \Delta}
+  }
+} \quad \becomes \hfill
+\\
+\hfill
+\vcenter{
+  \Inference{
+    \inference{
+      \inference{
+        \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+      }{!}{
+        \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
+      }
+      &
+      \inference{
+        \inference{
+          \tm{P'} \tpvdash \tp{{?\Gamma'} \comma \tmof{y'}A}
+        }{!}{
+          \tm{!x'(y').P'} \tpvdash \tp{{?\Gamma'} \comma \tmof{x'}{!A}}
+        }
+        &
+        \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?\dual{A}}
+                                  \comma \tmof{x'}{?\dual{A}}}
+      }{Cut}{
+        \tm{\nu x'\Of{!A}.(!x'(y').P' \mid Q)}
+          \tpvdash \tp{{?\Gamma'} \comma \Delta \comma \tmof{x}{?\dual{A}}}
+      }
+    }{Cut}{
+      \tm{\nu x\Of{!A}.(!x(y).P \mid \nu x'\Of{!A}.(!x'(y').P' \mid Q))}
+        \tpvdash \tp{{?\Gamma} \comma {?\Gamma'} \comma \Delta}
+    }
+  }{Contract}{
+    \tm{\nu x\Of{!A}.(!x(y).P \mid \nu x'\Of{!A}.(!x'(y).P \mid Q))}
+      \tpvdash \tp{{?\Gamma} \comma \Delta}
+  }
+}
+\\
+\multicolumn{1}{l}{(\beta_{\exists\forall})} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X}}
+    }{\exists}{
+      \tm{x[A].P} \tpvdash \tp{\Gamma \comma \tmof{x}\any{X}B}
+    } 
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dual{B}}
+    }{\forall}{
+      \tm{x(X).Q} \tpvdash \tp{\Delta \comma \tmof{x}\all{X}\dual{B}}
+    } 
+  }{Cut}{
+   \tm{\nu x \Of{\any{X}B}.(x[A].P \mid x(X).Q)} \tpvdash \tp{\Gamma \comma \Delta}
+  }
+} \quad \becomes \hfill
+\\
+\hfill
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X}}
+    &
+    \tm{Q\sub{A/X}} \tpvdash \tp{\Delta \comma \tmof{x}\dual{B}\sub{A/X}}
+  }{Cut}{
+   \tm{\nu x \Of{B\sub{A/X}}.(P \mid Q\sub{A/X})} \tpvdash \tp{\Gamma \comma \Delta}
+  }
+}
+\\
+\multicolumn{1}{l}{(\beta_{1\bot})} \\ % [-3ex]
+% \spacer
+\vcenter{\inference{
+  \inference{}{1}{
+    \tm{x[\,].0} \tpvdash \tp{\tmof{x}1}
+  }
+  &
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma}
+  }{\bot}{
+    \tm{x().P} \tpvdash \tp{\Gamma \comma \tmof{x}\bot}
+  } 
+}{Cut}{
+  \tm{\nu x\Of{1}.(x[\,].0 \mid x().P)} \tpvdash \tp{\Gamma}
+}}
+\quad \becomes \quad
+\tm{P} \tpvdash \tp{\Gamma}
+\\~\\
+\multicolumn{1}{l}{(\beta_{0\top})} \\% [-3ex]
+% \spacer
+\textrm{(no rule for $0$ with $\top$)}
+\end{array}\]
+\caption{Principal cut reductions for CP}
+\label{fig:principal}
+\end{figure*}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\figcommuteone}{
+
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\multicolumn{1}{l}{(\kappa_{\otimes1})}\filler \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+    }{\otimes}{
+      \tm{x[y].(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}A \otimes B \comma \tmof{z}C}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+\quad \becomes \hfill \\~\\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(P \mid R)} \tpvdash \tp{\Gamma \comma \Theta \comma \tmof{y}A}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+  }{\otimes}{
+    \tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\otimes2})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B \comma \tmof{z}C}
+    }{\otimes}{
+      \tm{x[y].(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}A \otimes B \comma \tmof{z}C}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+\quad \becomes \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(Q \mid R)} \tpvdash \tp{\Delta \comma \Theta \comma \tmof{x}B}
+    }
+  }{\otimes}{
+    \tm{x[y].(P \mid \nu z\Of{C}.(Q \mid R))} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\parr})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{x}B \comma \tmof{z}C}
+    }{\parr}{
+      \tm{x(y).P} \tpvdash \tp{\Gamma \comma \tmof{x}A \parr B \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x(y).P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}A \parr B}
+  }
+}
+\quad \becomes \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{x}B \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{y}A \comma \tmof{x}B}
+    }
+  }{\parr}{
+    \tm{x(y).\nu z\Of{C}.(P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}A \parr B}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\with})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Gamma \comma \tmof{x}B \comma \tmof{z}C}
+    }{\with}{
+      \tm{x.\case(P,Q)} \tpvdash \tp{\Gamma \comma \tmof{x}A \with B \comma \tmof{z}C}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x.\case(P,Q) \mid R)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}A \with B}
+  }
+}
+\quad \becomes \hfill \\~\\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(P \mid R)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}A}
+    }
+    &
+    \inference{ 
+      \tm{Q} \tpvdash \tp{\Gamma \comma \tmof{x}B \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(Q \mid R)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}B}
+    }
+  }{\with}{
+    \tm{x.\case(\nu z\Of{C}.(P \mid R),\nu z\Of{C}.(Q \mid R))} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}A \with B}
+  }
+}
+
+\\~\\
+\multicolumn{1}{l}{(\kappa_{\oplus})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A \comma \tmof{z}C}
+    }{\oplus}{
+      \tm{x[\inl].P} \tpvdash \tp{\Gamma \comma \tmof{x}A \oplus B \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+   \tm{\nu z \Of{C}.(x[\inl].P \mid Q)} \tpvdash
+     \tp{\Gamma \comma \Delta \comma \tmof{x}A \oplus B}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+     \tm{\nu z \Of{C}. (P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}A}
+    }
+  }{\oplus}{
+   \tm{x[\inl].\nu z \Of{C}. (P \mid Q)}
+     \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}A \oplus B}
+  }
+}
+
+\end{array}
+\]
+
+\caption{Commuting conversions for CP, Part I}
+\label{fig:commuteone}
+\end{figure*}
+
+}
+
+\newcommand{\figcommutetwo}{
+
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\multicolumn{1}{l}{(\kappa_{!})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A \comma \tmof{z}{?C}}
+    }{!}{
+      \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A} \comma \tmof{z}{?C}}
+    }
+    &
+    \tm{Q} \tpvdash \tp{{?\Delta} \comma \tmof{z}{!C^\bot}}
+  }{Cut}{
+   \tm{\nu z \Of{?C}.(!x(y).P \mid Q)} \tpvdash
+     \tp{{?\Gamma} \comma {?\Delta} \comma \tmof{x}{!A}}
+  }
+}
+\quad \becomes \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A \comma \tmof{z}{?C}}
+      &
+      \tm{Q} \tpvdash \tp{{?\Delta} \comma \tmof{z}{!C^\bot}}
+    }{Cut}{
+     \tm{\nu z \Of{?C}. (P \mid Q)} \tpvdash \tp{{?\Gamma} \comma {?\Delta} \comma \tmof{y}A}
+    }
+  }{!}{
+   \tm{!x(y).\nu z \Of{?C}. (P \mid Q)}
+     \tpvdash \tp{{?\Gamma} \comma {?\Delta} \comma \tmof{x}{!A}}
+  }
+}
+
+\\~\\
+\multicolumn{1}{l}{(\kappa_{?})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+    }{?}{
+      \tm{?x(y).P} \tpvdash \tp{\Gamma \comma \tmof{x}{?A} \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+   \tm{\nu z \Of{C}.(?x(y).P \mid Q)} \tpvdash
+     \tp{\Gamma \comma \Delta \comma \tmof{x}{?A}}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+     \tm{\nu z \Of{C}. (P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{y}A}
+    }
+  }{?}{
+   \tm{?x(y).\nu z \Of{C}. (P \mid Q)}
+     \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}{?A}}
+  }
+}
+
+\\~\\
+\multicolumn{1}{l}{(\kappa_{\exists})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X} \comma \tmof{z}C}
+    }{\exists}{
+      \tm{x[A].P} \tpvdash \tp{\Gamma \comma \tmof{x}\any{X}B \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z \Of{C}.(x[A].P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\any{X}B}
+  }
+}
+\quad \becomes \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X} \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z \Of{C}.(P \mid Q)} \tpvdash 
+        \tp{\Gamma \comma \Delta \comma \tmof{x}B\sub{A/X}}
+    }
+  }{\exists}{
+    \tm{x[A].\nu z \Of{C}.(P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\any{X}B}
+  }
+}
+
+\\~\\
+\multicolumn{1}{l}{(\kappa_{\forall})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B \comma \tmof{z}C}
+    }{\forall}{
+      \tm{x(X).P} \tpvdash \tp{\Gamma \comma \tmof{x}\all{X}B \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z \Of{C}.(x(X).P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\all{X}B}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z \Of{C}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}B}
+    }
+  }{\forall}{
+    \tm{x(X).\nu z \Of{C}.(P \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\all{X}B}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\bot})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{z}C}
+    }{\bot}{
+      \tm{x().P} \tpvdash \tp{\Gamma \comma \tmof{x}\bot \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z \Of{C}.(x().P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}\bot}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z \Of{C}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
+    }
+  }{\bot}{
+      \tm{x().\nu z \Of{C}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}\bot}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\kappa_{\top})} \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{}{\top}{
+      \tm{x.\case()} \tpvdash \tp{\Gamma \comma \tmof{x}\top \comma \tmof{z}C}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z \Of{C}.(x.\case() \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \tmof{x}\bot}
+  }
+}
+\quad \becomes \quad
+\vcenter{
+  \inference{}{\top}{
+    \tm{x.\case()} \tpvdash \tp{\Gamma \comma \Delta \comma x:\top}
+  }
+}
+
+\end{array}
+\]
+\caption{Commutative conversions for CP, Part II}
+\label{fig:commutetwo}
+\end{figure*}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\figgv}{
+
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\inference{}{Id}{
+  \Tp{\Tmof{x}T} \Tpvdash \Tmof{x}\Tp{T}
+}
+
+\quad\quad
+
+\inference{}{Unit}{
+  \Tpvdash \Tmof{\key{unit}}\Tp{\key{Unit}}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{N}\Tp{U}  &  \un(\Tp{T})
+}{Weaken}{
+  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N}\Tp{U}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi \comma \Tmof{x}T \comma \Tmof{x'}T} \Tpvdash \Tmof{N}\Tp{U}  &  \un(\Tp{T})
+}{Contract}{
+  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N\sub{x/x'}}\Tp{U}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N}\Tp{U}
+}{{\lolli}\intro}{
+  \Tp{\Phi} \Tpvdash \Tmof{\lam{x}N}\Tp{T \lolli U}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U} &
+  \Tp{\Psi} \Tpvdash \Tmof{M} \Tp{T}
+}{{\lolli}\elim}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{L \app M} \Tp{U}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U} & \un(\Tp{\Phi})
+}{{\to}\intro}{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \to U}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \to U}
+}{{\to}\elim}{
+  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T} &
+  \Tp{\Psi} \Tpvdash \Tmof{N} \Tp{U}
+}{\otimes\intro}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{(M,N)} \Tp{T \otimes U}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T \otimes U} &
+  \Tp{\Psi \comma \Tmof{x}T \comma \Tmof{y}U} \Tpvdash \Tmof{N} \Tp{V}
+}{\otimes\elim}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{let}~(x,y) = M~\key{in}~N} \Tp{V}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T} &
+  \Tp{\Psi} \Tpvdash \Tmof{N} \Tp{\outp{T}S}
+}{Send}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{send}~M~N} \Tp{S}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\inp{T}S}
+}{Receive}{
+  \Tp{\Phi} \Tpvdash \Tmof{\key{receive}~M} \Tp{T \otimes S}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\oplus \set{l_i : S_i}_{i \in I}}
+}{Select}{
+  \Tp{\Phi} \Tpvdash \Tmof{\key{select}~l_j~M} \Tp{S_j}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\with \set{l_i : S_i}_{i \in I}}  &
+  (\Tp{\Psi \comma \Tmof{x}S_i} \Tpvdash \Tmof{N_i} \Tp{T})_{\Tp{i \in I}}
+}{Case}{
+  \Tp{\Phi \comma \Psi} \Tpvdash
+    \Tmof{\key{case}~M~\key{of}~\set{ l_i : x . N_i }_{i \in I}} \Tp{T}
+}
+
+\\~\\
+
+\inference{
+  \Tp{\Phi \comma \Tmof{x}S} \Tpvdash \Tmof{M} \Tp{\key{end}_!} &
+  \Tp{\Psi \comma \Tmof{x}\overline{S}} \Tpvdash \Tmof{N} \Tp{T}
+}{Connect}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{with}~x~\key{connect}~M~\key{to}~N} \Tp{T}
+}
+
+\quad\quad
+
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\key{end}_?}
+}{Terminate}{
+  \Tp{\Phi} \Tpvdash \Tmof{\key{terminate}~M} \Tp{\key{Unit}}
+}
+
+% OLD VERSION OF TERMINATE
+% \inference{
+%   \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T \otimes \key{end}_?}
+% }{Terminate}{
+%   \Tp{\Phi} \Tpvdash \Tmof{\key{terminate}~M} \Tp{T}
+% }
+
+\end{array}
+\]
+
+\caption{GV, a session-typed functional language}
+\label{fig:gv}
+
+\end{figure*}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\figtranone}{
+
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\tmSem{
+  \vcenter{
+    \inference{}{Id}{
+      \Tp{\Tmof{x}T} \Tpvdash \Tmof{x}\Tp{T}
+    }  
+  }
+}\tm{z}
+\quad = \quad 
+\vcenter{
+  \inference{}{Ax}{
+    \tm{x \link z} \tpvdash \tp{\tmof{x}\tpsem{T}^\bot \comma \tmof{z}\tpsem{T}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{}{Unit}{
+      \Tpvdash \Tmof{\key{unit}} \Tp{\key{Unit}}
+    }
+  }
+}\tm{z}
+\quad = \quad
+\vcenter{
+  \inference{
+    \inference{}{\top}{
+      \tm{y.\case()} \tpvdash \tp{\tmof{y}\top}
+    }
+  }{!}{
+    \tm{!z(y).y.\case()} \tpvdash \tp{\tmof{z}{!\top}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{N}\Tp{U}  &  \un(\Tp{T})
+    }{Weaken}{
+      \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N}\Tp{U}
+    }
+  }
+}\tm{z}
+\quad = \quad
+\vcenter{
+  \inference{
+     \tm{\tmsem{N}z} \tpvdash \tp{\tpsem{\Phi}^\bot \comma \tmof{z}\tpsem{U}}
+  }{Weaken}{
+     \tm{\tmsem{N}z} \tpvdash
+       \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tpsem{T}^\bot \comma \tmof{z}\tpsem{U}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi \comma \Tmof{x}T \comma \Tmof{x'}T} \Tpvdash \Tmof{N}\Tp{U}  &  \un(\Tp{T})
+    }{Contract}{
+      \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N\sub{x/x'}}\Tp{U}
+    }
+  }
+}\tm{z}
+\quad = \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \tm{\tmsem{N}z} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tpsem{T}^\bot \comma
+                                   \tmof{x'}\tpsem{T}^\bot \comma \tmof{z}\tpsem{U}}
+  }{Contract}{
+    \tm{\tmsem{N\sub{x/x'}}z} \tpvdash
+     \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tpsem{T}^\bot \comma \tmof{z}\tpsem{U}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N}\Tp{U}
+    }{{\lolli}\intro}{
+      \Tp{\Phi} \Tpvdash \Tmof{\lam{x}N} \Tp{T \lolli U}
+    }  
+  }
+}\tm{z}
+\quad = \quad
+\vcenter{
+  \inference{
+    \tm{\tmsem{N}z} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tpsem{T}^\bot \comma \tmof{z}\tpsem{U}}
+  }{\parr}{
+    \tm{z(x).\tmsem{N}z} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{z}\tpsem{T}^\bot \parr \tpsem{U}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U} &
+      \Tp{\Psi} \Tpvdash \Tmof{M} \Tp{T}
+    }{{\lolli}\elim}{
+      \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{L \app M} \Tp{U}
+    } 
+  }
+}\tm{z}
+\quad = \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \tm{\tmsem{L}y} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{y} \tpsem{T}^\bot \parr \tpsem{U}}
+    &
+    \inference{
+      \tm{\tmsem{M}x} \tpvdash
+        \tp{\tpsem{\Psi}^\bot \comma \tmof{x} \tpsem{T}}
+      &
+      \inference{}{Ax}{
+        \tm{y \link z} \tpvdash
+          \tp{\tmof{y} \tpsem{U}^\bot \comma \tmof{z} \tpsem{U}}
+      }
+    }{\otimes}{
+      \tm{y[x].(\tmsem{M}x \mid y \link z)} \tpvdash
+        \tp{\tpsem{\Psi}^\bot \comma
+             \tmof{y} \tpsem{T} \otimes \tpsem{U}^\bot \comma \tmof{z} \tpsem{U}}
+    }
+  }{Cut}{
+    \tm{\nu y.(\tmsem{L}y \mid y[x].(\tmsem{M}x \mid y \link z))} \tpvdash
+        \tp{\tpsem{\Phi}^\bot \comma \tpsem{\Psi}^\bot \comma \tmof{z} \tpsem{U}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U} & \un(\Tp{\Phi})
+    }{{\to}\intro}{
+      \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \to U}
+    }
+  }
+}\tm{z}
+\quad = \quad
+\vcenter{
+  \inference{
+    \tm{\tmsem{L}y} \tpvdash \tp{\tpsem{\Phi}^\bot \comma \tmof{y}\tpsem{T \lolli U}}
+  }{!}{
+    \tm{!z(y).\tmsem{L}y} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{z}{!\tpsem{T \lolli U}}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \to U}
+    }{{\to}\elim}{
+      \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U}
+    }
+  }
+}\tm{z}
+\quad = \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \tm{\tmsem{L}y} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{y}{!\tpsem{T \lolli U}}}
+    &
+    \inference{
+      \inference{}{Ax}{
+        \tm{x \link z} \tpvdash
+          \tp{\Tmof{x}\tpsem{T \lolli U}^\bot \comma \tmof{z}\tpsem{T \lolli U}}
+      }
+    }{?}{
+     \tm{?y[x].x \link z} \tpvdash
+       \tp{\tmof{y}{?\tpsem{T \lolli U}^\bot} \comma \tmof{z}\tpsem{T \lolli U}}
+    }
+  }{Cut}{
+    \tm{\nu y.(\tmsem{L}y \mid {?y[x].x \link z})} \tpvdash
+       \tp{\tpsem{\Phi}^\bot \comma \tmof{z}\tpsem{T \lolli U}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T} &
+      \Tp{\Psi} \Tpvdash \Tmof{N} \Tp{U}
+    }{\otimes\intro}{
+      \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{(M,N)} \Tp{T \otimes U}
+    }
+  }
+}\tm{z}
+\quad = \quad
+\vcenter{
+  \inference{
+      \tm{\tmsem{M}y} \tpvdash \tp{\tpsem{\Phi}^\bot \comma \tmof{y}\tpsem{T}} &
+      \tm{\tmsem{N}z} \tpvdash \tp{\tpsem{\Psi}^\bot \comma \tmof{z}\tpsem{U}}
+  }{\otimes}{
+    \tm{z[y].(\tmsem{M}y \mid \tmsem{N}z)} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tpsem{\Psi}^\bot \comma
+           \tmof{z} \tpsem{T} \otimes \tpsem{U}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T \otimes U} &
+      \Tp{\Psi \comma \Tmof{x}T \comma \Tmof{y}U} \Tpvdash \Tmof{N} \Tp{V}
+    }{\otimes\elim}{
+      \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{let}~(x,y) = M~\key{in}~N} \Tp{V}
+    }
+  }
+}\tm{z}
+\quad = \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \tm{\tmsem{M}y} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{y} \tpsem{T} \otimes \tpsem{U}}
+    &
+    \inference{
+      \tm{\tmsem{N}z} \Tpvdash
+        \tp{\tpsem{\Psi}^\bot \comma \tmof{x}\tpsem{T}^\bot
+                               \comma \tmof{y}\tpsem{U}^\bot
+                                \comma \tmof{z}\tpsem{V}}
+    }{\parr}{
+      \tm{y(x).\tmsem{N}z} \Tpvdash
+        \tp{\tpsem{\Psi}^\bot \comma \tmof{y}\tpsem{T}^\bot \parr \tpsem{U}^\bot
+                               \comma \tmof{z}\tpsem{V}}
+    }
+  }{Cut}{
+    \tm{\nu y.(\tmsem{M}y \mid y(x).\tmsem{N}z)} \Tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tpsem{\Psi}^\bot \comma \tmof{z}\tpsem{V}}
+  }
+}
+
+\end{array}
+\]
+\caption{Translation from GV into CP, Part I}
+\label{fig:tran1}
+\end{figure*}
+
+}
+
+\newcommand{\figtrantwo}{
+
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T} &
+      \Tp{\Psi} \Tpvdash \Tmof{N} \Tp{\outp{T}S}
+    }{Send}{
+      \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{send}~M~N} \Tp{S}
+    }
+  }
+}\tm{z}
+\quad = \hfill \\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{\tmsem{M}y} \tpvdash \tp{\tpsem{\Phi}^\bot \comma \tmof{y}\sem{T}} &
+      \inference{}{Ax}{
+        \tm{x \link z} \tpvdash \tp{\tmof{x}\tpsem{S}^\bot \comma \tmof{z}\tpsem{S}}
+      }
+    }{\otimes}{
+      \tm{x[y].(\tmsem{M}y \mid x \link z)} \tpvdash
+        \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tpsem{T} \otimes \tpsem{S}^\bot
+          \comma \tmof{z}\tpsem{S}}
+    }
+    &
+    \tm{\tmsem{N}x} \tpvdash
+      \tp{\tpsem{\Psi}^\bot \comma \tmof{x}\tpsem{T}^\bot \parr \tpsem{S}}
+  }{Cut}{
+   \tm{\nu x.(x[y].(\tmsem{M}y \mid x \link z) \mid \tmsem{N}x)} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tpsem{\Psi}^\bot \comma \tmof{z}\tpsem{S}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\inp{T}S}
+    }{Receive}{
+      \Tp{\Phi} \Tpvdash \Tmof{\key{receive}~M} \Tp{T \otimes S}
+    }
+  }
+}\tm{z}
+\quad = \quad
+\tm{\tmsem{M}z} \tpvdash \tp{\tpsem{\Phi}^\bot \comma \tmof{z} \tpsem{T} \otimes \tpsem{S}}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\oplus \set{l_i : S_i}_{i \in I}}
+    }{Select}{
+      \Tp{\Phi} \Tpvdash \Tmof{\key{select}~l_j~M} \Tp{S_j}
+    }
+  }
+}\tm{z}
+\quad = \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \tm{\tmsem{M}x} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tpsem{S_1}\with\cdots\with\tpsem{S_n}}
+    &
+    \inference{
+      \inference{}{Ax}{
+        \tm{x \link z} \tpvdash \tp{\tmof{x}\tpsem{S_j}^\bot \comma \tmof{z}\tpsem{S_j}}
+      }
+    }{\oplus_i}{
+     \tm{x[\mathrm{in}_j].x \link z} \tpvdash
+       \tp{\tmof{x}\tpsem{S_1}^\bot\oplus\cdots\oplus\tpsem{S_n}^\bot \comma
+            \tmof{z}\tpsem{S_j}}
+    }
+  }{Cut}{
+    \tm{\nu x.(\tmsem{M}x \mid x[\mathrm{in}_j].x \link z)} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{z}\tpsem{S_j}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\with \set{l_i : S_i}_{i \in I}}  &
+      (\Tp{\Psi \comma \Tmof{x}S_i} \Tpvdash \Tmof{N_i} \Tp{T})_{\Tp{i \in I}}
+    }{Case}{
+      \Tp{\Phi \comma \Psi} \Tpvdash
+        \Tmof{\key{case}~M~\key{of}~\set{ l_i : x . N_i }_{i \in I}} \Tp{T}
+    }
+  }
+}\tm{z}
+\quad = \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \tm{\tmsem{M}x} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tmsem{S_1}\oplus\cdots\oplus\tmsem{S_n}}
+    &
+    \inference{
+      (\tm{\tmsem{N_i}z} \tpvdash
+        \tp{\tpsem{\Psi}^\bot \comma \tmof{x}\tpsem{S_i}^\bot
+                               \comma \tmof{z}\tpsem{T}})_{i \in I}
+    }{\with}{
+      \tm{x.\case(\tmsem{N_1},\ldots,\tmsem{N_n})} \tpvdash
+        \tp{\tmof{x}\tpsem{S_1}\with\cdots\with\tpsem{S_n} \comma \tmof{z}\tpsem{T}}
+    }
+  }{Cut}{
+   \tm{\nu x.(\tmsem{M}x \mid x.\case(\tmsem{N_1},\ldots,\tmsem{N_n}))} \tpvdash
+     \tp{\tpsem{\Phi}^\bot \comma \tpsem{\Psi}^\bot \comma \tmof{z}\tpsem{T}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi \comma \Tmof{x}S} \Tpvdash \Tmof{M} \Tp{\key{end}_!} &
+      \Tp{\Psi \comma \Tmof{x}\overline{S}} \Tpvdash \Tmof{N} \Tp{T}
+    }{Connect}{
+      \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{with}~x~\key{connect}~M~\key{to}~N} \Tp{T}
+    }
+  }
+}\tm{z}
+\quad = \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{\tmsem{M}y} \tpvdash
+        \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tpsem{S}^\bot \comma \tmof{y}\bot}
+      &
+      \inference{}{1}{
+        \tm{y[].0} \tpvdash \tp{\tmof{y}1}
+      }
+    }{Cut}{
+      \tm{\nu y.(\tmsem{M}y \mid y[].0)} \tpvdash
+        \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tpsem{S}^\bot}
+    }
+    &
+    \tm{\tmsem{N}z} \tpvdash
+      \tp{\tpsem{\Psi}^\bot \comma \tmof{x}\tpsem{S} \comma \tmof{z}\tpsem{T}}
+  }{Cut}{
+    \tm{\nu x.(\nu y.(\tmsem{M}y \mid y[].0) \mid \tmsem{N}z)} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tpsem{\Psi}^\bot \comma \tmof{z}\tpsem{T}}
+  }
+}
+
+\\~\\
+
+\tmSem{
+  \vcenter{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\key{end}_?}
+    }{Terminate}{
+      \Tp{\Phi} \Tpvdash \Tmof{\key{terminate}~M} \Tp{\key{Unit}}
+    }
+  }
+}\tm{z}
+\quad = \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \tm{\tmsem{M}x} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{x} 1}
+    &
+    \inference{
+      \inference{
+        \inference{}{\top}{
+          \tm{y.\case()} \tpvdash \tp{\tmof{y}\top}
+        }
+      }{!}{
+        \tm{!z(y).y.\case()} \tpvdash \tp{\tmof{z}{!\top}}
+      }
+    }{0}{
+       \tm{x().!z(y).y.\case()} \tpvdash \tp{\tmof{x}{0} \comma \tmof{z}{!\top}}
+    }
+  }{Cut}{
+    \tm{\nu x.(\tmsem{M}x \mid x().!z(y).y.\case())} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{z}{!\top}}
+  }
+}
+
+\end{array}
+\]
+
+\caption{Translation from GV into CP, Part II}
+\label{fig:tran2}
+\end{figure*}
+
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\title{Propositions as Sessions}
+\author{PHILIP WADLER University of Edinburgh}
+\matricnum{1002524}
+
+\maketitle
+
+\figcll
+
+\figstructural
+
+\figprincipal
+
+\figcommuteone
+\figcommutetwo
+
+\figgv
+
+\figtranone
+\figtrantwo
+
+\end{document}
