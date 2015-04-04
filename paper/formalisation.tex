@@ -1,7 +1,7 @@
 \section{Formalisation}
 
 The formalisation was performed using the Coq proof
-assisstant~\cite{Coq:manual}. In the spirit of the POPLMARK
+assistant~\cite{Coq:manual}. In the spirit of the POPLMARK
 challenge~\cite{Aydemir:2005:MMM}, the development utilises available
 libraries and infrastructure as much as possible. In particular,
 \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM} developed a metatheory
@@ -197,6 +197,31 @@ rules.
 
 % ...leading on to a discussion of further CP-specific issues encountered.
 
+% ... subject reduction....
+
+subject reduction proof proceeds by induction on the reduction relation then
+is automatic by appeal to the proved well-typed reductions.
+
+% ... cut elimination ....
+
+more elaborate than first thought. complicated measure.  as it stands the
+current definitions of well-typed terms and reduction are not amenable to the
+proving of the cut elimination theorem. some method of measure is necessary in
+order to develop some notion of termination and also some relationship to the
+the the underlying subprocesses additionally there is also the issue of the
+representation which includes cases that are not immediately clear how to
+prove for instance the commuting conversions are one such example the
+reduction is only defined if the logical operator corresponds to a free
+variable but induction on the typing judgement leads to two cases one where
+the logical operator is applied to the top-level cut variable it is not
+immediately clear how to eliminate this from happening a relationship between
+the two subprocesses of the cut would need to be stated to prevent them from
+differing so that a principal cut reduction rule may be applied yes only then
+may the the rule be reduced to a cut-free thing if we had a relationship
+between them then there would be some kind of thing that would allow
+destruction on one then fixing the other in the case of a bvar equal to zero
+\todo{how to proceed?}
+
 \subsection{The functional language GV}\label{sec:gv}
 
 \begin{comment}
@@ -213,7 +238,10 @@ The typing judgements for the functional language GV are shown in
 Figure~\ref{??}. Note that I have altered the $n$-ary branch and choice
 constructs to the restricted binary versions in order to avoid tricky
 formulations. The change is not restrictive however, since CP itself provides
-only binary versions of plus ($\oplus$) and with ($\with$) constructs.
+only binary versions of plus ($\oplus$) and with ($\with$)
+constructs. Explicit limiting and unlimiting of abstraction was chosen to
+enable the inclusion of these rules in the translation from GV to CP, which is
+performed by induction on GV terms.
 
 On a more technical note, all types are amalgamated into one inductive
 definition and provide a predicate for restricting typing rules to consider
@@ -242,23 +270,93 @@ considerate regarding when to use dependent types. these issues highlighted
 that one should be careful and considerate how the representation will affect
 later expressiveness.
 
-explicit limiting and unlimiting of abstraction to ensure rules are syntax
-directed - permits inductive argument on terms when translating from gv to cp
-
-metatheory library and the library of tactics from software foundations are
-used extensively: metatheory does not handle multiple binders (check this?)
-maybe add a generic tactic to handle multiple binders... or perhaps add a
-lemmas for handling binders
+similar infrastructure for gv required as for cp copy and paste job
 
 \subsection{CPS translation GV to CP}
+
+require type inference on gv terms to construct corresponding cp terms but we
+are assured that this is okay since the theorem only provides a well-typed gv
+term in a context that is well-defined
 
 type inference of gv terms required cluttered definition of translation with
 impossible error cases. avoided a dependently typed solution due to
 difficulties encountered earlier in the development. james mckinna et
 al. suggest encoding the successful cases in an inductive type and then
 defining the function to act on these cases. will this really work? this means
-a graph of positive cases for types then a function definition for it too
+a graph of positive cases for types then a function definition for it too this
+seems rather pathetic because i have to define th einference on terms and it
+seems wrong i have then to handle environments but also nonenvironments i
+can't remember what they are called unbound variables that is it they have to
+be handled as well so we have all this clutter and the types too that is the
+important part but the environments then have to be handled linearly
+unfortunately very bad because we could just use the well typed term relation
+for most of this headachey breaky stuff i'm not sure about that but what is
+can i say so for example lets see see no i also have to thing about the
+general guidelines i can be giving for this section so we have something to
+say about guidelines do we yes of course we have can say that out of this we
+realised that it is important for a representation to be good enough to
+succintly express that which we wish to say in particular the graph relation
+the inductive type that we define propositionally is better one would think
+than the other way the monadic possible failure way is not producing a valid
+thing that we can inductively induct on so we concern ourself with the proof
+of translation preserving the typed term and i think it is important to
+remember the problem we had with the inductive hypothesis we had something do
+with translating the inner term of a weakening term in a larger context than
+the one we had available and that was to do with the destruction of the term
+inference thing i think no no it was something else we had the inner term and
+we had it well typed in an environment that was smaller sure and then our
+thing our function was saying we had some environment that typed both the
+inner term and the outer weakening term but we know that is wrong so wrong so
+here is perhaps where the inductive type graph relation thing wins out in that
+we can have a hypothesis for the inner term which is sufficiently small for
+the environment and we pattern match not only on the term but also on the
+environment yes that is we will do because it seems to work only when we get
+to the messy two the messy two constructor caases will this become a bigg
+problem inthat we will then have all this stuff about environment being split
+and needing to be recombined in the composite process that is a term not a
+process but the point still stands it will need to be about the term and the
+splitting is really a duplication of the unfortunately the well typed term
+relation but otherwise i cannot think how to reuse or obtain that information
+for the translation to cp
 
-translation uses the coq-ext-lib from michela for monadic notation
+Translation uses the coq-ext-lib from michela for monadic notation
 
 Currently the formalisation does not handle this. Future work.
+
+\todo{how might we make progress on this?}
+
+\subsection{Issues and Guidelines}
+
+modularised development; tactics slow prover took a long time to reduce proofs
+so split the structure of the development \todo{picture of development
+  structure}.
+
+tactic performance is an issue to be addressed due to the slow proof search a
+future work (things like deciding equations on finite sets)
+
+One of the design goals of the development was to re-use existing libraries
+wherever possible. two such instances proved extremely useful. first is the
+Metatheory library developed at upenn. second, also from upenn, is the library
+of tactics from software foundations.
+
+software foundations helped in many ways: simplifying tacticals, ease of
+introducing proved assertions, etc. limited use of names introduced by prover
+leading to more robust development.
+
+used extensively: metatheory does not handle multiple binders (check this?)
+maybe add a generic tactic to handle multiple binders... or perhaps add a
+lemmas for handling binders
+
+Linearity create issues with typing some examples; the splitting of the
+environment was non-deterministic so required side-conditions to enforce a
+certain splitting of binders. For example the rule for associativity of
+cut. \todo{how to handle? is there a better way?}
+
+Base rules and rules with binders required permutation assumptions to allow
+any ordering of the constituent contexts. a lot of the proofs for well-typed
+reductions involved small amounts of permuting environments which were largely
+similar across the proofs. while some simple lemmas and tactics where created
+to handle the most tedious elements these did not make effective use of
+hypotheses from the context. Improved proof search for permutations is
+required to simplify such developments.
+
