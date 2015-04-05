@@ -13,7 +13,7 @@ these two disciplines by verifying a session-based $\pi$-calculus system (\S
 \subsubsection{Preamble}\label{sec:pre}
 
 The definition of session types will be important for the remainder:
-\input{../paper/session-types.tex}
+\input{session-types}
 
 Here, I use a modified version of the definition given by
 \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} where I have omitted recursive
@@ -43,8 +43,7 @@ propositions with session types of the process calculus via a bidirectional
 translation relation. They use a binary reduction relation and a labelled
 transition system to represent process reduction and process action with its
 environment as is standard~\cite{Sangiorgi:2001}.
-
-%\input{../paper/sill-branch-choice-rules}
+\input{sill-branch-choice-rules}
 
 They represent dual intuitionistic linear logic as a sequent calculus
 providing logical connectives which have session-based interpretations in
@@ -74,11 +73,7 @@ in the two-sided nature of the rules forcing one to commit to a certain
 convention when typing a communication system. Consider, an equivalent system
 to the buy/quote example given by
 \citeauthor{Caires:2010:STI}~\cite[\S~3]{Caires:2010:STI}:
-\begin{gather*}
-\sdef{ClientProto}{\BChoice{(\tensor{Book}
-                            {(\tensor{Card}{(\lfn{Receipt}{\1})})})}
-                           {(\tensor{Book}{(\lfn{Quote}{\1})})}}
-\end{gather*}
+\input{clientproto}
 
 Note, I am using $\tensor{}{}$ for session output and $\lfn{}{}$ for session
 input following the presentation by \citeauthor{Caires:2010:STI}. In the
@@ -91,22 +86,15 @@ types $N$ and $I$ used by \citeauthor{Caires:2010:STI} with more meaningful
 type names $Book$, $Card$, $Quote$ and $Receipt$ where appropriate; all are
 synonyms for the type $\1$ which denotes the terminal session type in this
 system. The client and server process bodies are as follows:
-\begin{gather*}
-\sdef{ClientBody_c}
-     {\CPinr{c}{\SLoutput{1984}{c}{\SLinput{c}{quote}{\0}}}}\\
-\sdef{ServerBody_c}
-     {\CPcase{c}
-             {\SLinput{c}{book}{\SLinput{c}{card}{\SLoutput{receipt}{c}{\0}}}}
-             {\SLinput{c}{book}{\SLoutput{quote}{c}{\0}}}}
-\end{gather*}
+\input{csbodies}
 
 \begin{samepage}
 The typings for the client and server processes are given by:
 \begin{gather*}
 \tsequent{\cdot}{\cdot}{ClientBody_c}{\typedid{c}{ClientProto}}
-\tag{\mkTrule{ClientBody}} \label{eq:cbtyp}
+\tag{\mkTrule{Client}} \label{eq:cbtyp}
 \\ \tsequent{\cdot}{\typedid{c}{ClientProto}}{ServerBody_c}{\typedid{-}{\1}}
-\tag{\mkTrule{ServerBody}} \label{eq:sbtyp}
+\tag{\mkTrule{Server}} \label{eq:sbtyp}
 \end{gather*}
 \end{samepage}
 
@@ -315,7 +303,7 @@ semantics for GV and their system has greater similarities with LAST than
 prior GV works, for example, by treating send and receive as linear functions
 rather than language primitives.
 
-\subsection{Mechanising Programming Language Metatheory}
+\subsection{Mechanising PL Metatheory}
 
 Interactive theorem proving and proof assistants have seen an upsurge in use
 in recent years. Especially within the domain of programming language
