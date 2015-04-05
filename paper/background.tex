@@ -126,8 +126,8 @@ between endpoints of the same channel are obscured by the nature of the typing
 judgements.
 
 Process reduction steps are equated with proof reduction via cut
-elimination. The relationship with proof normalisation in DILL provides
-absence of deadlocks in session-based communication for the process
+elimination. The relationship with proof normalisation in DILL ensures
+freedom from deadlock in session-based communication for the process
 calculus. The correspondence of session types to linear logic propositions is
 an important step in providing a solid logical foundation for a concurrent
 type theory; in the same way ``sequential'' type theory ($\lambda$-calculi)
@@ -166,55 +166,6 @@ works~\cite{Gay:2010:LAST,Mazurak:2010:LCC,Wadler:2014}. Certainly, it is the
 case that an aliased approach would fit better with mainstream programming
 languages and perhaps studying a similar system could offer some insights.
 
-The ``adoption and focus'' system~\cite{Fahndrich:2002} provides a notion of
-aliased access to linear resources. The type system requires special language
-features, e.g. to manage capabilities which can be thought as a form of object
-liveness mechanism, so GV typing judgements would need to be extended such
-that the capabilities can be included in soundness results. An extension to
-the translation to CP to incorporate the ``adopt'' and ``focus'' constructs
-would also need to be defined. It is not immediately clear how these features
-would assist in the management of session typed channels. The ``focus'' rule
-(and linearity generally) enforces an invariant on the focussed object
-(channel) such that the type is maintained during the focus operation:
-\input{../proposal/focus-rule}
-
-The typing judgements include \emph{capabilities} that track aliasing to heap
-objects, e.g. $\AFcap{\rho}{h}$ denotes a mapping from a static name $\rho$ to
-a heap type $h$, and a variable $x$ may be typed as $\typedid{x}{\AFtr{\rho}}$
-indicating that $x$ refers to an object of type $h$. The purpose of the
-capabilities is to enforce restrictions on when an object can be
-referenced. In other words, if $\AFcap{\rho}{h}$ is in the capabilities at
-some program point then $x$ may be used, otherwise such use is prohibited. In
-the [focus] rule, evaluating $e_1$ retrieves the object to be focussed. Note
-the type of $e_1$ is a ``guarded'' type. The guard $G$ is the static name of
-some object which ``adopted''~\footnote{I omit the adopt typing rule for
-  brevity.} an object of heap type $h$. If a program point has
-$\AFcap{G}{h_1}$ in the capabilities for some $h_1$ then all objects guarded
-by $G$ may be used; $\capsequent{\Delta}{C_1}{G}$ denotes containment of a
-such a capability in $C_1$. The guarded type may be thought of as policing
-manipulation of linear components within $h$. Treating $\otimes$ as the
-disjoint union for capability sets, the typing for $e_2$ temporarily removes
-the guard $G$ from the set of capabilities, and adds a new variable $x$, and
-associated capability, with a type permitting access to the object of type $h$
-i.e. a non-guarded type. Removing $G$ will prohibit access to allow objects
-guarded by $G$ for the during of $e_2$. The final capabilities after executing
-$e_2$ are required to be $\tensor{C_3}{\AFcap{\rho}{h}}$, enforcing that the
-type must remain as $h$. The typing of the $\letterm$ expression ensures that
-the guard $G$ (contained in $C_1$) is restored.
-
-Such a rule would appear to only benefit recursive session types. Indeed,
-focussing on a non-recursive channel would be pointless since one would be
-prevented from communicating across it since the focus rule requires
-maintenance of the channel type. Further, it would be undesirable to permit
-modification of a session type without guaranteeing exclusive access to the
-channel since this could lead to invalid communication e.g. trying to
-communicate on a closed channel. Additionally, a linear object is consumed
-upon being adopted and will be deallocated when its adopter's lifetime ends,
-although an alternative semantics could be defined which returned the linear
-resource to the context. Moreover, \citeauthor{Fahndrich:2002} do not provide
-operational semantics or soundness results for the ``adoption and focus'' type
-system.
-
 The Alms language~\cite{Aldrich:2009} provides a functional language with
 affine types based on linear logic. A notion of type \textit{kind} is used to
 distinguish between affine and unrestricted values. The typing judgements use
@@ -230,9 +181,11 @@ the appropriate kind qualifier. Type variables are provided to support kind
 polymorphism of function qualifiers. The system is expressive enough to
 implement session types as a module using a similar approach to
 \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} although treating channels as
-affine rather than linearly typed. \citeauthor{Aldrich:2009} note that Alms'
-type system can support the ``adoption and focus'' system but do not specify
-details or whether any changes are necessary to their typing judgements.
+affine rather than linearly typed.
+
+%% \citeauthor{Aldrich:2009} note that Alms' type system can support the
+%% ``adoption and focus'' system but do not specify details or whether any
+%% changes are necessary to their typing judgements.
 
 The work on a linear functional language with session types by
 \citeauthor{Gay:2010:LAST}~\cite{Gay:2010:LAST} is the main influence for the
@@ -351,15 +304,16 @@ linear. Examples show the system can provide a wide range of permissions on
 interfaces, from full exclusive access to read-only shared references. The
 system is very close to the Alms language described by
 \citeauthor{Aldrich:2009} but has the advantage that the soundness results
-(type safety and parametricity) have been entirely mechanised in Coq. It would
-be interesting to see if one could encode the ``adopt'' and ``focus''
-constructs in this system to compare its expressiveness to Alms. The ``adopt''
-rule can be encoded similarly to the ShareRef
-example~\cite{Mazurak:2010:LLT}. It is not immediately clear how to encode the
-``focus'' rule within the present semantics, as one needs to prevent
-non-linear access to its argument implying the presence of knowledge about
-aliasing within the typing judgements; absence of aliasing is not identified
-with linear kinded types in \fpop.
+(type safety and parametricity) have been entirely mechanised in Coq.
+
+%%  It would be interesting to see if one could encode the ``adopt'' and
+%% ``focus'' constructs in this system to compare its expressiveness to
+%% Alms. The ``adopt'' rule can be encoded similarly to the ShareRef
+%% example~\cite{Mazurak:2010:LLT}. It is not immediately clear how to encode
+%% the ``focus'' rule within the present semantics, as one needs to prevent
+%% non-linear access to its argument implying the presence of knowledge about
+%% aliasing within the typing judgements; absence of aliasing is not
+%% identified with linear kinded types in \fpop.
 
 While not related to programming language metatheory,
 \citeauthor{Gay:2001:FFP}~\cite{Gay:2001:FFP} provides a $\pi$-calculus
