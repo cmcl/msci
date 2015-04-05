@@ -22,10 +22,10 @@ types agree on the type of message to be exchanged. In this way, correctness
 of communication can be statically assured by providing communicating agents
 with a \textit{channel} whose endpoints have dual session types. A channel is
 defined as a bi-directional conduit for exchanging messages, not unlike a
-socket in network programming. In contrast to sockets, however, a channel is
+socket in network programming. In contrast to sockets however, a channel is
 associated with an explicit type which provides a description of its
 protocol. Thus, in session-based systems a channel is usually provided as a
-primitive type.
+primitive of the language.
 
 In programming language research, work on static type systems is usually
 presented on paper complete with informal proofs of correctness for the system
@@ -37,7 +37,7 @@ hold. More generally, unassisted formalisms are error-prone to develop and do
 not provide a firm basis upon which other researchers can experiment.
 
 Proof assistants such as Coq~\cite{Coq:manual} offer a platform on which to
-develop programming languages and type systems and associated proofs of
+develop programming languages, type systems and associated proofs of
 properties with strong guarantees of correctness. Not only is proving with a
 proof assistant much less error-prone than the unaided approach, it also eases
 extension of the system since the proof assistant will highlight parts of
@@ -48,15 +48,19 @@ binders are usually assumed in informal presentations, whereas in the
 mechanised setting one has to explicitly encode and reason about these
 properties~\cite{Aydemir:2005:MMM, Aydemir:2008:EFM}.
 
-This project describes work towards the development of a framework for
-formalising lambda calculus type systems with session types using interactive
-theorem proving (in particular, the system Coq). The framework should enable a
-whole class of related languages and type systems to be formalised with little
-extra proof effort. Inspired by previous work on a mechanised framework for
-$\pi$-calculus type systems~\cite{Gay:2001:FFP}, the current work focuses on
-the lambda calculus to provide a basis on which session types for mainstream
-programming languages can be studied, whilst taking advantage of previous
-proof effort and specialising only for those parts unique to the particular
-system. The starting point for the framework is the calculi developed by
+This project describes work towards the formalisation of calculi developed by
 \citeauthor{Wadler:2014}~\cite{Wadler:2014} describing a relationship between
-classical linear logic (CP) and a functional language with session types (GV).
+classical linear logic (CP) and a functional language with session types (GV)
+using interactive theorem proving (in particular, the system Coq). The
+formalisation is a contribution to the practice of programming language
+metatheory and informs what is required of a framework for formalising lambda
+calculus type systems with session types. Such a framework should enable a
+whole class of related languages and type systems to be formalised with little
+extra proof effort and is inspired by previous work on a mechanised framework
+for $\pi$-calculus type systems~\cite{Gay:2001:FFP}. The current work focuses
+on the lambda calculus to provide a basis on which session types for
+mainstream programming languages can be studied, taking advantage of previous
+proof effort through the re-use of existing libraries for programming language
+metatheory. The work has presented a number of interesting challenges for the
+formalisation of programming languages and as a result generated a number of
+useful guidelines and issues to consider.
