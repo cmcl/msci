@@ -8,10 +8,9 @@ following questions I have:
     quantification* form to obtain figures closer to the mechanised
     proofs. What do you think? Otherwise (and with the second bullet in mind)
     I'm not clear what I can really show to the reader and say, ``Look! This
-    is what I've done!''. I'm reluctant to put too much Coq code in paper
+    is what I've done!''. I'm reluctant to put too much Coq code in the paper
     since it usually winds up unreadable even to people well-versed in the
-    system. Besides, I trusted you and my reader will have access to the
-    source should that be of interest?
+    system.
 
   * I'm not sure to what extent I should be regurgitating the work of Wadler
     in my paper. Do I include relevant figures e.g. GV/CP types and terms and
