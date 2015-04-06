@@ -1,18 +1,30 @@
 \begin{figure*}
 \begin{gather*}
-  S \bnf \mbox{\lstinline{end}} \alt \inpt{T}{S} \alt \outpt{T}{S} \alt
-  \Branch{l_i}{S_i}{i\in I} \alt \Choice{l_i}{S_i}{i\in I}
+  \tag{\key{Types},\key{Session Types}}
+  \begin{array}{rclc}
+    T & \bnf & S & \key{session type}\\
+      & \alt & \tensor{T}{U} & \key{tensor product}\\
+      & \alt & \lfn{T}{U} & \key{linear function}\\
+      & \alt & \fn{T}{U} & \key{unlimited function}\\
+      & \alt & \key{Unit} & \key{unit base type}
+  \end{array}
   \qquad
-  \begin{array}{ll}
-    S \bnf & \mbox{\lstinline{end}} \alt \\
-           & \inpt{T}{S} \alt \\
-           & \outpt{T}{S} \alt \\
-           & \Branch{l_i}{S_i}{i\in I} \alt \\
-           & \Choice{l_i}{S_i}{i\in I}
+  \begin{array}{rcl}
+    S & \bnf & \inpt{T}{S}\\
+      & \alt & \outpt{T}{S}\\
+      & \alt & \Branch{l_i}{S_i}{i\in I}\\
+      & \alt & \Choice{l_i}{S_i}{i\in I}\\
+      & \alt & \outend\\
+      & \alt & \inend
   \end{array}
   \\ \\
-  S \bnf \mbox{\lstinline{end}} \alt \inpt{T}{S} \alt \outpt{T}{S} \alt
-  \Branch{l_i}{S_i}{i\in I} \alt \Choice{l_i}{S_i}{i\in I}  
+  \tag{\key{Terms}}
+  \begin{array}{rclc}
+    L,M,N & \bnf & x          & \key{identifier}\\
+          & \alt & \key{unit} & \key{unit constant}\\
+          & \alt & \abs{x}{N} & \key{function abstraction}\\
+          & \alt & \cdots     &
+  \end{array}
 \end{gather*}
 \caption{GV Types and Terms}
 \label{fig:gvtnts}

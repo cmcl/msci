@@ -1,0 +1,21 @@
+\begin{figure*}
+\begin{gather*}
+  \tag{\key{Propositions},\key{Processes}}
+  \begin{array}{rclc}
+    A,B,C & \bnf & X & \key{propositional variable (prop. var)}\\
+          & \alt & \dualbt{X} & \key{dual of a prop. var}\\
+          & \alt & A \otimes B & \key{times: output A then behave as B}\\
+          & \alt & A \parr B & \key{par: input A then behave as B}\\
+          & \alt & A \oplus B & \key{plus: select from A or B}\\
+          & \alt & \cdots &
+  \end{array}
+  \qquad
+  \begin{array}{rclc}
+    P,Q,R & \bnf & w \link x & \key{link}\\
+          & \alt & \nu x \of{A}.(P \mid Q) & \key{par}\\
+          & \alt & \cdots &
+  \end{array}
+\end{gather*}
+\caption{CP Propositions and Processes}
+\label{fig:cptnts}
+\end{figure*}
