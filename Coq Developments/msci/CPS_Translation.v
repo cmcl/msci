@@ -1,6 +1,7 @@
 (** Beginning of the file defining the translation from GV to CP. *)
 Require Import Metatheory.
-Require Import CP_Definitions CP_Typing GV_Definitions GV_Infrastructure.
+Require Import CP_Definitions CP_Infrastructure CP_Typing.
+Require Import GV_Definitions GV_Infrastructure.
 Require Import ExtLib.Structures.Applicative.
 Require Import ExtLib.Structures.Functor.
 Require Import ExtLib.Structures.Monad.
@@ -315,24 +316,56 @@ Fixpoint trans_env (Φ:tenv) : penv :=
     | (x,a) :: Φ' => (x,¬⟦a⟧t) :: trans_env Φ'
   end.
 
+Lemma unlimited_trans:
+  forall T (WF: wf_typ T un),
+    exists A, ¬(⟦T⟧t) = (pp_request A).
+Proof. ii; inv WF; eauto. Qed.
+
+Lemma dom_trans:
+  forall Φ, dom (trans_env Φ) = dom Φ.
+Proof. ii; induction Φ; ss; des; auto; []; ss; rewrite IHΦ; auto. Qed.
+
+Lemma uniq_trans:
+  forall Φ (UN: uniq Φ),
+    uniq (trans_env Φ).
+Proof.
+  ii; induction Φ; ss; des; auto.
+  simpl_env. destruct_uniq. apply uniq_app. auto. auto. 
+  unfold disjoint; simpl_env; rewrite dom_trans; fsetdec.
+Qed.
+
+Hint Resolve uniq_trans.
+
 Theorem cps_trans_wt:
   forall Φ M T z P Γ Δ
          (WT: Φ ⊢ M ∈ T)
-         (NIN: z `notin` GVFV M)
+         (NIN: z `notin` GVFV M `union` dom Φ)
          (ENV: trans_env Φ = Δ)
          (PER: Permutation Γ (Δ ++ z ~ ⟦T⟧t))
-         (CP: trans_tm M Φ z = Some P),
+         (CP: transTm M Φ z P),
     P ⊢cp Γ.
 Proof.
-  introv WT; gen z P Γ Δ; induction WT; ii; unfold trans_tm in CP; ss
-  ; unfold apply in CP; substs; destruct_notin; des; tryfalse; repeat injs
-  ; auto.
+  ii; gen z P Γ; induction WT; ii. inv CP. 
   - apply Permutation_sym in PER; applys ignore_env_order PER.
     simpl_env; eauto.
-  - apply Permutation_sym in PER; applys ignore_env_order PER.
+  - inv CP.
+    apply Permutation_sym in PER; applys ignore_env_order PER.
     simpl_env.
     pick fresh y and apply cp_accept; eauto.
     rewrite /open_proc; s; simpl_env; eauto.
-  - admit.
+  - inv CP; destruct_uniq; destruct_notin.
+    apply Permutation_sym in PER; applys ignore_env_order PER.
+    simpl_env.
+    forwards EQ: unlimited_trans WFT; inversion_clear EQ as [A EQ'].
+    rewrite EQ' in *; clear EQ'.
+    eapply cp_weaken; first eauto.
+    + destruct_uniq; destruct_notin.
+      repeat (apply uniq_push); repeat (apply uniq_app); auto.
+      red; rewrite !dom_trans; simpl_env; fsetdec.
+      simpl_env. rewrite !dom_trans; solve_notin.
+    + apply IHWT.
+
+
+admit.
   -
 Admitted.
