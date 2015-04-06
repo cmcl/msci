@@ -1,0 +1,19 @@
+\begin{figure*}
+\begin{gather*}
+  S \bnf \mbox{\lstinline{end}} \alt \inpt{T}{S} \alt \outpt{T}{S} \alt
+  \Branch{l_i}{S_i}{i\in I} \alt \Choice{l_i}{S_i}{i\in I}
+  \qquad
+  \begin{array}{ll}
+    S \bnf & \mbox{\lstinline{end}} \alt \\
+           & \inpt{T}{S} \alt \\
+           & \outpt{T}{S} \alt \\
+           & \Branch{l_i}{S_i}{i\in I} \alt \\
+           & \Choice{l_i}{S_i}{i\in I}
+  \end{array}
+  \\ \\
+  S \bnf \mbox{\lstinline{end}} \alt \inpt{T}{S} \alt \outpt{T}{S} \alt
+  \Branch{l_i}{S_i}{i\in I} \alt \Choice{l_i}{S_i}{i\in I}  
+\end{gather*}
+\caption{GV Types and Terms}
+\label{fig:gvtnts}
+\end{figure*}

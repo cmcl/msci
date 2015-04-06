@@ -53,6 +53,16 @@ resource to the context. Moreover, \citeauthor{Fahndrich:2002} do not provide
 operational semantics or soundness results for the ``adoption and focus'' type
 system.
 
+%% System F-pop and ``adoption and focus''
+%%  It would be interesting to see if one could encode the ``adopt'' and
+%% ``focus'' constructs in this system to compare its expressiveness to
+%% Alms. The ``adopt'' rule can be encoded similarly to the ShareRef
+%% example~\cite{Mazurak:2010:LLT}. It is not immediately clear how to encode
+%% the ``focus'' rule within the present semantics, as one needs to prevent
+%% non-linear access to its argument implying the presence of knowledge about
+%% aliasing within the typing judgements; absence of aliasing is not
+%% identified with linear kinded types in \fpop.
+
 \citeauthor{??} extend \citeauthor{Wadler:2014}'s work to support polymorphism
 in GV. (polymorphism in CP) Future work is to support reduction under these
 terms.
