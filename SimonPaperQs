@@ -1,0 +1,29 @@
+Hi Simon,
+
+I have a draft of the paper (attached) to give you some context for the
+following questions I have:
+
+  * I have been thinking about including the typing judgements for CP and GV,
+    and the reduction rules for CP but using the *locally nameless cofinite
+    quantification* form to obtain figures closer to the mechanised
+    proofs. What do you think? Otherwise (and with the second bullet in mind)
+    I'm not clear what I can really show to the reader and say, ``Look! This
+    is what I've done!''. I'm reluctant to put too much Coq code in paper
+    since it usually winds up unreadable even to people well-versed in the
+    system. Besides, I trusted you and my reader will have access to the
+    source should that be of interest?
+
+  * I'm not sure to what extent I should be regurgitating the work of Wadler
+    in my paper. Do I include relevant figures e.g. GV/CP types and terms and
+    also the CPS translation as relevant background? As it stands my draft is
+    already hovering around 14 pages and I've not finalised the main
+    contribution section (Section 3, Formalisation).
+
+  * What can I assume of the reader's knowledge? Should I have a section
+    explaining aspects of Coq? Its features for theorem proving, underlying
+    type theory, etc? I have looked at one other MSci project which used
+    Isabelle and there were some simple examples of how the prover worked (a
+    student of John's two years ago, no less)
+
+Regards,
+Craig
