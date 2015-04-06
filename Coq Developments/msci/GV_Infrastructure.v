@@ -18,14 +18,14 @@ Proof. decide equality. Qed.
 Instance EqDec_typ : @EqDec_eq typ.
 Proof. exact eq_typ_dec. Defined.
 
+(* Try to solve some proof obligations related to vars. *)
+Ltac vcrush :=
+  destruct_all var; des; ss; des; try easy.
+
 (** Following ``Engineering Formal Metatheory'', we need some properties
     regarding opening and substitution w.r.t locally closed terms.
 *)
 Section GVBasicSubstOpenProperties.
-
-  (* try to solve some proof obligations related to vars. *)
-  Ltac vcrush :=
-    destruct_all var; des; ss; des; try easy.
 
   Lemma open_rec_same :
     forall t j v i u
@@ -38,6 +38,14 @@ Section GVBasicSubstOpenProperties.
     ; des; auto.
     - subst n; exfalso; auto.
     - subst n; ss; destruct (i == i); auto; []; exfalso; auto.
+  Qed.
+
+  Lemma open_var_rec_comm:
+    forall t j i (u v:atom)
+           (NEQ: i <> j),
+      {i ~> u}({j ~> v} t) = {j ~> v} ({i ~> u}t).
+  Proof.
+    induction t; ii; vcrush; tryfalse; f_equal; firstorder.
   Qed.
 
   Lemma lc_no_bvar:

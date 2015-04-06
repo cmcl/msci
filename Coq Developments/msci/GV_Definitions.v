@@ -70,7 +70,7 @@ Notation "S1 <&> S2" := (typ_sbranch S1 S2) (at level 68,
                                              right associativity) : gv_scope.
 Notation "T ⊸ U" := (typ_labs T U) (at level 68, right associativity)
                                    : gv_scope.
-Notation "T → U" := (typ_abs T U) (at level 68, right associativity)
+Notation "T ⟶ U" := (typ_abs T U) (at level 68, right associativity)
                                   : gv_scope.
 Notation "T <x> U" := (typ_tensor T U) (at level 68, right associativity)
                                      : gv_scope.
@@ -124,7 +124,7 @@ Inductive wf_typ : typ -> kind -> Prop :=
   | wf_labs : forall kt ku T U (WFT: wf_typ T kt) (WFU: wf_typ U ku),
                 wf_typ (T ⊸ U) lin
   | wf_abs : forall kt ku T U (WFT: wf_typ T kt) (WFU: wf_typ U ku),
-               wf_typ (T → U) un
+               wf_typ (T ⟶ U) un
   | wf_unit : wf_typ typ_unit un.
 
 Hint Constructors wf_typ.
@@ -371,14 +371,14 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
                         (WTM: Φ ⊢ M ∈ T ⊸ U) (WTN: Ψ ⊢ N ∈ T),
                    Φ ++ Ψ ⊢ (tm_app M N) ∈ U
   | wt_tm_iabs : forall Φ T U M
-                       (WF: wf_typ (T → U) un)
+                       (WF: wf_typ (T ⟶ U) un)
                        (UN: uniq Φ)
                        (WT: Φ ⊢ M ∈ T ⊸ U) (UL: un_env Φ),
-                  Φ ⊢ λ! M ∈ T → U
+                  Φ ⊢ λ! M ∈ T ⟶ U
   | wt_tm_eabs : forall Φ T U M
                        (WF: wf_typ (T ⊸ U) lin)
                        (UN: uniq Φ)
-                       (WT: Φ ⊢ M ∈ T → U),
+                       (WT: Φ ⊢ M ∈ T ⟶ U),
                   Φ ⊢ λ? M ∈ T ⊸ U
   | wt_tm_pair : forall Φ Ψ T U M N
                         (WF: wf_typ (T <x> U) lin)
@@ -393,7 +393,7 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
              (WTN: forall (x y:atom)
                           (XL: x `notin` L)
                           (YL: y `notin` L `union` singleton x),
-                     y ~ U ++ x ~ T ++ Ψ ⊢ ({1 ~> x} (open N y)) ∈ V),
+                     x ~ T ++ y ~ U ++ Ψ ⊢ ({1 ~> x} (open N y)) ∈ V),
         Φ ++ Ψ ⊢ (tm_let T U M N) ∈ V
   | wt_tm_send : forall Φ Ψ M T N S
                         (WF: wf_typ (! T # S) lin)

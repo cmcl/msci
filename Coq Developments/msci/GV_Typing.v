@@ -12,7 +12,7 @@ Ltac des_wfs :=
     | [H: wf_typ (_ <&> _) _ |- _] => inverts H
     | [H: wf_typ (_ <x> _) _ |- _] => inverts H
     | [H: wf_typ (_ ⊸ _) _ |- _] => inverts H
-    | [H: wf_typ (_ → _) _ |- _] => inverts H
+    | [H: wf_typ (_ ⟶ _) _ |- _] => inverts H
     | |- _ => idtac
   end.
 
