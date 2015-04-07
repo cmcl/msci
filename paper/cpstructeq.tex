@@ -1,0 +1,68 @@
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+\multicolumn{1}{l}{(\Swap)}\filler \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dual{A}}
+  }{Cut}{
+    \tm{\nu x \of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
+  }
+}
+\quad \equiv \quad
+\vcenter{
+  \inference{
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dual{A}}
+    &
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+  }{Cut}{
+    \tm{\nu x \of{A^\bot}.(Q \mid P)} \tpvdash \tp{\Gamma \comma \Delta}
+  }
+}
+
+\\~\\
+
+\multicolumn{1}{l}{(\Assoc)} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+      &
+      \tm{Q} \tpvdash \Delta \comma \tp{\tmof{x}A^\bot \comma \tmof{y}B}
+    }{Cut}{
+      \tm{\nu x \Of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{y}B}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}B^\bot}
+  }{Cut}{
+    \tm{\nu y \Of{B}.(\nu x \Of{A}.(P \mid Q) \mid R)} \tpvdash 
+      \tp{\Gamma \comma \Delta \comma \Theta}
+  }
+}
+\quad \equiv \hfill \\ \hfill
+\vcenter{
+  \inference{
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+    &
+    \inference{
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}A^\bot \comma \tmof{y}B}
+      &
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}B^\bot}
+    }{Cut}{
+      \tm{\nu y \Of{B}.(Q \mid R)} \tpvdash \tp{\Delta \comma \Theta \comma \tmof{x}A^\bot}
+    }
+  }{Cut}{
+    \tm{\nu x \Of{A}.(P \mid \nu y \Of{B}.(Q \mid R))} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta}
+  }
+}
+
+\end{array}
+\]
+\caption{Structural cut equivalences and reduction for CP}
+\label{fig:structural}
+\end{figure*}

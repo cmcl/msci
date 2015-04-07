@@ -1,6 +1,24 @@
 \begin{figure*}
 \[\colored
 \begin{array}{c}
+\multicolumn{1}{l}{(\Ax\Cut)} \\ % [-3ex]
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+    }{Ax}{
+      \tm{w \link x} \tpvdash \tp{\tmof{w}\dualbt{A} \comma \tmof{x}A}
+    }
+    &
+    \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}\dualbt{A}}
+  }{Cut}{
+   \tm{\nu x \Of{A}.(w \link x \mid P)} \tpvdash
+     \tp{\Gamma \comma \tmof{w}\dualbt{A}}
+ }
+}
+\quad \becomes \quad
+\tm{P\sub{w/x}} \tpvdash  \tp{\Gamma \comma \tmof{w}A^\bot}
+\\
 \multicolumn{1}{l}{(\beta_{\otimes\parr})}\filler \\ % [-3ex]
 % \spacer
 \vcenter{
