@@ -69,9 +69,9 @@ well-typed terms as a separate inductive type.
 
 \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM} note that the size of
 their language proof infrastructure is proportional to the number of binding
-constructs. In the case of a simply typed lambda calculus this is not onerous,
-but GV has four binding constructs, CP has six and propositions have
-two. Indeed, a lot of effort was expended setting up this
+constructs. In the case of a simply typed $\lambda$-calculus ($\stlc$) this is
+not onerous, but GV has four binding constructs, CP has six and propositions
+have two. Indeed, a lot of effort was expended setting up this
 infrastructure. However, I believe one of the contributions of this work is to
 articulate what one needs from state of the art metatheory libraries in order
 to handle session-based languages, and more generally, linear type systems.
@@ -106,45 +106,52 @@ stage.
 \begin{comment}
 FIGURES
 
-propositions
-
-processes
-
 equivalences and axiomatic cut
 \end{comment}
 
-Formalising the process calculus CP provided many challenges for the
-metatheory library since to my knowledge, the library has never been applied
-to a process calculus before. So for instance, in the lambda calculus one
-typically does not work up to permutation of binders, whereas in a process
-calculus these kinds of structural equivalences are standard. Additionally,
-substitution and opening are only defined for names. In other words, one
-cannot substitute an arbitrary process term for a name, unlike in the lambda
-calculus. Thus frameworks which assume a lambda calculi style operations are
-not immediately amenable to the CP setting~\cite{Lee:2012}. Ordering in
-environments is ignored so the development required lemmas allowing the
-permutation of environments. Support for permutating environments is not
-currently supported by the Metatheory library but some general lemmas were
-added as a result of this work. Additionally, custom tactics were developed to
-automatatically solve some simple permutation goals, however these tactics are
-not a ``catch all'' and some generalising still needs to be done.
-
 % Description of the typing rules...
 
-Figure~\ref{fig:cll} presents the process calculus CP in LNCQ form (ignoring
-permutation premises). In other words bound variables are represented using de
-Brujin indices and free variables are represented using an abstract type
-provided by the Metatheory library. The rules with binders reflect this by
-specifying the type of a bound variable in the constructor rather than the
-name. Cofinite quantification is performed in the hypotheses to these rules by
-excluding a finite set of names from opening the subprocesses. Note that the
-rules for polymorphism, $\exists$ and $\forall$, were included in the final
-Coq development since GV (\S~\ref{sec:gv}) does not support polymorphism
-making the rules unnecessary for the translation. They appear in the Figure
-simply for the sake of completeness. Additionally, as noted by
-\citeauthor{Lee:2012}, support for polymorphism in type variables creates an
-explosion of the infrastructure requiring duplication of opening and
-substituting definitions and lemmas.
+Figure~\ref{fig:cll} presents the process calculus CP in LNCQ form with some
+tedious details relating to environment uniqueness and ordering (see below)
+elided. In other words, bound variables are represented using de Brujin
+indices and free variables are represented using an abstract type provided by
+the Metatheory library. The rules with binders reflect this by specifying the
+type of a bound variable in the constructor rather than the name. Cofinite
+quantification is performed in the hypotheses to these rules by excluding a
+finite set of names from opening the subprocesses where opening a process $P$
+with name $x$ is denoted $P^x$. Note that the rules for polymorphism,
+$\exists$ and $\forall$, were included in the final Coq development since GV
+(\S~\ref{sec:gv}) does not support polymorphism making the rules unnecessary
+for the translation. Further, as noted by \citeauthor{Lee:2012}, support for
+polymorphism in type variables creates an explosion of the infrastructure
+requiring additional of opening and substituting definitions and lemmas. They
+appear in the Figure simply for the sake of completeness.
+
+Formalising the process calculus CP provided many challenges for the
+Metatheory library since to my knowledge, the library has never been applied
+to a process calculus before, and the treatment of names, binding and
+substitution differ to that present in $\lambda$-calculi. For instance, in the
+$\stlc$ one typically does not work up to permutation of binders, whereas in a
+process calculus these kinds of structural equivalences are
+standard. Additionally, substitution and opening are only defined for
+names. In other words, one cannot substitute an arbitrary process term for a
+name, unlike in the $\lambda$-calculus. Thus frameworks which assume
+$\lambda$-calculi style operations are not immediately amenable to the CP
+setting~\cite{Lee:2012}. Ordering in environments is ignored so the
+development required lemmas allowing the permutation of
+environments. Permutating environments is not currently supported by the
+Metatheory library but some general lemmas were added as a result of this
+work, and custom tactics were developed to automatically solve certain
+permutation goals via simple proof search. However, there are still many cases
+where manual sequences of primitive lemmas, such as appending, commutativity
+and transitivity, need to be used. A lot of these cases are similar but there
+would not appear to be an advantage in developing a tactic to do the
+work. Doing so would create a dependency between a hard-to-debug and obscure
+Ltac definition and the proofs which utilise it, becoming a burden to
+change. This development philosophy treats Ltac definitions akin to macros, a
+shorthand for expressing an oft-repeated sequence of tactics, and it is
+doubtful much can be gained from it unless the use of Ltac definitions can be
+made more transparent.
 
 % ...leading on to the discussion of the explicit weakening...
 
@@ -153,11 +160,17 @@ Initially, an implicit notion of weakening was chosen so as to be in line with
 required to differentiate the principal cut elimination rules for the various
 interactions between servers and clients. contraction is not supported because
 of the difficulty in specifying its principal cut elimination rule. In order
-to specify the rule one requires to show the following:
+to specify the rule one requires to show the following: \todo{fix binders of
+  Q}
+\begin{gather*}
+\tm{\nu A.(!0(A).P \mid ?z[z',z''].Q)}
+\quad \becomes \quad \\
+\tm{\nu A.(!0(A).P \mid \nu A.(!0(A).P \mid \key{contract}_{\Gamma} Q))}
+\end{gather*}
 
-\todo{v A -> !0(A).P | Q{x/x'}
-  ==>
-v A -> !0(A).P | v A -> !0(A).P | contract (Gamma) Q}
+where $\tm{P^y} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}$ for some
+sufficiently fresh name $y$ and $\key{contract}_{\Gamma} \tm{Q}$ contracts
+$\tm{Q}$ with the names in $\Gamma$.
 
 Unfortunately, the reduction relation does not have knowledge of the
 environment typing process P. This fact does not impact upon expressing
@@ -174,17 +187,18 @@ since it weakening rule corresponds to affine logic
 
 \input{principalcp}
 
-The principal cut elimination rules are presented in Figure~\ref{??}. These
-rules are expressed to indicate some additional complexity not present in the
-original presentation. For example, structural equivalences and associativity
-are not unique and different process terms result depending on initial binder
-permutation. ${0 <~> 1}P$ indicates the permuting of binders $0$ and $1$ in
-process P. The paper presentation specifies only one possible associativity
-rule lending to the specific split of the linear environments. The reduction
-rules were complicated to prove due to being composed of multiple constructor
-instances and differed significantly to the standard operational semantics one
-typically deals with in lambda calculus formalisms.
-linear environments caused a problem with the splitting up of variables.
+The structural equvialences and principal cut elimination rules are presented
+in Figures~\ref{??} and \ref{??} respectively. These rules are expressed to
+indicate some additional complexity not present in the original
+presentation. For example, structural equivalences are not unique and
+different process terms result depending on initial binder permutation. ${0
+  <~> 1}P$ indicates the permuting of binders $0$ and $1$ in process P. The
+paper presentation specifies only one possible associativity rule lending to
+the specific split of the linear environments. The reduction rules were
+complicated to prove due to being composed of multiple constructor instances
+and differed significantly to the standard operational semantics one typically
+deals with in lambda calculus formalisms.  linear environments caused a
+problem with the splitting up of variables.
 
 % ...commuting conversions
 
@@ -198,7 +212,7 @@ rules.
 
 % ...leading on to a discussion of further CP-specific issues encountered.
 
-% ... subject reduction....
+% ... subject reduction ...
 
 subject reduction proof proceeds by induction on the reduction relation then
 is automatic by appeal to the proved well-typed reductions.
@@ -224,14 +238,6 @@ destruction on one then fixing the other in the case of a bvar equal to zero
 \todo{how to proceed?}
 
 \subsection{The functional language GV}\label{sec:gv}
-
-\begin{comment}
-FIGURES
-
-types
-
-terms
-\end{comment}
 
 \input{gv}
 
