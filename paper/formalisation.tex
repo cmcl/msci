@@ -118,20 +118,20 @@ equivalences and axiomatic cut
 % Description of the typing rules...
 
 Figure~\ref{fig:cll} presents the process calculus CP in LNCQ form with some
-tedious details relating to environment uniqueness and ordering (see below)
-elided. In other words, bound variables are represented using de Brujin
-indices and free variables are represented using an abstract type provided by
-the Metatheory library. The rules with binders reflect this by specifying the
-type of a bound variable in the constructor rather than a name. Cofinite
-quantification is performed in the hypotheses to these rules by excluding a
-finite set of names from opening the subprocesses where opening a process $P$
-with name $x$ is denoted $P^x$. Note that the rules for polymorphism,
-$\exists$ and $\forall$, were not included in the final Coq development since
-GV (\S~\ref{sec:gv}) does not support polymorphism making the rules
-unnecessary for the translation. Further, as noted by \citeauthor{Lee:2012},
-support for polymorphism in type variables creates an explosion of the
-infrastructure requiring additional of opening and substituting definitions
-and lemmas. They appear in the Figure simply for the sake of completeness.
+tedious details relating to environment uniqueness elided. In other words,
+bound variables are represented using de Bruijn indices and free variables are
+represented using an abstract type provided by the Metatheory library. The
+rules with binders reflect this by specifying the type of a bound variable in
+the constructor rather than a name. Cofinite quantification is performed in
+the hypotheses to these rules by excluding a finite set of names from opening
+the subprocesses where opening a process $P$ with name $x$ is denoted
+$P^x$. Note that the rules for polymorphism, $\exists$ and $\forall$, were not
+included in the final Coq development since GV (\S~\ref{sec:gv}) does not
+support polymorphism making the rules unnecessary for the
+translation. Further, as noted by \citeauthor{Lee:2012}, support for
+polymorphism in type variables creates an explosion of the infrastructure
+requiring additional of opening and substituting definitions and lemmas. They
+appear in the Figure simply for the sake of completeness.
 
 Formalising the process calculus CP provided many challenges for the
 Metatheory library since to my knowledge, the library has never been applied
@@ -160,18 +160,48 @@ philosophy treats Ltac tactics akin to macros, a shorthand for expressing an
 oft-repeated sequence of tactics, and it is doubtful much can be gained from
 it unless the execution of Ltac tactics can be made more transparent.
 
+\subsubsection{Subject Reduction Theorem}
+
+The subject reduction theorem can be expressed in Coq as follows:
+\begin{coq}
+Theorem proc_sub_red:
+  forall $\Gamma$ P Q
+         (WT: P $\tpvdash_{cp}$ $\Gamma$)
+         (RED: P $\becomes$ Q),
+    Q $\tpvdash_{cp}$ $\Gamma$.
+Proof. ii; gen $\Gamma$; induction RED; subst; eauto. Qed.
+\end{coq}
+
+\coqe$forall$ quantifies over hypotheses in the statement; everything before
+the comma. \key{WT} and \key{RED} introduce names for the corresponding
+hypotheses. The statement to prove is that if \coqe$P$ is a well-typed process
+in a context $\Gamma$ and \coqe$P$ reduces to \coqe$Q$ then \coqe$Q$ is
+well-typed in $\Gamma$. The proof environment is started using \coqe$Proof.$
+and then followed by a sequence of tactics until all goals have a been
+proven. After execution of \coqe$Qed.$ the Coq system inspects the validity of
+the proof object constructed by the tactics and, if valid, will added the
+theorem to the environment.
+
+Some tactics used above are shorthands for commonly combined tactics, defined
+using Ltac, a language for defining custom tactics and decision
+procedures. For example, \coqe$ii$ repeatedly performs hypothesis introduction
+then simplification until no more can be peformed, and \coqe$gen$ $\Gamma$
+generalises the following induction over the environment $\Gamma$.
+
 \input{principalcp}
 
-The principal cut elimination rules are presented in Figure~\ref{??}. The
+The last step in the proof \coqe$eauto$ attempts to solve the goals generated
+by the induction using lemmas known to the system. The goals to be proved
+corresponding exactly to lemmas satisfying the reduction relation. The
 reduction rules were complicated to prove due to being composed of multiple
 constructor instances and differ significantly to the standard operational
-semantics one typically deals with in $\lambda$-calculus formalisms. As a
-result, these well-typed reductions were not proved ``in-place'', instead each
-rule is proved as a separate lemma. Most proofs followed a pattern but it was
-difficult to automate satisfactorily for the reasons stated in the previous
-paragraph. However, some tasks could be delegated to a custom tactic, for
-example instantiating cofinitely quantified hypotheses with a newly introduced
-fresh variable.
+semantics one typically deals with in $\lambda$-calculus formalisms. Most
+proofs followed a pattern but it was difficult to automate satisfactorily for
+the similar reasons stated for permutation automation. However, some tasks
+could be delegated to a custom tactic, for example instantiating cofinitely
+quantified hypotheses with a newly introduced fresh variable. An example of a
+principal cut reduction statement in Coq is shown in Figure~\ref{principal}.
+The hypothesis contains explicit de Bruijn 
 
 Initially, an implicit notion of weakening was chosen so as to be in line with
 \citeauthor{Wadler:2014}'s definitions. However, explicit weakening is
@@ -197,8 +227,9 @@ $\tm{Q}$ with the names in $\Gamma$.
 Unfortunately, the reduction relation does not have knowledge of the
 environment, $\Gamma$, typing process $\tm{P}$. This fact does not impact upon
 expressing weakening because only the names (not the types in the bindings)
-within the environment are required for weakening. one can compare alms with this version of cp
-since it weakening rule corresponds to affine logic
+within the environment are required for weakening. Without contraction, this
+version of CP corresponds to affine logic. alms calculus vs gv calculus w/o
+contraction?
 
 In the empty choice rule there may only be a single binding in the context
 (cf. an arbitrary context in \citeauthor{Wadler:2014}'s
@@ -213,11 +244,11 @@ subprocesses environments are created from destructing the environment
 
 % ...commuting conversions
 
-\input{cpstructeq}
+%\input{cpstructeq}
 
-\input{commconvonecp}
+%\input{commconvonecp}
 
-\input{commconvtwocp}
+%\input{commconvtwocp}
 
 The structural equivalences and commuting conversions are shown in
 Figure~\ref{??} and Figures~\ref{??} and~\ref{??}, respectively. These rules
@@ -265,7 +296,7 @@ destruction on one then fixing the other in the case of a bvar equal to zero
 
 \subsection{The functional language GV}\label{sec:gv}
 
-\input{gv}
+%\input{gv}
 
 The typing judgements for the functional language GV are shown in
 Figure~\ref{??}. Note that I have altered the $n$-ary branch and choice

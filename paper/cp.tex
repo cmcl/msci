@@ -1,139 +1,62 @@
-\begin{figure*}
-\[\colored
-\begin{array}{c}
-
-\inference{
-}{Ax}{
-  \tm{w \link x} \tpvdash \tp{\tmof{w} \dualbt{A} \comma \tmof{x} A}
-}
-
-\quad\quad
-
-\inference{
-  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
-  &
-  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dualbt{A}}
-}{Cut}{
-  \tm{\nu x \of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
-}
-
-\\~\\
-
-\inference{
-  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A}  &
-  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
-}{\otimes}{
-  \tm{x[y].(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta \comma \tmof{x}A
-    \otimes B}
-}
-
-\quad\quad
-
-\inference{
-  \tm{R} \tpvdash \tp{\Theta \comma \tmof{y}A \comma \tmof{x}B}
-}{\parr}{
-  \tm{x(y).R} \tpvdash \tp{\Theta \comma \tmof{x}A \parr B}
-}
-
-\\~\\
-
-\inference{
-  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
-}{\oplus_1}{
-  \tm{x[\inlterm].P} \tpvdash \tp{\Gamma \comma \tmof{x}A \oplus B}
-}
-
-\quad\quad
-
-\inference{
-  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B}
-}{\oplus_2}{
-  \tm{x[\inrterm].P} \tpvdash \tp{\Gamma \comma \tmof{x}A \oplus B}
-}
-
-\quad\quad
-
-\inference{
-  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}A}  &
-  \tm{R} \tpvdash \tp{\Delta \comma \tmof{x}B}
-}{\with}{
-  \tm{x.\caseterm(Q,R)} \tpvdash \tp{\Delta \comma \tmof{x}A \with B}
-}
-
-\\~\\
-
-\inference{
-  \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
-}{!}{
-  \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
-}
-
-\quad\quad
-
-\inference{
-  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}A}
-}{?}{
-  \tm{?x[y].Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
-}
-
-\\~\\
-
-\inference{
-  \tm{Q} \tpvdash \tp{\Delta}
-}{Weaken}{
-  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
-}
-
-\quad\quad
-
-\inference{
-  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}{?A} \comma \tmof{x'}{?A}}
-}{Contract}{
-  \tm{Q\sub{x/x'}} \tpvdash \tp{\Delta \comma \tmof{x}{?A}}
-}
-
-\\~\\
-
-\inference{
-  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}B\sub{A/X}}
-}{\exists}{
-  \tm{x[A].P} \tpvdash \tp{\Gamma \comma \tmof{x}\any{X}B}
-}
-
-\quad\quad
-
-\inference{
-  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
-}{\forall~~\textrm{($X \not\in \fv(\Delta)$)}}{
-  \tm{x(X).Q} \tpvdash \tp{\Delta \comma \tmof{x}\all{X}B}
-}
-
-\\~\\
-
-\inference{}{1}{
-  \tm{x[\,].0} \tpvdash \tp{\tmof{x}1}
-}
-
-\quad\quad
-
-\inference{
-  \tm{P} \tpvdash \tp{\Gamma}
-}{\bot}{
-  \tm{x().P} \tpvdash \tp{\Gamma \comma \tmof{x}\bot}
-}
-
-\quad\quad
-
-\textrm{(no rule for $0$)}
-
-\quad\quad
-
-\inference{}{\top}{
-  \tm{x.\caseterm()} \tpvdash \tp{\Gamma \comma \tmof{x}\top}
-}
-
-\end{array}
-\]
+\begin{figure}
+\begin{coq}
+Inductive cp_rule : proc -> penv -> Prop :=
+  | cp_fwd : forall $\Gamma$ (x w:atom) A
+             (PER: Permutation $\Gamma$ (w $\sim$ $\dualbt{A}$ ++ x $\sim$ A))
+           w $\link$ x $\tpcp$ $\Gamma$
+  | cp_cut :
+      forall (L:atoms) P Q A $\Gamma$ $\Delta$P $\Delta$Q
+             (PER: Permutation $\Gamma$ ($\Delta$P ++ $\Delta$Q))
+             (CPP: forall (x:atom) (NL: x `notin` L),
+                     (open_proc P x) $\tpcp$ (x $\sim$ A) ++ $\Delta$P)
+             (CPQ: forall (x:atom) (NL: x `notin` L),
+                (open_proc Q x) $\tpcp$ (x $\sim$ $\dualbt{A}$) ++ $\Delta$Q),
+        $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$
+  | cp_output : forall (L:atoms) P Q $\Gamma$ $\Delta$P $\Delta$Q x A B
+                  (PER: Permutation $\Gamma$ ((x $\sim$ A $\otimes$ B) ++
+                                               $\Delta$P ++ $\Delta$Q))
+                  (CPP: forall (y:atom) (NL: y `notin` L),
+                          (open_proc P y) $\tpcp$ (y $\sim$ A) ++ $\Delta$P)
+                  (CPQ: Q $\tpcp$ (x $\sim$ B) ++ $\Delta$Q),
+              x[A].(P $\mid$ Q) $\tpcp$ $\Gamma$
+  | cp_input : forall (L:atoms) P $\Gamma$ $\Delta$P x A B
+         (PER: Permutation $\Gamma$ ((x $\sim$ A $\parr$ B) ++ $\Delta$P))
+         (CPP: forall (y:atom) (NL: y `notin` L),
+            open_proc P y) $\tpcp$ (y $\sim$ A) ++ (x $\sim$ B) ++ $\Delta$P),
+        x(A).P $\tpcp$ $\Gamma$
+  | cp_left : forall P $\Gamma$ $\Delta$ x A B
+            (PER: Permutation $\Gamma$ ((x $\sim$ A $\oplus$ B) ++ $\Delta$))
+            (CPP: P $\tpcp$ (x $\sim$ A) ++ $\Delta$),
+          x[inl].P $\tpcp$ $\Gamma$
+  | cp_right : $\cdots$ (* symmetrical to cp_left *)
+  | cp_choice : forall P Q $\Gamma$ $\Delta$ x A B
+                  (PER: Permutation $\Gamma$ ((x $\sim$ A & B) ++ $\Delta$))
+                  (CPP: P $\tpcp$ (x $\sim$ A) ++ $\Delta$)
+                  (CPQ: Q $\tpcp$ (x $\sim$ B) ++ $\Delta$),
+                x CASE P OR Q $\tpcp$ $\Gamma$
+  | cp_accept : forall (L:atoms) P $\Gamma$ $\Delta$ (x:atom) A
+                  (PER: Permutation $\Gamma$ (x $\sim$ ! A ++ $\Delta$))
+                  (REQS$\Gamma$: all_requests $\Delta$)
+                  (CPP: forall (y:atom) (NL: y `notin` L),
+                         (open_proc P y) $\tpcp$ (y $\sim$ A) ++ $\Delta$),
+                !x(A).P $\tpcp$ $\Gamma$
+  | cp_request : forall (L:atoms) P $\Gamma$ $\Delta$ (x:atom) A
+                   (PER: Permutation $\Gamma$ (x $\sim$ ? A ++ $\Delta$))
+                   (CPP: forall (y:atom) (NL: y `notin` L),
+                          (open_proc P y) $\tpcp$ (y $\sim$ A) ++ $\Delta$),
+                 ?x[A].P $\tpcp$ $\Gamma$
+  | cp_weaken : forall P $\Gamma$ $\Delta$ (x:atom) A
+                       (PER: Permutation $\Gamma$ (x $\sim$ ? A ++ $\Delta$))
+                       (CPP: P $\tpcp$ $\Delta$),
+                  ?x[].P $\tpcp$ $\Gamma$
+  | cp_empout : forall (x: atom), x.0 $\tpcp$ x $\sim$ pp_one
+  | cp_empin : forall P $\Gamma$ $\Delta$ (x:atom)
+                      (PER: Permutation $\Gamma$ (x $\sim$ pp_bot ++ $\Delta$))
+                      (CPP: P $\tpcp$ $\Delta$),
+                 x().P $\tpcp$ $\Gamma$
+  | cp_empcho : forall (x:atom), x CASE 0 $\tpcp$ x $\sim$ pp_top
+where "P `$\tpcp$' $\Gamma$" := (cp_rule P $\Gamma$) : cp_scope.
+\end{coq}
 \caption{CP, classical linear logic as a session-typed process calculus}
 \label{fig:cll}
-\end{figure*}
+\end{figure}

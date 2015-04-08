@@ -24,7 +24,7 @@
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \lstset{
 basicstyle=\ttfamily \footnotesize,
-backgroundcolor=\color{lightgray},
+%backgroundcolor=\color{lightgray},
 breaklines=true,
 }
 
