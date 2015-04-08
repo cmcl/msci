@@ -3,9 +3,9 @@
 Lemma reduce_spawn:
   forall P Q A dA $\Gamma$
          (DUA: dual_props A dA)
-         (WT: $\nu$ !A.(!0(A).P $\mid$ ?0[dA].Q $\tpcp$ $\Gamma$),
+         (WT: $\nu$ !A.(!0(A).P $\mid$ ?0[dA].Q) $\tpcp$ $\Gamma$),
     $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$.
 \end{coq}
-\caption{Principal cut reductions for server accept and client request.}
+\caption{Cut of server against client request.}
 \label{fig:principal}
 \end{figure}
