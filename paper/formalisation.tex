@@ -217,45 +217,95 @@ manipulation. However, some tasks were delegated to custom tactics, for
 example instantiating cofinitely quantified hypotheses with a newly introduced
 fresh variable.
 
-Initially, an implicit notion of weakening was chosen so as to be in line with
-\citeauthor{Wadler:2014}'s definitions. However, explicit weakening is
-required to differentiate the principal cut elimination rules for the
-interactions between servers and clients (spawning and weakening). The paper
-presentation does not specify where weakening could occur; it is tacitly
-assumed weakening can always be pushed further up the derivation tree to a
-base rule e.g. \coqe$cp_fwd$ rule. Contraction is not supported in the
-formalisation due to the difficulty in specifying its principal cut
-elimination rule. In order to specify the rule one requires to show the
-following:
+\subsubsection{Issues for Reduction}
+
+A consequence of defining the reduction relation with respect to compound
+process terms is that the subprocesses have implicit derivations which are
+unavailable in the conclusion. For example, \coqe$reduce_spawn$ provides no
+information about the environment which types \coqe$P$ in the statement of the
+lemma. The derivation for \coqe$P$ (similarly, \coqe$Q$) is obtained by
+inverting the hypothesis \key{WT} and specialising the resulting assumptions
+to a newly introduced fresh variable (to replace the de Bruijn index). In the
+case of \coqe$reduce_spawn$, two inversions are required to get derivations
+for \coqe$P$ and \coqe$Q$. This property of the reduction relation affects the
+definitions of the typing rules for CP, though it was not obvious at the time.
+Notable examples are the structural rules, weakening and contraction, and
+empty choice.
+
+\textbf{Weakening and Contraction} Initially, an implicit notion of weakening
+was chosen so as to be in line with \citeauthor{Wadler:2014}'s
+definitions. However, explicit weakening is required to differentiate the
+principal cut elimination rules for the interactions between servers and
+clients; spawning and garbage collection (weakening). The paper presentation
+does not specify where weakening could occur; it is tacitly assumed weakening
+can always be pushed further up the derivation tree to a base rule
+e.g. \coqe$cp_fwd$ rule.
+
+\begin{samepage}
+Contraction is not supported in the formalisation due to the difficulty in
+specifying its principal cut elimination rule.  In order to specify the rule
+one requires knowledge of the environment typing process \coqe$P$ with the
+rule of the form:
 \begin{gather*}
 \tm{\nu A.(!0(A).P \mid ?z[[A]].Q)}
 \quad \becomes \quad \\
 \tm{\nu A.(!0(A).P \mid \nu A.(!0(A).P \mid \key{contract}_{\Gamma} Q))}
 \end{gather*}
 
-where $\tm{?z[[A]].Q}$ denotes contraction by $z$ of two channels of type $A$
-in $Q$, $\tm{P^y} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}$ for some
-sufficiently fresh name $y$ and $\key{contract}_{\Gamma} \tm{Q}$ contracts
-$\tm{Q}$ with the names in $\Gamma$.
+where $\Gamma$ is the assumed environment typing \coqe$P$, $\tm{?z[[A]].Q}$
+denotes contraction by $z$ of two channels of type $A$ in $Q$ and
+$\key{contract}_{\Gamma} \tm{Q}$ contracts $\tm{Q}$ with the bindings in
+$\Gamma$. Unfortunately, as explained above, there is no way for the reduction
+relation to obtain the environment $\Gamma$.
+\end{samepage}
 
-Unfortunately, the reduction relation does not have knowledge of the
-environment, $\Gamma$, typing process $\tm{P}$ because this information is
-only available after the compound cut is destructed, yielding a derivation for
-$\tm{P}$. This fact does not impact upon expressing weakening because only the
-names (not the types in the bindings) within the environment are required for
-weakening.
+The reader may wonder how weakening is supported if not
+contraction. Fortunately, weakening only requires the names (not the types in
+the bindings) within the environment, and these may be obtained by relying on
+the following lemma relating the free variables of a process and the domain of
+its environment:
+\begin{coq}
+Lemma in_env_fv:
+  forall P $\Gamma$ x (WT: P $\tpcp$ $\Gamma$),
+    x $\in$ dom $\Gamma$ $\iff$ x $\in$ fv_proc P.
+\end{coq}
 
-In the empty choice rule there may only be a single binding in the context
-(cf. an arbitrary context in \citeauthor{Wadler:2014}'s
-presentation~\cite{Wadler:2014}). \todo{look into a fix for the empty choice
-  rule} While this diverges with the presentation of linear logic it became
-necessary to do this because otherwise there would be no relationship between
-the free variables within a process and its environment. no there is a clear
-iff relationship which permits reduction rules to apply such as i think
-weakening but it should be any rule which takes some fvs of proc and infers
-something about environments from that...otherwise what it is not at all clear
-how to encode the reductions in a relation, the subprocesses environments are
-created from destructing the environment
+\textbf{Empty Choice} The empty choice rule may only have a single binding in
+the context (cf. an arbitrary context in \citeauthor{Wadler:2014}'s
+presentation~\cite{Wadler:2014}). Adding an arbitrary environment to the empty
+choice constructor would prohibit \coqe$in_env_fv$ since its process no longer
+contains all the names of its environment. Not only would weakening be
+inadmissible if \coqe$in_env_fv$ did not hold, but also axiom cut reduction:
+\begin{coq}
+Lemma reduce_axcut:
+  forall P A (w : atom) $\Gamma$
+         (NFV: w $\notin$ fv_proc P)
+         (WT: $\nu$ A.(w $\link$ 0 $\mid$ P) $\tpcp$ $\Gamma$),
+    (open_proc P w) $\tpcp$ $\Gamma$.
+\end{coq}
+
+The proof of \coqe$reduce_axcut$ needs to rename the variable chosen to open
+the process \coqe$P$ in the conclusion. Initially, the variable is a fresh
+\coqe$x$ introduced during the proof, but using the following
+\coqe$typing_rename$ lemma, \coqe$w$ can replace \coqe$x$ by appeal to
+\coqe$in_env_fv$:
+\begin{coq}
+Lemma typing_rename:
+  forall $\Gamma$ P k (x y : atom) A
+         (NINX: x $\notin$ dom $\Gamma$ $\cup$ fv_proc P)
+         (NINY: y $\notin$ dom $\Gamma$ $\cup$ fv_proc P)
+         (WTX: $\open{k}{x}{P}$ $\tpcp$ (x $\sim$ A) ++ $\Gamma$),
+    $\open{k}{y}{P}$ $\tpcp$ (y $\sim$ A) ++ $\Gamma$.
+\end{coq}
+
+where $\open{k}{x}{P}$ denotes replacing de Bruijn index $k$ with free
+variable $x$ in process $P$.
+
+While this diverges with the linear logic rule for top, I believe it to be
+sound within the CP/GV eco-system such that this variant of CP still leads to
+a valid translation to GV. In a private communication, Philip Wadler echoed
+these remarks but pointed out that this is likely more to do with GV
+\todo{what's another way to say ``too small'' vs. ``too large''}.
 
 % ...commuting conversions
 
@@ -283,13 +333,6 @@ rules. since this involves some element of searching the context followed by
 destructing hypotheses it could be effectively automated in permutations in
 subprocesses which use a binder of the parent. the rule for associativity w
 linear environments caused a problem with the splitting up of variables.
-
-% ... subject reduction ...
-
-subject reduction proof proceeds by induction on the reduction relation then
-is automatic by appeal to the proved well-typed reductions.
-
-% ... cut elimination ....
 
 \subsubsection{Top-level Cut Elimination}
 
@@ -414,30 +457,51 @@ Currently the formalisation does not handle this. Future work.
 
 \subsection{Issues and Guidelines}
 
-modularised development; tactics slow prover took a long time to reduce proofs
-so split the structure of the development \todo{picture of development
-  structure}.
+\textbf{Modularised development} Not only is modular development an important
+programming practice in general, but in the context of theorem proving it has
+the advantage of reducing interactive load time. Executing proof scripts can
+be time-consuming especially if those scripts make frequent use of decision
+procedures performing proof search, then the execution time is proportional to
+the size of the proof context and complexity of the goal. There were cases in
+which the system crashed unexpectedly during interactive mode and it is
+conceivable that having many large proofs in-memory could be a contributing
+factor. For these reasons, the development is partitioned into GV and CP
+sections each with sub-divided into definition, infrastructure and typing
+modules (CP also has an additional module for reduction lemmas). The CPS
+translation is also defined separately. Load time is considerably improved and
+the consequences of a crash are mitigated.
+
+\textbf{Representation} It is important not to go overboard in the
+when developing not to use dependent types all the time without working out if
+it will be to the advantage of the prover use dependent types and other power
+with care for example we could don't want to use mutual inductive definitions
+for the types construct since this is overly complicated for what we wish to
+achieve and we don't want to index types with kinds since this complicates
+further definitions it is about trying to use dependent types responsibly
+without using them in an uncritical or thinking manner with great power comes
+great responsibility
+
+\textbf{Library reuse} One of the design goals of the development was to reuse
+existing libraries wherever possible. Two such instances proved extremely
+useful, first is the Metatheory library as already mentioned. Second, is the
+library of tactics provided by the Software Foundations online book~\cite{SF}.
+The tactics helped in many ways including simplifying introduction of
+assertions, providing convenient shorthands and ... Traditionally, assertions
+in Coq have to be explicitly written within a proof leading to the use of
+empheremal names introduced by prover. If the proof of the assertion follows
+from an already proved lemma and some assumptions in the context this is
+unnecessary verbage and this is what the library allows to omit \todo{example
+  of using the forwards tactic} an example of the so called forwards tactic is
+given below the $\sim$ is a a shorthand for immediately applying \coqe$auto$
+to all subgoals generated by the tactic.
+
+\textbf{Linear environments} Linearity create issues with typing some
+examples; the splitting of the environment was non-deterministic so required
+side-conditions to enforce a certain splitting of binders. For example the
+rule for associativity of cut. \todo{how to handle? is there a better way?}
 
 tactic performance is an issue to be addressed due to the slow proof search a
 future work (things like deciding equations on finite sets)
-
-One of the design goals of the development was to re-use existing libraries
-wherever possible. two such instances proved extremely useful. first is the
-Metatheory library developed at upenn. second, also from upenn, is the library
-of tactics from software foundations.
-
-software foundations helped in many ways: simplifying tacticals, ease of
-introducing proved assertions, etc. limited use of names introduced by prover
-leading to more robust development.
-
-used extensively: metatheory does not handle multiple binders (check this?)
-maybe add a generic tactic to handle multiple binders... or perhaps add a
-lemmas for handling binders
-
-Linearity create issues with typing some examples; the splitting of the
-environment was non-deterministic so required side-conditions to enforce a
-certain splitting of binders. For example the rule for associativity of
-cut. \todo{how to handle? is there a better way?}
 
 Base rules and rules with binders required permutation assumptions to allow
 any ordering of the constituent contexts. a lot of the proofs for well-typed
@@ -446,4 +510,3 @@ similar across the proofs. while some simple lemmas and tactics where created
 to handle the most tedious elements these did not make effective use of
 hypotheses from the context. Improved proof search for permutations is
 required to simplify such developments.
-

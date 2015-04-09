@@ -8,8 +8,10 @@
 \usepackage{prooftree}
 \usepackage{amsmath}
 \newcommand{\typestate}[2]{{#1}\gg{#2}}
-\usepackage[style=alphabetic,sorting=nymt,natbib=true,
+\usepackage[style=alphabetic,sorting=nymt,natbib=true,firstinits=true,
   maxbibnames=100]{biblatex}
+% http://tex.stackexchange.com/questions/10682/suppress-in-biblatex
+\renewbibmacro{in:}{}
 \addbibresource{paper.bib}
 
 \DeclareSortingScheme{nymt}{
