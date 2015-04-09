@@ -126,17 +126,17 @@ introduce them into the proof context during theorem proving. Some details
 such as environment uniqueness have been elided, but notice the use of LNCQ
 form within the hypotheses of the rules with binders. These rules exclude a
 finite set of names \coqe$L$ from opening the subprocesses where opening a
-process \coqe$P$ with name \coqe$x$ is denoted by \coqe$open_proc P x$. Bound
-variables are represented using de Bruijn indices and free variables are
-represented using an abstract type, \coqe$atom$, provided by the Metatheory
-library. The rules with binders specify the type of a bound variable in the
-constructor rather than a name. Note that the rules for polymorphism,
-$\exists$ and $\forall$, were not included in the final Coq development since
-GV (\S~\ref{sec:gv}) does not support polymorphism making the rules
-unnecessary for the translation. Further, as noted by \citeauthor{Lee:2012},
-support for polymorphism in type variables creates an explosion of the
-infrastructure requiring additional of opening and substituting definitions
-and lemmas.
+process \coqe$P$ with name \coqe$x$ is denoted by \coqe$open_proc P x$ and
+corresponds to replacing de Bruijn index 0 with \coqe!x!. Bound variables are
+represented using de Bruijn indices and free variables are represented using
+an abstract type, \coqe$atom$, provided by the Metatheory library. The rules
+with binders specify the type of a bound variable in the constructor rather
+than a name. Note that the rules for polymorphism, $\exists$ and $\forall$,
+were not included in the final Coq development since GV (\S~\ref{sec:gv}) does
+not support polymorphism making the rules unnecessary for the
+translation. Further, as noted by \citeauthor{Lee:2012}, support for
+polymorphism in type variables creates an explosion of the infrastructure
+requiring additional of opening and substituting definitions and lemmas.
 
 Formalising the process calculus CP provided many challenges for the
 Metatheory library since to my knowledge, the library has never been applied
@@ -299,7 +299,8 @@ Lemma typing_rename:
 \end{coq}
 
 where $\open{k}{x}{P}$ denotes replacing de Bruijn index $k$ with free
-variable $x$ in process $P$.
+variable $x$ in process $P$~\footnote{For example, \coqe!$\open{0}{x}{P}
+  \defeq$ open_proc P x!}.
 
 While this diverges with the linear logic rule for top, I believe it to be
 sound within the CP/GV eco-system such that this variant of CP still leads to
@@ -307,43 +308,112 @@ a valid translation to GV. In a private communication, Philip Wadler echoed
 these remarks but pointed out that this is likely more to do with GV
 \todo{what's another way to say ``too small'' vs. ``too large''}.
 
-% ...commuting conversions
+The structural equivalences and commuting conversions have some additional
+complexity not present in the original presentation. For instance, structural
+equivalences are not unique and different process terms result depending on
+the initial binder permutation. Consider the associativity rule for which the
+paper presentation specifies only one rule:
+\begin{coq}
+Lemma assoc_1:
+  forall P Q R A B $\Gamma$
+         (LCP: forall x, lc_proc (open_proc P x))
+         (WT: $\nu$ B.($\nu$ A.(P $\mid$ Q) $\mid$ R) $\tpcp$ $\Gamma$),
+    $\nu$ A.(P $\mid$ $\nu$ B.($\permb{0}{1}{Q}$ $\mid$ R)) $\tpcp$ $\Gamma$.
+\end{coq}
 
-%\input{cpstructeq}
+where \coqe$lc_proc P$ specifies that \coqe$P$ is a \textit{local closure}, in
+other words contains no unbound de Bruijn indices and $\permb{0}{1}Q$
+indicates the permuting of binders 0 and 1 in process $\tm{Q}$. The typing
+rule for \coqe$cp_cut$ does not specify any particular split of the linear
+environment in the conclusion; splitting is non-deterministic. So, in order to
+prove the above statement, it must be true in \key{WT} that \coqe$Q$ takes the
+binder of type \coqe$B$ and not \coqe$P$, hence the local closure assumption
+on \coqe$open_proc P x$. Similarly, to prove the converse statement
+\coqe$forall x, open_proc R x$ must be assumed. For commuting conversions,
+permutating binders is essential in formulating the majority of the rules.
 
-%\input{commconvonecp}
+Regarding commuting conversions, many require analysing permutations
+containing singleton bindings. Consider the following commuting conversion:
+\begin{coq}
+  Lemma reduce_cc_input:
+    forall P Q (x:atom) A B $\Gamma$
+           (WT: $\nu$ A.(x(B).P $\mid$ Q) $\tpcp$ $\Gamma$),
+      x(B).($\nu$ A.($\open{0}{1}{P}$ $\mid$ Q)) $\tpcp$ $\Gamma$.
+\end{coq}
 
-%\input{commconvtwocp}
+Afer inverting \key{WT} and specialising the resulting hypotheses, regarding
+the subprocesses, with fresh variables the proof state is as follows:
 
-The structural equivalences and commuting conversions are shown in
-Figure~\ref{??} and Figures~\ref{??} and~\ref{??}, respectively. These rules
-are expressed to indicate some additional complexity not present in the
-original presentation. For example, structural equivalences are not unique and
-different process terms result depending on initial binder
-permutation. $\permb{0}{1}$ indicates the permuting of binders $0$ and $1$ in
-process $\tm{P}$. The paper presentation specifies only one possible
-associativity rule lending to the specific split of the linear environments.
-Notice that permutating binders is essential to formulating the majority of
-these rules. Analysing permutations containing singleton bindings was
-necessary for the commuting conversion rules. Singleton bindings can occur
-frequently during a proof and it is sometimes necessary to analyse a
-permutation of the form P++x~A ~~ Q++R to determine whether x occurs in Q or
-R. the rule for associativity requires this and so do quite a few reduction
-rules. since this involves some element of searching the context followed by
-destructing hypotheses it could be effectively automated in permutations in
-subprocesses which use a binder of the parent. the rule for associativity w
-linear environments caused a problem with the splitting up of variables.
+\begin{tabular}{l}
+\begin{coq}
+1 subgoal
+(* ... other elements of the proof context ... *)
+CPQ : open_proc Q y $\tpcp$ y$\sim$A++$\Delta$Q
+CPP0 : $\open{0}{z}{\open{1}{y}{P}}$ $\tpcp$ z$\sim$B++x$\sim$C++$\Delta$P0
+PER : Permutation $\Gamma$ ($\Delta$P++$\Delta$Q)
+PER0 : Permutation ($\Delta$P++y$\sim$A)]) (x$\sim$B$\parr$C++$\Delta$P0)
+\end{coq}\\ \hline
+\begin{coq}
+x(B).($\nu$ A.($\open{0}{1}{P}$ $\mid$ Q)) $\tpcp$ $\Gamma$.
+\end{coq}
+\end{tabular}
+\\~\\
+
+In order to prove the goal, $\Gamma$ must be replaced with the sublists typing
+\coqe!P! and \coqe!Q!. Therefore, \coqe!PER0! needs to modified such that the
+left-hand side is $\Delta$P and the right-hand side has \coqe!y$\sim$A!
+removed. In other words, the binding of \coqe!y! within \coqe!$\Delta$P0! must
+be extracted. Since many of the commuting conversion rules required this sort
+of reasoning separating the work out into a tactic comes to mind. Indeed, Ltac
+is well-suited for this type of work, searching the context and manipulating
+hypotheses of a particular form. The Ltac script in Figure~\ref{fig:extract}
+does the job\todo{keep (and explain) this?}.
+
+\begin{figure}
+\begin{coq}
+Ltac extract_bnd x A :=
+  match goal with
+    | [H: Permutation (_++x~A) ?F |- _] =>
+      let BNDS := fresh "BNDS" in
+      forwards~ BNDS: Perm_binds x A H
+      ; analyze_binds_uniq BNDS
+      ; try (by applys~ uniq_perm H)
+      ; try (match goal with
+               | [H: binds x A ?E |- _] =>
+                 let E1 := fresh "E1" in
+                 let E2 := fresh "E2" in
+                 let EQ := fresh "EQ" in
+                 apply binds_env_split in H
+                 ; inversion_clear H as (E1 & E2 & EQ)
+                 ; substs~; des_reqs
+             end)
+  end.
+\end{coq}
+\caption{Tactic finds binding in permutation RHS}
+\label{fig:extract}
+\end{figure}
+
+However, the task of removing the binding from the permutation is not
+automated to keep information loss within the context transparent to an
+individual proof. The tactic appears more general in this form and allows more
+than one ordering of tactic sequences. feels like two jobs to remove it as
+well as find it. although perhaps extract is not the right term if it doesn't
+remove it
 
 \subsubsection{Top-level Cut Elimination}
 
-The theorem for top-level cut elimination can be expressed as:
+\begin{figure}
 \begin{coq}
 Theorem proc_cut_elim:
   forall P $\Gamma$
          (WT: P $\tpcp$ $\Gamma$),
     exists Q, P $\becomes^\star$ Q /\ $\sim$ is_cut Q.
 \end{coq}
+\caption{Cut elimination theorem}
+\label{fig:cutelim}
+\end{figure}
 
+The theorem for top-level cut elimination appears in Figure~\ref{fig:cutelim}
 where $\becomes^\star$ denotes the reflexive and transitive closure of
 $\becomes$ and $\sim$ \coqe$is_cut Q$ expresses that Q is not a cut.
 
