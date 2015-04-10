@@ -1,147 +1,54 @@
-\begin{figure*}
-\[\colored
-\begin{array}{c}
-
-\inference{}{Id}{
-  \Tp{\Tmof{x}T} \Tpvdash \Tmof{x}\Tp{T}
-}
-
-\quad\quad
-
-\inference{}{Unit}{
-  \Tpvdash \Tmof{\key{unit}}\Tp{\key{Unit}}
-}
-
-\\~\\
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{N}\Tp{U}  &  \un(\Tp{T})
-}{Weaken}{
-  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N}\Tp{U}
-}
-
-\quad\quad
-
-\inference{
-  \Tp{\Phi \comma \Tmof{x}T \comma \Tmof{x'}T} \Tpvdash \Tmof{N}\Tp{U}  &  \un(\Tp{T})
-}{Contract}{
-  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N\sub{x/x'}}\Tp{U}
-}
-
-\\~\\
-
-\inference{
-  \Tp{\Phi \comma \Tmof{x}T} \Tpvdash \Tmof{N}\Tp{U}
-}{{\lolli}\intro}{
-  \Tp{\Phi} \Tpvdash \Tmof{\lam{x}N}\Tp{T \lolli U}
-}
-
-\quad\quad
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U} &
-  \Tp{\Psi} \Tpvdash \Tmof{M} \Tp{T}
-}{{\lolli}\elim}{
-  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{L \app M} \Tp{U}
-}
-
-\\~\\
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U} & \un(\Tp{\Phi})
-}{{\to}\intro}{
-  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \to U}
-}
-
-\quad\quad
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \to U}
-}{{\to}\elim}{
-  \Tp{\Phi} \Tpvdash \Tmof{L} \Tp{T \lolli U}
-}
-
-\\~\\
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T} &
-  \Tp{\Psi} \Tpvdash \Tmof{N} \Tp{U}
-}{\otimes\intro}{
-  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{(M,N)} \Tp{T \otimes U}
-}
-
-\quad\quad
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T \otimes U} &
-  \Tp{\Psi \comma \Tmof{x}T \comma \Tmof{y}U} \Tpvdash \Tmof{N} \Tp{V}
-}{\otimes\elim}{
-  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{let}~(x,y) = M~\key{in}~N} \Tp{V}
-}
-
-\\~\\
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T} &
-  \Tp{\Psi} \Tpvdash \Tmof{N} \Tp{\pwoutp{T}S}
-}{Send}{
-  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{send}~M~N} \Tp{S}
-}
-
-\quad\quad
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\pwinp{T}S}
-}{Receive}{
-  \Tp{\Phi} \Tpvdash \Tmof{\key{receive}~M} \Tp{T \otimes S}
-}
-
-\\~\\
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\oplus \set{l_i : S_i}_{i \in I}}
-}{Select}{
-  \Tp{\Phi} \Tpvdash \Tmof{\key{select}~l_j~M} \Tp{S_j}
-}
-
-\quad\quad
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\with \set{l_i : S_i}_{i \in I}}  &
-  (\Tp{\Psi \comma \Tmof{x}S_i} \Tpvdash \Tmof{N_i} \Tp{T})_{\Tp{i \in I}}
-}{Case}{
-  \Tp{\Phi \comma \Psi} \Tpvdash
-    \Tmof{\key{case}~M~\key{of}~\set{ l_i : x . N_i }_{i \in I}} \Tp{T}
-}
-
-\\~\\
-
-\inference{
-  \Tp{\Phi \comma \Tmof{x}S} \Tpvdash \Tmof{M} \Tp{\key{end}_!} &
-  \Tp{\Psi \comma \Tmof{x}\overline{S}} \Tpvdash \Tmof{N} \Tp{T}
-}{Connect}{
-  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{with}~x~\key{connect}~M~\key{to}~N} \Tp{T}
-}
-
-\quad\quad
-
-\inference{
-  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{\key{end}_?}
-}{Terminate}{
-  \Tp{\Phi} \Tpvdash \Tmof{\key{terminate}~M} \Tp{\key{Unit}}
-}
-
-% OLD VERSION OF TERMINATE
-% \inference{
-%   \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T \otimes \key{end}_?}
-% }{Terminate}{
-%   \Tp{\Phi} \Tpvdash \Tmof{\key{terminate}~M} \Tp{T}
-% }
-
-\end{array}
-\]
-
-\caption{GV, a session-typed functional language}
+\begin{figure}
+\begin{coq}
+Inductive wt_tm : tenv -> term -> typ -> Prop :=
+  | wt_tm_id : forall k T x (WFT: wf_typ T k), x$\sim$T $\tpvdash$ x$\of{T}$
+  | wt_tm_labs : forall L $\Phi$ T U M (WF: wf_typ ($T\lolli{}U$) lin)
+        (WT: forall (x:atom),
+                     x$\notin$L ->
+                     x$\sim$T ++ $\Phi$ $\tpvdash$ (open M x)$\of{U}$),
+                   $\Phi$ $\tpvdash$ tm_abs T M$\of{T\lolli{}U}$
+  | wt_tm_lapp : forall $\Phi$ $\Psi$ T U M N (WF: wf_typ (T $\lolli$ U) lin)
+        (WTM: $\Phi$ $\tpvdash$ M$\of{T \lolli U}$)
+        (WTN: $\Psi$ $\tpvdash$ N$\of{T}$),
+      $\Phi$ ++ $\Psi$ $\tpvdash$ (tm_app M N)$\of{U}$b
+  | wt_tm_iabs : forall $\Phi$ T U M
+        (WF: wf_typ ($\fn{T}{U}$) un)
+        (UN: uniq $\Phi$)
+        (WT: $\Phi$ $\tpvdash$ M$\of{\fn{T}{U}}$)
+        (UL: un_env $\Phi$),
+                  $\Phi$ $\tpvdash$ $\lambda$! M $\of{\fn{T}{U}}$
+  | wt_tm_let :
+      forall (L:atoms) $\Phi$ $\Psi$ kv T U V M N
+        (WF: wf_typ (T $\otimes$ U) lin) (WFV: wf_typ V kv)
+        (WTM: $\Phi$ $\tpvdash$ M$\of{\tensor{T}{U}}$)
+        (WTN: forall (x y:atom)
+                     (XL: x$\notin$L)
+                     (YL: y$\notin$L `union` singleton x),
+                x$\sim$T++y$\sim$U++$\Psi$ $\tpvdash$ ($\open{1}{x}{\open{0}{y}{N}}\of{V}$),
+      $\Phi$ ++ $\Psi$ $\tpvdash$ (tm_let T U M N)$\of{V}$
+  | wt_tm_send : forall $\Phi$ $\Psi$ M T N S
+        (WF: wf_typ ($\outpt{T}{S}$) lin)
+        (WTM: $\Phi$ $\tpvdash$ M:T) (WTN: $\Psi$ $\tpvdash$ N:! T # S),
+      $\Phi$ ++ $\Psi$ $\tpvdash$ tm_send M N:S
+  | wt_tm_recv : forall $\Phi$ M T S (WF: wf_typ ($\inpt{T}{S}$) lin)
+                        (WT: $\Phi$ $\tpvdash$ M$\of{\inpt{T}{S}}$),
+                   $\Phi$ $\tpvdash$ tm_recv M$\of{\tensor{T}{S}}$
+  | wt_tm_l_select : forall $\Phi$ M S1 S2
+        (WF: wf_typ (S1 $\oplus$ S2) lin)
+        (WT: $\Phi$ $\tpvdash$ M:(S1 $\oplus$ S2)),
+      $\Phi$ $\tpvdash$ tm_select lb_inl M:S1
+  | wt_tm_connect : forall (L:atoms) $\Phi$ $\Psi$ M N S S' kt T
+        (DU: are_dual S S')
+        (WF: wf_typ T kt)
+        (WTM: forall (x:atom) (NL: x$\notin$L),
+                x$\sim$S ++ $\Phi$ $\tpvdash$ (open M x):typ_oend)
+        (WTN: forall (x:atom) (NL: x$\notin$L),
+                x$\sim$S' ++ $\Psi$ $\tpvdash$ (open N x):T),
+      $\Phi$ ++ $\Psi$ $\tpvdash$ (tm_connect S M N):T
+  | wt_tm_end : forall $\Phi$ M (WT: $\Phi$ $\tpvdash$ M:typ_iend),
+                  $\Phi$ $\tpvdash$ tm_end M$\of{\tm{unit}}$
+where "$\Phi$ $\tpvdash$ t$\of{T}$" := (wt_tm $\Phi$ t T) : gv_scope.
+\end{coq}
+\caption{GV well-typed terms encoding (selected rules)}
 \label{fig:gv}
-
-\end{figure*}
+\end{figure}

@@ -432,16 +432,17 @@ apply a principal cut rule.
 
 \subsection{The functional language GV}\label{sec:gv}
 
-%\input{gv}
+\input{gv}
 
 The typing judgements for the functional language GV are shown in
-Figure~\ref{??}. Note that I have altered the $n$-ary branch and choice
+Figure~\ref{fig:gv}. Note that I have altered the $n$-ary branch and choice
 constructs to the restricted binary versions in order to avoid tricky
 formulations. The change is not restrictive however, since CP itself provides
 only binary versions of plus ($\oplus$) and with ($\with$)
 constructs. Explicit limiting and unlimiting of abstraction was chosen to
 enable the inclusion of these rules in the translation from GV to CP, which is
-performed by induction on GV terms.
+performed by induction on GV terms. \todo{could take about opening the
+  multiple binder let. multi but not as in literature}
 
 On a more technical note, all types are amalgamated into one inductive
 definition and provide a predicate for restricting typing rules to consider
@@ -469,62 +470,84 @@ highlighted that one should be careful and considerate regarding when to use
 dependent types. These issues highlighted that one should take care over the
 representation and its effect on later expressiveness.
 
-\subsection{CPS translation GV to CP}
+\subsection{CPS translation from GV to CP}
 
-require type inference on gv terms to construct corresponding cp terms but we
-are assured that this is okay since the theorem only provides a well-typed gv
-term in a context that is well-defined
+Following the original work by \citeauthor{Wadler:2014}, the translation from
+GV to CP requires defining translations on types and terms of GV, which for
+terms is in continuation-passing style.
 
-type inference of gv terms required cluttered definition of translation with
-impossible error cases. avoided a dependently typed solution due to
-difficulties encountered earlier in the development. james mckinna et
-al. suggest encoding the successful cases in an inductive type and then
-defining the function to act on these cases. will this really work? this means
-a graph of positive cases for types then a function definition for it too this
-seems rather pathetic because i have to define th einference on terms and it
-seems wrong i have then to handle environments but also nonenvironments i
-can't remember what they are called unbound variables that is it they have to
-be handled as well so we have all this clutter and the types too that is the
-important part but the environments then have to be handled linearly
-unfortunately very bad because we could just use the well typed term relation
-for most of this headachey breaky stuff i'm not sure about that but what is
-can i say so for example lets see see no i also have to thing about the
-general guidelines i can be giving for this section so we have something to
-say about guidelines do we yes of course we have can say that out of this we
-realised that it is important for a representation to be good enough to
-succintly express that which we wish to say in particular the graph relation
-the inductive type that we define propositionally is better one would think
-than the other way the monadic possible failure way is not producing a valid
-thing that we can inductively induct on so we concern ourself with the proof
-of translation preserving the typed term and i think it is important to
-remember the problem we had with the inductive hypothesis we had something do
-with translating the inner term of a weakening term in a larger context than
-the one we had available and that was to do with the destruction of the term
-inference thing i think no no it was something else we had the inner term and
-we had it well typed in an environment that was smaller sure and then our
-thing our function was saying we had some environment that typed both the
-inner term and the outer weakening term but we know that is wrong so wrong so
-here is perhaps where the inductive type graph relation thing wins out in that
-we can have a hypothesis for the inner term which is sufficiently small for
-the environment and we pattern match not only on the term but also on the
-environment yes that is we will do because it seems to work only when we get
-to the messy two the messy two constructor caases will this become a bigg
-problem inthat we will then have all this stuff about environment being split
-and needing to be recombined in the composite process that is a term not a
-process but the point still stands it will need to be about the term and the
-splitting is really a duplication of the unfortunately the well typed term
-relation but otherwise i cannot think how to reuse or obtain that information
-for the translation to cp
+\subsubsection{Types}
 
-Translation uses the coq-ext-lib from michela for monadic notation
+The translation of from GV types to CP propositons is shown in Figure~\ref{??}
+\todo{Coq version or regular version?}. Translation of session types is
+noteworthy for taking a GV session type to its notional dual in CP, reflecting
+the semantic difference between channels in GV and those in CP.
 
-Currently the formalisation does not handle this. Future work.
+\subsubsection{Terms}
 
-\todo{how might we make progress on this?}
+Due to the locally nameless representation, the translation of GV terms
+required type inference of terms to construct corresponding CP terms in order
+to specify the propositions. So, the translation takes the environment, in
+which the term was typed, as an argument to query the type of free
+variables. Unfortunately, this query returns a type of \coqe!option typ!
+(\coqe!option! is equivalent to \tm{Maybe} in Haskell) since it may not be
+found, but in fact since only well-typed GV terms are translated it is
+guaranteed to return something! Therefore, the definition is unnecessarily
+cluttered with impossible error cases.
+
+The term translation was initially designed using a monadic approach to
+account for the possible error cases in retreiving names from the
+environment. The coq-ext-lib
+library~\footnote{https://github.com/coq-ext-lib/coq-ext-lib} provides
+definitions for monad, functor and applicative type classes and associated
+instances for basic Coq types. It is similar in style to Haskell's support for
+these objects. Unfortunately, this definition did not yield a suitable
+function to prove the translation well-typed because the function needs to be
+able to operate structurally on not only terms, but also the environment and
+the processes being constructed.
+
+An alternative formulation, which avoids the need to handle error cases, is to
+first define only the positive cases using an inductive type, the so-called
+\textit{graph relation}, and then define a dependent function which only
+considers the positive cases within the relation~\cite{McKinna:2009}. However,
+several issues were encountered when attempting to specify the
+translation. The graph relation requires much of the clutter present in both
+the \coqe!cp_rule! and \coqe!wt_tm! definition such as linear enviornments and
+cofinite quanitifcation.
+
+i'm not sure about that but what is can i say so for example lets see see no i
+also have to thing about the general guidelines i can be giving for this
+section so we have something to say about guidelines do we yes of course we
+have can say that out of this we realised that it is important for a
+representation to be good enough to succintly express that which we wish to
+say in particular the graph relation the inductive type that we define
+propositionally is better one would think than the other way the monadic
+possible failure way is not producing a valid thing that we can inductively
+induct on so we concern ourself with the proof of translation preserving the
+typed term and i think it is important to remember the problem we had with the
+inductive hypothesis we had something do with translating the inner term of a
+weakening term in a larger context than the one we had available and that was
+to do with the destruction of the term inference thing i think no no it was
+something else we had the inner term and we had it well typed in an
+environment that was smaller sure and then our thing our function was saying
+we had some environment that typed both the inner term and the outer weakening
+term but we know that is wrong so wrong so here is perhaps where the inductive
+type graph relation thing wins out in that we can have a hypothesis for the
+inner term which is sufficiently small for the environment and we pattern
+match not only on the term but also on the environment yes that is we will do
+because it seems to work only when we get to the messy two the messy two
+constructor caases will this become a bigg problem inthat we will then have
+all this stuff about environment being split and needing to be recombined in
+the composite process that is a term not a process but the point still stands
+it will need to be about the term and the splitting is really a duplication of
+the unfortunately the well typed term relation but otherwise i cannot think
+how to reuse or obtain that information for the translation to cp
+
+Roughly, the theorm aiming to prove is:
 
 \subsection{Issues and Guidelines}
 
-\textbf{Modularised development} Not only is modular development an important
+\textbf{Modularised development.} Not only is modular development an important
 programming practice in general, but in the context of theorem proving it has
 the advantage of reducing interactive load time. Executing proof scripts can
 be time-consuming especially if those scripts make frequent use of decision
@@ -538,7 +561,7 @@ modules (CP also has an additional module for reduction lemmas). The CPS
 translation is also defined separately. Load time is considerably improved and
 the consequences of a crash are mitigated.
 
-\textbf{Representation} It is important not to go overboard in the
+\textbf{Representation.} It is important not to go overboard in the
 when developing not to use dependent types all the time without working out if
 it will be to the advantage of the prover use dependent types and other power
 with care for example we could don't want to use mutual inductive definitions
@@ -548,21 +571,21 @@ further definitions it is about trying to use dependent types responsibly
 without using them in an uncritical or thinking manner with great power comes
 great responsibility
 
-\textbf{Library reuse} One of the design goals of the development was to reuse
-existing libraries wherever possible. Two such instances proved extremely
-useful, first is the Metatheory library as already mentioned. Second, is the
-library of tactics provided by the Software Foundations online book~\cite{SF}.
-The tactics helped in many ways including simplifying introduction of
-assertions, providing convenient shorthands and ... Traditionally, assertions
-in Coq have to be explicitly written within a proof leading to the use of
-empheremal names introduced by prover. If the proof of the assertion follows
-from an already proved lemma and some assumptions in the context this is
-unnecessary verbage and this is what the library allows to omit \todo{example
-  of using the forwards tactic} an example of the so called forwards tactic is
-given below the $\sim$ is a a shorthand for immediately applying \coqe$auto$
-to all subgoals generated by the tactic.
+\textbf{Library reuse.} One of the design goals of the development was to
+reuse existing libraries wherever possible. Two such instances proved
+extremely useful, first is the Metatheory library as already
+mentioned. Second, is the library of tactics provided by the Software
+Foundations online book~\cite{SF}.  The tactics helped in many ways including
+simplifying introduction of assertions, providing convenient shorthands and
+... Traditionally, assertions in Coq have to be explicitly written within a
+proof leading to the use of empheremal names introduced by prover. If the
+proof of the assertion follows from an already proved lemma and some
+assumptions in the context this is unnecessary verbage and this is what the
+library allows to omit \todo{example of using the forwards tactic} an example
+of the so called forwards tactic is given below the $\sim$ is a a shorthand
+for immediately applying \coqe$auto$ to all subgoals generated by the tactic.
 
-\textbf{Linear environments} Linearity create issues with typing some
+\textbf{Linear environments.} Linearity create issues with typing some
 examples; the splitting of the environment was non-deterministic so required
 side-conditions to enforce a certain splitting of binders. For example the
 rule for associativity of cut. \todo{how to handle? is there a better way?}
