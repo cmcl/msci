@@ -302,11 +302,10 @@ where $\open{k}{x}{P}$ denotes replacing de Bruijn index $k$ with free
 variable $x$ in process $P$~\footnote{For example, \coqe!$\open{0}{x}{P}
   \defeq$ open_proc P x!}.
 
-While this diverges with the linear logic rule for top, I believe it to be
-sound within the CP/GV eco-system such that this variant of CP still leads to
-a valid translation to GV. In a private communication, Philip Wadler echoed
-these remarks but pointed out that this is likely more to do with GV
-\todo{what's another way to say ``too small'' vs. ``too large''}.
+While this diverges with the linear logic rule for top, I believe this variant
+of CP still admits a valid translation from GV. In a private communication,
+Philip Wadler echoed these remarks but pointed out that this is likely because
+the GV-to-CP translation does not require the full expressiveness of CP.
 
 The structural equivalences and commuting conversions have some additional
 complexity not present in the original presentation. For instance, structural
@@ -400,7 +399,7 @@ than one ordering of tactic sequences. feels like two jobs to remove it as
 well as find it. although perhaps extract is not the right term if it doesn't
 remove it
 
-\subsubsection{Top-level Cut Elimination}
+\subsubsection{Top-level Cut Elimination}\label{sec:cutelim}
 
 \begin{figure}
 \begin{coq}
@@ -470,7 +469,7 @@ highlighted that one should be careful and considerate regarding when to use
 dependent types. These issues highlighted that one should take care over the
 representation and its effect on later expressiveness.
 
-\subsection{CPS translation from GV to CP}
+\subsection{CPS translation from GV to CP}\label{sec:trans}
 
 Following the original work by \citeauthor{Wadler:2014}, the translation from
 GV to CP requires defining translations on types and terms of GV, which for

@@ -244,22 +244,43 @@ of the definition presented in \S~\ref{sec:pre} where \lstinline{end} has been
 replaced with $\outend$ and $\inend$. The intention is that $\outend$
 ($\inend$) terminates a session type whose last operation is an output
 (input), and they correspond to the units of the respective linear logical
-connectives \todo{Do I need to elaborate on the translation? Yet another
-  figure?}. CP provides linear logical connectives with session type
-interpretations inspired by
-\citeauthor{Caires:2010:STI}~\cite{Caires:2010:STI} shown in
-Figure~\ref{fig:cptnts} along with the terms of CP. The process calculus CP is
-slightly different to $\pi$DILL by \citeauthor{Caires:2010:STI}, apart from
-being classical in nature, the constructs for server replication are modified:
-CP provides separate weakening and contraction rules whereas these are encoded
-in one rule for process reduction in $\pi$DILL. Additionally, rather than a
+connectives (see \S~\ref{sec:trans}). CP provides linear logical connectives
+with session type interpretations shown in Figure~\ref{fig:cptnts} along with
+the terms of CP.
+
+The process calculus CP is slightly different to $\pi$DILL by
+\citeauthor{Caires:2010:STI}, besides from being classical (rather than
+intuitionistic), the constructs for server replication are modified: CP
+provides separate weakening and contraction rules whereas these are encoded in
+one rule for process reduction in $\pi$DILL. Additionally, rather than a
 two-sided sequent calculus, \citeauthor{Wadler:2014} uses one-sided sequents
 for defining CP, which provides a more intuitive presentation of session type
 duality and a clearer correspondence to a $\lambda$-calculi surface syntax
-like GV. \citeauthor{Wadler:2014} describes a continuation-passing style (CPS)
+like GV.
+
+\input{ccoutput}
+
+Subject reduction in CP proceeds by cut reductions of the logical operators
+against their duals and \textit{commuting conversions}. Commuting conversions
+push a cut inside a logical operator and the intuition is that they permit
+further communication to occur which was guarded by a cut. An example of a
+commuting conversion on output is shown in Figure~\ref{fig:ccoutput}. On the
+left-hand side $R$ can interact with its environment, but commuting the output
+and the cut prevents $R$ from doing this. As explained by
+\citeauthor{Wadler:2014}, the semantics of the rule are either $x$ is bound by
+an outer cut and will be eliminated eventually by cut reduction, or the
+process is blocked waiting for external communication on channel $x$. This
+differs from the lambda calculus where the evaluation strategy is
+deterministic (e.g. left-to-right call-by-value semantics).
+
+\citeauthor{Wadler:2014} describes a continuation-passing style (CPS)
 translation from GV types and terms to CP classical linear logic propositions
-and processes, respectively. As presented, GV does not support all features of
-CP and thus the translation is one way (GV to
+and processes, respectively. Freedom from deadlock within GV is assured
+through the translation of CP and the top-level cut elimination property of CP
+(see \S~\ref{sec:cutelim}).
+
+\citeauthor{Wadler:2014}'s GV does not support all features of CP and thus the
+translation is one way (GV to
 CP). \citeauthor{Lindley:2014:SAP}~\cite{Lindley:2014:SAP} extend GV to
 provide support for polymorphism and replication following a similar CPS
 translation scheme. Lastly,
