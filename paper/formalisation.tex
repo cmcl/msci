@@ -232,7 +232,7 @@ definitions of the typing rules for CP, though it was not obvious at the time.
 Notable examples are the structural rules, weakening and contraction, and
 empty choice.
 
-\textbf{Weakening and Contraction} Initially, an implicit notion of weakening
+\textbf{Weakening and Contraction.} Initially, an implicit notion of weakening
 was chosen so as to be in line with \citeauthor{Wadler:2014}'s
 definitions. However, explicit weakening is required to differentiate the
 principal cut elimination rules for the interactions between servers and
@@ -270,7 +270,7 @@ Lemma in_env_fv:
     x $\in$ dom $\Gamma$ $\iff$ x $\in$ fv_proc P.
 \end{coq}
 
-\textbf{Empty Choice} The empty choice rule may only have a single binding in
+\textbf{Empty Choice.} The empty choice rule may only have a single binding in
 the context (cf. an arbitrary context in \citeauthor{Wadler:2014}'s
 presentation~\cite{Wadler:2014}). Adding an arbitrary environment to the empty
 choice constructor would prohibit \coqe$in_env_fv$ since its process no longer
@@ -514,7 +514,7 @@ several issues were encountered when attempting to specify the
 translation. The graph relation requires much of the clutter present in both
 the \coqe!cp_rule! and \coqe!wt_tm! definition such as linear enviornments and
 cofinite quanitifcation.
-
+\begin{comment}
 i'm not sure about that but what is can i say so for example lets see see no i
 also have to thing about the general guidelines i can be giving for this
 section so we have something to say about guidelines do we yes of course we
@@ -542,7 +542,7 @@ the composite process that is a term not a process but the point still stands
 it will need to be about the term and the splitting is really a duplication of
 the unfortunately the well typed term relation but otherwise i cannot think
 how to reuse or obtain that information for the translation to cp
-
+\end{comment}
 Roughly, the theorm aiming to prove is:
 
 \subsection{Issues and Guidelines}

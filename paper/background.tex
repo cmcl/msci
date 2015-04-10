@@ -213,11 +213,10 @@ effective abstraction layer for the programmer since it does not expose the
 underlying process calculus.
 
 Concurrency is provided by control operators which, respectively, spawn a
-child process and wait for a child process to complete. The spawning process
-creates a channel between parent and child process; a channel is represented
-as a continuation and the type denotes the communication protocol
-(i.e. session type) between parent and child \todo{what part of session type
-  is being discussed here? spawning process or spawning operation?}.
+child process and wait for a child process to complete. The spawning operator
+creates a channel between the parent and child processes; a channel is
+represented by a pair of endpoints with dual types denoting the communication
+protocol (i.e. session type) between parent and child.
 
 \citeauthor{Mazurak:2010:LCC} present proofs for type safety, strong
 normalisation and confluence. Confluence provides the guarantee that no race
