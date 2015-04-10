@@ -310,31 +310,12 @@ Inductive transTm : term -> tenv -> pname -> proc -> Prop :=
 Definition trans_tm M G z := trans_tm' M G nil z.
 
 (** Translation of environments. *)
-Fixpoint trans_env (Φ:tenv) : penv :=
-  match Φ with
-    | nil => nil
-    | (x,a) :: Φ' => (x,¬⟦a⟧t) :: trans_env Φ'
-  end.
+Definition trans_env (Φ:tenv) : penv := map (fun a => ¬⟦a⟧t) Φ.
 
 Lemma unlimited_trans:
   forall T (WF: wf_typ T un),
     exists A, ¬(⟦T⟧t) = (pp_request A).
 Proof. ii; inv WF; eauto. Qed.
-
-Lemma dom_trans:
-  forall Φ, dom (trans_env Φ) = dom Φ.
-Proof. ii; induction Φ; ss; des; auto; []; ss; rewrite IHΦ; auto. Qed.
-
-Lemma uniq_trans:
-  forall Φ (UN: uniq Φ),
-    uniq (trans_env Φ).
-Proof.
-  ii; induction Φ; ss; des; auto.
-  simpl_env. destruct_uniq. apply uniq_app. auto. auto. 
-  unfold disjoint; simpl_env; rewrite dom_trans; fsetdec.
-Qed.
-
-Hint Resolve uniq_trans.
 
 Theorem cps_trans_wt:
   forall Φ M T z P Γ Δ
@@ -345,27 +326,18 @@ Theorem cps_trans_wt:
          (CP: transTm M Φ z P),
     P ⊢cp Γ.
 Proof.
-  ii; gen z P Γ; induction WT; ii. inv CP. 
-  - apply Permutation_sym in PER; applys ignore_env_order PER.
-    simpl_env; eauto.
-  - inv CP.
-    apply Permutation_sym in PER; applys ignore_env_order PER.
-    simpl_env.
-    pick fresh y and apply cp_accept; eauto.
+  ii; gen z P Γ Δ; induction WT; ii; inv CP; destruct_uniq; destruct_notin
+  ; apply Permutation_sym in PER; applys ignore_env_order PER
+  ; apply Permutation_sym in PER; simpl_env in *; unfold trans_env in *.
+  - eauto.
+  - pick fresh y and apply cp_accept; eauto.
     rewrite /open_proc; s; simpl_env; eauto.
-  - inv CP; destruct_uniq; destruct_notin.
-    apply Permutation_sym in PER; applys ignore_env_order PER.
-    simpl_env.
-    forwards EQ: unlimited_trans WFT; inversion_clear EQ as [A EQ'].
+  - forwards EQ: unlimited_trans WFT; inversion_clear EQ as [A EQ'].
     rewrite EQ' in *; clear EQ'.
-    eapply cp_weaken; first eauto.
-    + destruct_uniq; destruct_notin.
-      repeat (apply uniq_push); repeat (apply uniq_app); auto.
-      red; rewrite !dom_trans; simpl_env; fsetdec.
-      simpl_env. rewrite !dom_trans; solve_notin.
-    + apply IHWT.
-
-
-admit.
-  -
+    eapply cp_weaken; try by solve_uniq.
+    eapply IHWT with (z:=z); auto; []; fsetdec.
+  - eapply ignore_env_order; [apply Permutation_app_comm|].
+    pick fresh y and apply cp_input; try (by solve_uniq); []; destruct_notin.
+    applys H Fr.
+    admit.
 Admitted.

@@ -872,6 +872,12 @@ the above form:
       ~ In x s.
     Proof. fsetdec. Qed.
 
+    Lemma test_baydemir_5 :
+      forall (x : elt) (s : t),
+      ~ In x s ->
+      Subset (inter (singleton x) s) empty.
+    Proof. fsetdec. Qed.
+
   End FSetDecideTestCases.
 
 End WDecide_fun.

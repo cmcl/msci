@@ -12,13 +12,6 @@ Require Import Coq.Sorting.Permutation.
 
 Set Implicit Arguments.
 
-(* Find co-finitely quantified hypotheses to specialise. *)
-Ltac find_specializes :=
-  repeat match goal with
-         | [H: forall x, x `notin` ?L -> _, H1: ?y `notin` ?L |- _]
-           => specializes H H1
-         end.
-
 Lemma assoc_1:
   forall P Q R A B Γ
          (LCP: forall x, lc_proc (P ^^ x))
@@ -856,8 +849,53 @@ Theorem proc_sub_red: forall Γ P Q
   Q ⊢cp Γ.
 Proof. ii; gen Γ; induction RED; subst; eauto. Qed.
 
+Require Import Relation_Operators.
+
+Notation "P '==>cp*' Q" := (clos_refl_trans proc proc_red P Q) (at level 68).
+
 Theorem proc_cut_elim:
   forall P Γ
-         (WT: P ⊢cp Γ),    exists Q, P ==>cp Q /\ ~ is_cut Q.
+         (WT: P ⊢cp Γ),
+    exists Q, P ==>cp* Q /\ ~ is_cut Q.
 Proof.
+  ii; induction WT; eauto using rt_refl.
+  pick fresh x; destruct_notin; specializes CPP Fr; destruct P.
+  {
+    rewrite /open_proc in CPP; s in CPP.
+    destruct_all pname; des; substs; repeat injs.
+    - inv CPP; apply (uniq_perm PER0) in UN0; solve_uniq.
+    - inv CPP; simpl_env in *.
+      eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+      extract_bnd x A.
+      rewrite <-app_nil_r in PER0; rewrite app_assoc in PER0
+      ; apply perm_dom_uniq in PER0; [|solve_uniq].
+      s in PER0; apply Permutation_sym,Permutation_length_1_inv in PER0.
+      simpl_env in PER0; substs.
+      specializes H0 Fr; inversion H0 as [Q' IHQ]; des.
+      exists Q'; split; auto.
+      admit.
+    - admit.
+    - admit.
+  }
+  {
+    specializes H Fr; inversion H as [P' IHP]; des.
+    admit.
+  }
+  {
+    rewrite /open_proc in CPP; s in CPP.
+    destruct_all pname; des; substs.
+    - specializes H Fr; inverts H; des. admit.
+    - inverts CPP; simpl fv_proc in *; destruct_notin; simpl_env in *.
+      eapply Permutation_trans in PER0; [|apply Permutation_app_comm].
+      extract_bnd x A.
+      + apply wt_nin_proc in CPQ0; [|solve_notin].
+        forwards LCQ: cp_implies_lc CPQ0.
+        eexists; split; [apply rt_step; apply red_cc_multi_one|]; auto.
+      + pick fresh y; destruct_notin; find_specializes.
+        rewrite /open_proc in CPP0; rewrite~ open_rec_comm in CPP0.
+        apply wt_nin_proc in CPP0; [|solve_notin].
+        forwards LCP: cp_implies_lc CPP0.
+        eexists; split; [apply rt_step; apply red_cc_multi_two|]; auto.
+        admit (* forall x, LC (P1 ^^ x) -- a bit too strong... *).
+  }
 Admitted.
