@@ -448,29 +448,26 @@ definition and provide a predicate for restricting typing rules to consider
 only valid session types. \citeauthor{Wadler:2014} defines GV types as a set
 of mutually recursive definitions; session types are types which may contain
 types as subcomponents (arguments to send, for example). Unfortunately,
-handling mutually inductive definitions in Coq can be quite involved;
+handling mutually inductive definitions in Coq can be quite involved,
 requiring one to either rely on the Coq system to provide a stronger mutual
 induction principle or defining one manually. Such a definition is possible,
 but it complicates applications of the induction principle.
 
-Another issue related to types is how to representing type kinds (linearity or
-non-linearity). Initially the type definition was defined as an indexed
-family, indexed by the kind. While this definition has the advantage of
-preventing certain ill-formed types, such as a non-linear session type, it
-complicated later definitions and proofs. For instance, the decidability of
-equality on types now relied on an axiom permitting heterogeneous
-equality~\cite{??}. Generally, it is better to avoid unnecessary postulates if
-possible. Further, when formulating the typing judgements the kind must be
-given to each type hypothesised and most rules (e.g. ...) are polymorphic in
-the kind, motivating an awkward inspection function to be applied per
-application of a constructor \todo{clean this description up}. A solution to
-this was to define a well-formed type relation and do away with the type
-dependency. these issues highlighted that one should be careful and
-considerate regarding when to use dependent types. these issues highlighted
-that one should be careful and considerate how the representation will affect
-later expressiveness.
-
-similar infrastructure for gv required as for cp copy and paste job
+Another issue related to types is how to represent type kinds, linear and
+unlimited kind. Initially the type definition was indexed by the kind and
+while this definition has the advantage of preventing certain ill-formed
+types, such as a non-linear session type, it complicated later definitions and
+proofs. For instance, the decidability of equality on types now relied on an
+axiom permitting heterogeneous equality~\cite{McBride:1999}. Generally, it is
+better to avoid unnecessary postulates if possible. Further, when formulating
+the typing rules, the kind must be given to each type hypothesised and most
+rules (e.g. \coqe!wt_tm_labs!) are polymorphic in the kind, requring an
+awkward kind inspection function to be applied to each type within a
+binding. The alternative approach taken was to define a well-formed type
+relation and remove the kind index from the type definition. These issues
+highlighted that one should be careful and considerate regarding when to use
+dependent types. These issues highlighted that one should take care over the
+representation and its effect on later expressiveness.
 
 \subsection{CPS translation GV to CP}
 
