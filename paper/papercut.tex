@@ -1,0 +1,13 @@
+\begin{figure}
+\[\colored
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+  &
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dualbt{A}}
+}{Cut}{
+  \tm{\nu x \of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
+}
+\]
+\caption{Informal cut rule}
+\label{fig:papercut}
+\end{figure}

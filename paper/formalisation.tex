@@ -108,12 +108,7 @@ stage.
 \subsection{The process calculus CP}\label{sec:cp}
 
 \input{cp}
-
-\begin{comment}
-FIGURES
-
-equivalences and axiomatic cut
-\end{comment}
+\input{papercut}
 
 Figure~\ref{fig:cll} presents the well-typed process relation for CP as an
 inductive type in Coq. Each typing rule in CP is represented as a constructor
@@ -131,9 +126,13 @@ corresponds to replacing de Bruijn index 0 with \coqe!x!. Bound variables are
 represented using de Bruijn indices and free variables are represented using
 an abstract type, \coqe$atom$, provided by the Metatheory library. The rules
 with binders specify the type of a bound variable in the constructor rather
-than a name. Note that the rules for polymorphism, $\exists$ and $\forall$,
-were not included in the final Coq development since GV (\S~\ref{sec:gv}) does
-not support polymorphism making the rules unnecessary for the
+than a name. As an illustrative example of the differences between the Coq
+encoding of the rules and the paper presentation consider the pen-and-paper
+version of the cut rule shown in Figure~\ref{fig:papercut}.
+
+Note that the rules for polymorphism, $\exists$ and $\forall$, were not
+included in the final Coq development since GV (\S~\ref{sec:gv}) does not
+support polymorphism making the rules unnecessary for the
 translation. Further, as noted by \citeauthor{Lee:2012}, support for
 polymorphism in type variables creates an explosion of the infrastructure
 requiring additional of opening and substituting definitions and lemmas.
