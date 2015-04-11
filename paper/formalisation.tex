@@ -451,15 +451,16 @@ seems excessive for the GV let rule and the only rule to benefit from multiple
 binders. For that reason, the simple solution of performing two openings was
 chosen.
 
-On a more technical note, all types are amalgamated into one inductive
-definition and provide a predicate for restricting typing rules to consider
-only valid session types. \citeauthor{Wadler:2014} defines GV types as a set
-of mutually recursive definitions; session types are types which may contain
-types as subcomponents (arguments to send, for example). Unfortunately,
-handling mutually inductive definitions in Coq can be quite involved,
-requiring one to either rely on the Coq system to provide a stronger mutual
-induction principle or defining one manually. Such a definition is possible,
-but it complicates applications of the induction principle.
+All types are amalgamated into one inductive definition and provide a
+predicate for restricting typing rules to consider only valid session
+types. As shown in \S~\ref{sec:...}, \citeauthor{Wadler:2014} defines GV types
+as a set of mutually recursive definitions. Unfortunately, handling mutually
+inductive definitions in Coq can be quite involved, requiring one to either
+rely on the Coq system to provide a stronger mutual induction principle or
+define one manually. Such a definition is possible, but it complicates
+applications of the induction principle.
+
+\input{wft}
 
 Another issue related to types is how to represent type kinds, linear and
 unlimited kind. Initially the type definition was indexed by the kind and
@@ -469,10 +470,13 @@ proofs. For instance, the decidability of equality on types now relied on an
 axiom permitting heterogeneous equality~\cite{McBride:1999}. Generally, it is
 better to avoid unnecessary postulates if possible. Further, when formulating
 the typing rules, the kind must be given to each type hypothesised and most
-rules (e.g. \coqe!wt_tm_labs!) are polymorphic in the kind, requring an
-awkward kind inspection function to be applied to each type within a
-binding. The alternative approach taken was to define a well-formed type
-relation and remove the kind index from the type definition. These issues
+rules are polymorphic in the kind, requring an awkward kind inspection
+function to be applied to each type within a binding. The alternative approach
+taken was to define a well-formed type relation and remove the kind index from
+the type definition. Figure~\ref{fig:wft} shows the well-formedness for the
+linear function type. Notice, that even though the conclusion must have linear
+kind, as in rule \coqe!wt_tm_labs!, the argument and result types can have any
+kind, highlighting the aforementioned kind polymorphism. These issues
 highlighted that one should be careful and considerate regarding when to use
 dependent types. These issues highlighted that one should take care over the
 representation and its effect on later expressiveness.
