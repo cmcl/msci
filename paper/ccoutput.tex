@@ -1,0 +1,49 @@
+\begin{figure*}
+\[\colored
+\begin{array}{c}
+
+\multicolumn{1}{l}{(\kappa_{\otimes1})}\filler \\
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+    }{\otimes}{
+      \tm{x[y].(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}A \otimes B \comma \tmof{z}C}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+\quad \becomes \hfill \\~\\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(P \mid R)} \tpvdash
+        \tp{\Gamma \comma \Theta \comma \tmof{y}A}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+  }{\otimes}{
+    \tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+
+\end{array}
+\]
+
+\caption{Commuting conversion for output}
+\label{fig:ccoutput}
+\end{figure*}
