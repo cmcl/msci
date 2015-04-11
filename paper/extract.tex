@@ -1,0 +1,23 @@
+\begin{figure}
+\begin{coq}
+Ltac extract_bnd x A :=
+  match goal with
+    | [H: Permutation (_++x$\sim$A) ?F |- _] =>
+      let BNDS := fresh "BNDS" in
+      forwards$\sim$ BNDS: Perm_binds x A H
+      ; analyze_binds_uniq BNDS
+      ; try (by applys$\sim$ uniq_perm H)
+      ; try (match goal with
+               | [H: binds x A ?E |- _] =>
+                 let E1 := fresh "E1" in
+                 let E2 := fresh "E2" in
+                 let EQ := fresh "EQ" in
+                 apply binds_env_split in H
+                 ; inversion_clear H as (E1 & E2 & EQ)
+                 ; substs$\sim$; des_reqs
+             end)
+  end.
+\end{coq}
+\caption{Tactic finds binding in permutation RHS}
+\label{fig:extract}
+\end{figure}
