@@ -1,11 +1,43 @@
-\begin{figure}
+\begin{figure*}
+\begin{tabular*}{\textwidth}{lc}
 \begin{coq}
 Lemma reduce_spawn:
   forall P Q A dA $\Gamma$
          (DUA: dual_props A dA)
          (WT: $\nu$ !A.(!0(A).P $\mid$ ?0[dA].Q) $\tpcp$ $\Gamma$),
     $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$.
-\end{coq}
-\caption{Cut of server against client request.}
+\end{coq} &
+\begin{math}
+\begin{array}{c}
+\colored
+\inference{
+  \inference{
+    \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+  }{!}{
+    \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
+  }
+  &
+  \inference{
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}\dualbt{A}}
+  }{?}{
+    \tm{?x[y].Q} \tpvdash \tp{\Delta \comma \tmof{x}{?\dualbt{A}}}
+  }
+}{}{
+  \tm{\nu x \Of{!A}.(!x(y).P \mid {?x[y].Q})} \tpvdash
+    \tp{{?\Gamma} \comma \Delta}
+}
+\becomes
+\inference{
+  \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+  \\
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}\dualbt{A}}
+}{}{
+  \tm{\nu y\Of{A}.(P \mid Q)} \tpvdash \tp{{?\Gamma} \comma \Delta}
+}
+\end{array}
+\end{math}
+\end{tabular*}
+\caption{Cut of server against client request: Coq version (left) and
+  \citeauthor{Wadler:2014}'s version (right).}
 \label{fig:principal}
-\end{figure}
+\end{figure*}

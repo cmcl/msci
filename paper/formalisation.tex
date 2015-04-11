@@ -382,7 +382,7 @@ sort of reasoning, separating the work out into a tactic appears
 beneficial. Indeed, Ltac is well-suited for this type of work, searching the
 context and manipulating hypotheses of a particular form. The Ltac script in
 Figure~\ref{fig:extract} does the job and after executing
-\coqe!extract_bnd y A! \key{PER0} becomes:
+\coqe!extract_bnd y A!, \key{PER0} becomes:
 \begin{coq}
 Permutation ($\GD$P++y$\sim$A) (x$\sim$B$\otimes$C++E1++y$\sim$A++E2++$\GD$Q0)
 \end{coq}
