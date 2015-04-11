@@ -434,6 +434,7 @@ apply a principal cut rule.
 \subsection{The functional language GV}\label{sec:gv}
 
 \input{gv}
+\input{letscompare}
 
 The typing judgements for the functional language GV are shown in
 Figure~\ref{fig:gv}. Note that I have altered the $n$-ary branch and choice
@@ -442,8 +443,13 @@ formulations. The change is not restrictive however, since CP itself provides
 only binary versions of plus ($\oplus$) and with ($\with$)
 constructs. Explicit limiting and unlimiting of abstraction was chosen to
 enable the inclusion of these rules in the translation from GV to CP, which is
-performed by induction on GV terms. \todo{could take about opening the
-  multiple binder let. multi but not as in literature}
+performed by induction on GV terms and is therefore
+syntax-directed. Figure~\ref{fig:letscompare} presents the informal version of
+the well-typed let rule. While \citeauthor{Char:2012} suggests a two-indices
+approach for handling for multiple binders~\cite{Char:2012}, such a strategy
+seems excessive for the GV let rule and the only rule to benefit from multiple
+binders. For that reason, the simple solution of performing two openings was
+chosen.
 
 On a more technical note, all types are amalgamated into one inductive
 definition and provide a predicate for restricting typing rules to consider
