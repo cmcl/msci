@@ -20,10 +20,20 @@
   \\ \\
   \tag{\key{Terms}}
   \begin{array}{rclc}
-    L,M,N & \bnf & x          & \key{identifier}\\
-          & \alt & \key{unit} & \key{unit constant}\\
-          & \alt & \abs{x}{N} & \key{function abstraction}\\
-          & \alt & \cdots     &
+    L,M,N & \bnf & x                    & \key{identifier}\\
+          & \alt & \key{unit}           & \key{unit constant}\\
+          & \alt & \abs{x}{N}           & \key{function abstraction}\\
+          & \alt & LM                   & \key{function application}\\
+          & \alt & \pair{M}{N}          & \key{construct a pair}\\
+          & \alt & \Letpair{x}{y}{M}{N} & \key{destruct a pair}\\
+          & \alt & \send{M}{N}          & \key{send value M on channel N}\\
+          & \alt & \receive{M}          & \key{receive from channel M}\\
+          & \alt & \select{l}{M}        & \key{select label l on channel M}\\
+          & \alt & \cse{M}{\set{l_i:x.N_i}_{i \in I}}
+                                        & \key{offer choice on channel M}\\
+          & \alt & \key{with}~x~\key{connect}~M~\key{to}~N
+                                        & \key{connect M to N by channel x}\\
+          & \alt & \key{terminate}~M    & \key{terminate input}
   \end{array}
 \end{gather*}
 \caption{GV Types and Terms}
