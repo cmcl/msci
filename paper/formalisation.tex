@@ -422,14 +422,31 @@ Unfortunately, the theorem has eluded attempts at mechanised proof so far. The
 hypothesis of a well-typed process \coqe$P$ is not sufficient to prove the
 theorem. For instance, the \coqe$cp_cut$ constructor does not ensure that
 there is a duality relationship between the subprocesses. Following informal
-proofs, it is likely to require a termination measure involving the length of
-the derivation is needed. Additionally, the locally nameless representation
-creates subgoals for which it is not clear how to prove. For instance, a
-commuting conversion is only defined if the logical operator corresponds to a
-free variable but induction on \key{WT} yields two cases one of which applies
-the logical operator to the top-level cut variable. Since there is no
-relationship between the subprocesses, in general it will not be possible to
-apply a principal cut rule.
+proofs, it initially seemed likely that the proof required a termination
+measure involving the length of the derivation. However due to the
+difficulties in trying to prove the above rule some doubt was
+seeded. additionally previous attempts in the literature formalised cut
+elimination using a deep embedding perhaps an alternative formulation of the
+reduction relation as a deep embedding expressed using derivations would
+permit progress on the proof but this particular avenue is left for future
+work
+
+Formalised efforts for proving cut elimination for other logics have adopted a
+deep embedding~\cite{??,??,??}, where sequents and derivations are represented
+explicitly rather than just the conclusion as in the shallow embedding adopted
+here. It is unclear whether the cut elimination theorem can be rescued in the
+current setting or not, but previous work suggests it is better to use other
+approaches. It is worth noting that \citeauthor{Tews:2013}'s Coq development
+significant; about 36,000 lines.
+
+the locally nameless
+representation creates subgoals for which it is not clear how to prove. For
+instance, a commuting conversion is only defined if the logical operator
+corresponds to a free variable, but induction on \key{WT} yields two cases one
+of which applies the logical operator to the top-level cut variable and since
+there is no relationship between the subprocesses, in general it will not be
+possible to apply a principal cut rule.
+
 
 \subsection{The functional language GV}\label{sec:gv}
 
