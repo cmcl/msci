@@ -425,8 +425,7 @@ operate dually on the bound variable. The condition is required after
 induction on \key{WT} yields a goal similar to the following:
 \begin{coq}
 exists R, ($\nu$A.([B]0.($P_1$ $\mid$ $P_2$) $\mid$ Q)) $\becomes^\star$ R
-               /\   
-          (is_cut R -> False)
+          /\ (is_cut R -> False)
 \end{coq}
 
 The left subprocess has been destructed to a logical operator which operates
@@ -442,7 +441,7 @@ derivations represented explicitly as
 trees~\cite{Tews:2013,Dawson:2010,Dawson:2002}. Whereas, in the approach taken
 here, that information is limited and ephemeral in that it is only available
 during the proving of a derivation e.g. a reduction lemma. It is future work
-to investigate these and other strategies which will assist in proving
+to investigate these and other strategies which will assist in formalising
 cut-elimination for CP.
 
 \subsection{The functional language GV}\label{sec:gv}
