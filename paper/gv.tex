@@ -3,51 +3,50 @@
 Inductive wt_tm : tenv -> term -> typ -> Prop :=
   | wt_tm_id : forall k T x (WFT: wf_typ T k), x$\sim$T $\tpvdash$ x$\of{T}$
   | wt_tm_labs : forall L $\Phi$ T U M (WF: wf_typ ($T\lolli{}U$) lin)
-        (WT: forall (x:atom),
-                     x$\notin$L ->
-                     x$\sim$T ++ $\Phi$ $\tpvdash$ (open M x)$\of{U}$),
-                   $\Phi$ $\tpvdash$ tm_abs T M$\of{T\lolli{}U}$
+        (WT: forall (x:atom) (NL: x $\notin$ L),
+               x $\sim$ T ++ $\Phi$ $\tpgv$ (open M x)$\of{U}$),
+      $\Phi$ $\tpvdash$ tm_abs T M$\of{T\lolli{}U}$
   | wt_tm_lapp : forall $\Phi$ $\Psi$ T U M N (WF: wf_typ (T $\lolli$ U) lin)
-        (WTM: $\Phi$ $\tpvdash$ M$\of{T \lolli U}$)
-        (WTN: $\Psi$ $\tpvdash$ N$\of{T}$),
-      $\Phi$ ++ $\Psi$ $\tpvdash$ (tm_app M N)$\of{U}$b
+        (WTM: $\Phi$ $\tpgv$ M$\of{T \lolli U}$)
+        (WTN: $\Psi$ $\tpgv$ N$\of{T}$),
+      $\Phi$ ++ $\Psi$ $\tpgv$ (tm_app M N)$\of{U}$
   | wt_tm_iabs : forall $\Phi$ T U M
         (WF: wf_typ ($\fn{T}{U}$) un)
         (UN: uniq $\Phi$)
-        (WT: $\Phi$ $\tpvdash$ M$\of{\fn{T}{U}}$)
+        (WT: $\Phi$ $\tpgv$ M$\of{\fn{T}{U}}$)
         (UL: un_env $\Phi$),
-                  $\Phi$ $\tpvdash$ $\lambda$! M $\of{\fn{T}{U}}$
+                  $\Phi$ $\tpgv$ $\lambda$! M $\of{\fn{T}{U}}$
   | wt_tm_let :
-      forall (L:atoms) $\Phi$ $\Psi$ kv T U V M N
+      forall L $\Phi$ $\Psi$ kv T U V M N
         (WF: wf_typ (T $\otimes$ U) lin) (WFV: wf_typ V kv)
         (WTM: $\Phi$ $\tpvdash$ M$\of{\tensor{T}{U}}$)
         (WTN: forall (x y:atom)
-                     (XL: x$\notin$L)
-                     (YL: y$\notin$L `union` singleton x),
+                     (XL: x $\notin$ L) (YL: y $\notin$ L $\cup$ $\set{x}$),
                 x$\sim$T++y$\sim$U++$\Psi$ $\tpvdash$ ($\open{1}{x}{\open{0}{y}{N}}\of{V}$),
       $\Phi$ ++ $\Psi$ $\tpvdash$ (tm_let T U M N)$\of{V}$
   | wt_tm_send : forall $\Phi$ $\Psi$ M T N S
         (WF: wf_typ ($\outpt{T}{S}$) lin)
-        (WTM: $\Phi$ $\tpvdash$ M:T) (WTN: $\Psi$ $\tpvdash$ N:! T # S),
-      $\Phi$ ++ $\Psi$ $\tpvdash$ tm_send M N:S
+        (WTM: $\Phi$ $\tpgv$ M$\of{T}$)
+        (WTN: $\Psi$ $\tpgv$ N$\of{\outpt{T}{S}}$),
+      $\Phi$ ++ $\Psi$ $\tpgv$ tm_send M N$\of{S}$
   | wt_tm_recv : forall $\Phi$ M T S (WF: wf_typ ($\inpt{T}{S}$) lin)
-                        (WT: $\Phi$ $\tpvdash$ M$\of{\inpt{T}{S}}$),
-                   $\Phi$ $\tpvdash$ tm_recv M$\of{\tensor{T}{S}}$
-  | wt_tm_l_select : forall $\Phi$ M S1 S2
-        (WF: wf_typ (S1 $\oplus$ S2) lin)
-        (WT: $\Phi$ $\tpvdash$ M:(S1 $\oplus$ S2)),
-      $\Phi$ $\tpvdash$ tm_select lb_inl M:S1
-  | wt_tm_connect : forall (L:atoms) $\Phi$ $\Psi$ M N S S' kt T
+                        (WT: $\Phi$ $\tpgv$ M$\of{\inpt{T}{S}}$),
+                   $\Phi$ $\tpgv$ tm_recv M$\of{\tensor{T}{S}}$
+  | wt_tm_l_select : forall $\Phi$ M $S_1$ $S_2$
+        (WF: wf_typ ($S_1~\oplus~S_2$) lin)
+        (WT: $\Phi$ $\tpgv$ M$\of{S_1~\oplus~S2}$),
+      $\Phi$ $\tpgv$ tm_select lb_inl M$\of{S1}$
+  | wt_tm_connect : forall L $\Phi$ $\Psi$ M N S S' kt T
         (DU: are_dual S S')
         (WF: wf_typ T kt)
-        (WTM: forall (x:atom) (NL: x$\notin$L),
-                x$\sim$S ++ $\Phi$ $\tpvdash$ (open M x):typ_oend)
-        (WTN: forall (x:atom) (NL: x$\notin$L),
-                x$\sim$S' ++ $\Psi$ $\tpvdash$ (open N x):T),
-      $\Phi$ ++ $\Psi$ $\tpvdash$ (tm_connect S M N):T
-  | wt_tm_end : forall $\Phi$ M (WT: $\Phi$ $\tpvdash$ M:typ_iend),
-                  $\Phi$ $\tpvdash$ tm_end M$\of{\tm{unit}}$
-where "$\Phi$ $\tpvdash$ t$\of{T}$" := (wt_tm $\Phi$ t T) : gv_scope.
+        (WTM: forall (x:atom) (NL: x $\notin$ L),
+                x $\sim$ S ++ $\Phi$ $\tpgv$ (open M x) : typ_oend)
+        (WTN: forall (x:atom) (NL: x $\notin$ L),
+                x $\sim$ S' ++ $\Psi$ $\tpgv$ (open N x)$\of{T}$),
+      $\Phi$ ++ $\Psi$ $\tpgv$ (tm_connect S M N)$\of{T}$
+  | wt_tm_end : forall $\Phi$ M (WT: $\Phi$ $\tpgv$ M : typ_iend),
+                  $\Phi$ $\tpgv$ tm_end M : unit
+where "$\Phi$ $\tpgv$ t$\of{T}$" := (wt_tm $\Phi$ t T) : gv_scope.
 \end{coq}
 \caption{GV well-typed terms encoding (selected rules)}
 \label{fig:gv}

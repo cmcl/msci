@@ -250,7 +250,7 @@ Inductive transTm : term -> tenv -> pname -> proc -> Prop :=
       forall T U M N P Q G H z
              (INFM: inferTy M G T)  (INFN: inferTy N H U)
              (TRM: transTm M G 0 P) (TRN: transTm N H 0 Q),
-        transTm (tm_app M N) (G++H) z (ν ⟦T⟧t → P ‖ [⟦T⟧t]0 → Q ‖ 1 ⟷ z)
+        transTm (tm_app M N) (G++H) z (ν ⟦T⟧t → P ‖ [⟦U⟧t]0 → Q ‖ 1 ⟷ z)
   | trans_pair:
       forall T M N P Q G H z
              (INFM: inferTy M G T)
@@ -287,6 +287,7 @@ Inductive transTm : term -> tenv -> pname -> proc -> Prop :=
   | trans_case:
       forall L S1 S2 M NL NR P QL QR G H z
              (INFM: inferTy M G (S1 <&> S2))
+             (TRM: transTm M G 0 P)
              (TRNL: forall x (NIN: x `notin` L),
                        transTm (open NL x) (x ~ S1 ++ H) z QL)
              (TRNR: forall x (NIN: x `notin` L),
@@ -338,5 +339,6 @@ Proof.
     eapply IHWT with (z:=z); auto; []; fsetdec.
   - eapply ignore_env_order; [apply Permutation_app_comm|].
     pick fresh y and apply cp_input; try (by solve_uniq); []; destruct_notin.
+    eapply H.
     admit.
 Admitted.
