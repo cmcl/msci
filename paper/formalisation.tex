@@ -133,7 +133,7 @@ included in the final Coq development since GV (\S~\ref{sec:gv}) does not
 support polymorphism making the rules unnecessary for the
 translation. Further, as noted by \citeauthor{Lee:2012}, support for
 polymorphism in type variables creates an explosion of the infrastructure
-requiring additional of opening and substituting definitions and lemmata.
+requiring additional open and substitution definitions and related lemmata.
 
 Formalising the process calculus CP provided many challenges for the
 Metatheory library since to my knowledge, the library has never been applied
@@ -524,15 +524,19 @@ which communicates the result of the translation (a CP process). Due to the
 locally nameless representation, the translation of GV terms required a
 procedure to infer the type of terms in order to specify the binding type for
 the corresponding CP process. An example, translating choice, is shown in
-Figure~\ref{fig:trans}, note that I am using \citeauthor{Wadler:2014}'s style
-but using an LNCQ notation for clarity. In order to construct the cut and
-output processes, the type of \tm{M} and \tm{N} must be computed. So, the
-translation takes the environment, in which the term is typed, as an argument
-to query the type of free variables. Unfortunately, this query returns a type
-of \coqe!option typ!  (\coqe!option! is equivalent to \tm{Maybe} in Haskell)
-since it may not be found, but in fact since only well-typed GV terms are
-translated it is guaranteed to return something!  Therefore, the definition is
-unnecessarily cluttered with impossible error cases.
+Figure~\ref{fig:trans}, unfortunately this definition is wrong because the
+process P is not being opened and therefore during the proof we are unable to
+reason about the typability of P opened with a sufficiently fresh variable the
+reason is that P is a subprocess and therefore is not locally closed note that
+I am using \citeauthor{Wadler:2014}'s style but using an LNCQ notation for
+clarity. In order to construct the cut and output processes, the type of
+\tm{M} and \tm{N} must be computed. So, the translation takes the environment,
+in which the term is typed, as an argument to query the type of free
+variables. Unfortunately, this query returns a type of \coqe!option typ!
+(\coqe!option! is equivalent to \tm{Maybe} in Haskell) since it may not be
+found, but in fact since only well-typed GV terms are translated it is
+guaranteed to return something!  Therefore, the definition is unnecessarily
+cluttered with impossible error cases.
 
 The term translation was initially designed using a monadic approach to
 account for the possible error cases in retreiving names from the
@@ -595,15 +599,27 @@ translation is also defined separately. Load time is considerably improved and
 the consequences of a crash are mitigated.
 
 \textbf{Representation.} As discussed in the previous sections representation
-choice is a central issue in formalising programming language
+choice is a central issue when formalising programming language
 metatheory. Decisions on how to define, for instance, types, calculi and
 translations impact on future definitions and properties dependent on
-them. Considerations range from exploiting the full expressivity of the
-theorem prover by using dependent types in the case of Coq. to how to encode
-the properties of interest and being able to assess accurately the most
-fruitful encoding upfront. avoiding features that would provide a more faitful
-relationship between formal and informal systems is desirable if those
-features would unnecessarily complicated the reasoning. it is a tradeoff.
+them. Considerations range from how much expressive power provided by the
+theorem prover to exploit to the choice of encoding to use for the properties
+of interest. Some of these decisions may impact the correspondence between the
+formal and informal systems e.g. the empty choice rule and omission of
+contraction in CP, and the omission of n-ary branch and choice from GV, and
+such things are necessarily a tradeoff between simplicity and
+adequacy.
+
+Interplay between different decisions is an additional factor to consider. For
+example, the representation choice for linearity makes environment splitting
+non-deterministic. Applying inversion on well-typed process terms requires, in
+some cases such as \coqe!assoc_1!, to enforce a certain split between
+subprocesses. The choice of LNCQ representation forces a local closure
+assumption in these cases. Alternative representations for the CP calculus,
+such as separating the rules (link, cut, etc.) from the derivations
+(associativity, reductions, etc.)~\cite{Tews:2013,Dawson:2010,Dawson:2002},
+may ameliorate the handling of linearity by allowing one to explicate the
+particular splitting for a derivation.
 
 \textbf{Library reuse.} One of the design goals of the development was to
 reuse existing libraries wherever possible. Two such instances proved
@@ -630,7 +646,7 @@ $\nu$ A.(P $\mid$ $\nu$ B.($\open{0}{1}{Q}$ $\mid$ R)) $\tpcp$ $\Gamma$
 In order to proceed with proving the goal, it is necessary to show that
 $\GD$P0++$\GD$Q0 is unique. The proof follows from \key{PER} and \key{UN} upon
 application of an appropriate lemma, and there are two possible ways to prove
-this using plain Coq. One way is to apply the lemma to one of \key{PER} and
+this using plain Coq. One way is to apply the lemma to one of \key{PER} or
 \key{UN} thereby replacing the chosen hypothesis with the conclusion of the
 lemma (termed \textit{forward reasoning}). The opposite of forward reasoning,
 namely backward reasoning, does not apply since the goal has nothing to do
@@ -640,7 +656,7 @@ goal (the asserted goal) which may then be tackled using tactics in the
 standard way. Unfortunately, this approach requires the explicit writing of
 the goal, namely \coqe!uniq ($\GD$P0++$\GD$Q0)!, into the proof script of the
 lemma cluttering the proof script sensitive to change because \coqe!$\GD$P0!
-and \coqe!$\GD$Q0! are emphemeral names introduced by prover.
+and \coqe!$\GD$Q0! are ephemeral names introduced by prover.
 
 The \coqe!forwards! tactic avoids the problem of explicit names by allowing
 the uniqueness property to be proven succiently:
@@ -655,18 +671,9 @@ reduced the dependencies on introduced names. The improvement is more
 pronounced in cases where the goal is particularly long involving many
 variables from the context.
 
-\textbf{Linear environments.} Linearity create issues with typing some
-examples; the splitting of the environment was non-deterministic so required
-side-conditions to enforce a certain splitting of binders. For example the
-rule for associativity of cut. \todo{how to handle? is there a better way?}
-
 \textbf{Effective Automation.} It is worth considering situations where
 automation would simplify proofs. Automation is already an important
-consideration in the interactive theorem proving community. Base rules and
-rules with binders required permutation assumptions to allow any ordering of
-the constituent contexts. a lot of the proofs for well-typed reductions
-involved small amounts of permuting environments which were largely similar
-across the proofs. while some simple lemmata and tactics where created to
-handle the most tedious elements these did not make effective use of
-hypotheses from the context. Improved proof search for permutations is
-required to simplify such developments.
+consideration in the interactive theorem proving community. Examples of
+automation from the current development have been highlighted, but particular
+emphasis should be placed on tactics involving non-trivial proof search of the
+context because these tend to be more widely applicable.
