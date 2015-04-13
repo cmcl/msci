@@ -458,20 +458,19 @@ constructs. Explicit limiting and unlimiting of abstraction was chosen to
 enable the inclusion of these rules in the translation from GV to CP, which is
 performed by induction on GV terms and is therefore
 syntax-directed. Figure~\ref{fig:letscompare} presents the informal version of
-the well-typed let rule. While \citeauthor{Char:2012} suggests a two-indices
-approach for handling for multiple binders~\cite{Char:2012}, such a strategy
+the well-typed let rule. While \citeauthor{Char:2012} suggests using
+two-indices for handling multiple binders~\cite{Char:2012}, such a strategy
 seems excessive for the GV let rule and the only rule to benefit from multiple
 binders. For that reason, the simple solution of performing two openings was
 chosen.
 
-All types are amalgamated into one inductive definition and provide a
-predicate for restricting typing rules to consider only valid session
-types. As shown in \S~\ref{sec:fusion}, \citeauthor{Wadler:2014} defines GV
-types as a set of mutually recursive definitions. Unfortunately, handling
-mutually inductive definitions in Coq can be quite involved, requiring one to
-either rely on the Coq system to provide a stronger mutual induction principle
-or define one manually. Such a definition is possible, but it complicates
-applications of the induction principle.
+As shown in \S~\ref{sec:fusion}, \citeauthor{Wadler:2014} defines GV types as
+a set of mutually recursive definitions. Unfortunately, handling mutually
+inductive definitions in Coq can be quite involved, requiring one to either
+rely on the Coq system to provide a stronger mutual induction principle or
+define one manually. Such a definition is possible, but it complicates
+applications of the induction principle. Therefore, all types are amalgamated
+into one inductive definition.
 
 \input{wft}
 
@@ -489,10 +488,12 @@ taken was to define a well-formed type relation and remove the kind index from
 the type definition. Figure~\ref{fig:wft} shows the well-formedness for the
 linear function type. Notice, that even though the conclusion must have linear
 kind, as in rule \coqe!wt_tm_labs!, the argument and result types can have any
-kind, highlighting the aforementioned kind polymorphism. These issues
-highlighted that one should be careful and considerate regarding when to use
-dependent types. These issues highlighted that one should take care over the
-representation and its effect on later expressiveness.
+kind, highlighting the aforementioned kind polymorphism. An additional
+predicate was defined to ensure typing rules consider only valid session
+types. The predicate appears in the well-formedness constructors for session
+types, ensuring the continuation is a session type and not, for example, a
+linear function type. These issues highlight that one should be mindful of the
+chosen representation and its effect on later expressiveness.
 
 \subsection{CPS translation from GV to CP}\label{sec:trans}
 
