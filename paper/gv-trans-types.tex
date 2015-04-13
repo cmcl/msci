@@ -1,0 +1,20 @@
+\begin{figure}
+\begin{coq}
+Fixpoint trans_types (T:typ) : prop :=
+  match T with
+    | !A.B => $\dualbt{\sem{A}t}$ $\parr$ $\sem{B}$t
+    | ?A.B => $\sem{A}t$ $\otimes$ $\sem{B}$t
+    | A $\oplus$ B => $\sem{A}$t $\with$ $\sem{B}$t
+    | A $\with$ B => $\sem{A}$t $\oplus$ $\sem{B}$t
+    | typ_oend => pp_bot
+    | typ_iend => pp_one
+    | A $otimes$ B => $\sem{A}$t $\otimes$ $\sem{B}$t
+    | A $\lolli$ B => $\dualbt{\sem{A}t}$ $\parr$ $\sem{B}$t
+    | A $\to$ B => !($\dualbt{\sem{A}t}$ $\parr$ $\sem{B}$t)
+    | typ_unit => !$\top$
+  end
+where "`$\llbracket$' T `$\rrbracket$t'" := (trans_types T).
+\end{coq}
+\caption{GV type translation}
+\label{fig:typtrans}
+\end{figure}

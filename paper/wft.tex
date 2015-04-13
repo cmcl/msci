@@ -1,0 +1,13 @@
+\begin{figure}
+\begin{coq}
+Inductive wf_typ : typ -> kind -> Prop :=
+  | $\ldots$
+  | wf_labs : forall kt ku T U
+                     (WFT: wf_typ T kt)
+                     (WFU: wf_typ U ku),
+                wf_typ (T $\lolli$ U) lin
+  | $\ldots$
+\end{coq}
+\caption{Well-formed linear function type}
+\label{fig:wft}
+\end{figure}

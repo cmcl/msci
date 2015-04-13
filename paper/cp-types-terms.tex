@@ -1,38 +1,39 @@
 \begin{figure*}
 \begin{gather*}
+\colored
   \tag{\key{Propositions},\key{Processes}}
   \begin{array}{rclc}
-    A,B,C & \bnf & X & \key{propositional variable (prop. var)}\\
-          & \alt & \dualbt{X} & \key{dual of a prop. var}\\
-          & \alt & A \otimes B & \key{times: output A then behave as B}\\
-          & \alt & A \parr B & \key{par: input A then behave as B}\\
-          & \alt & A \oplus B & \key{plus: select from A or B}\\
-          & \alt & A \with B & \key{with: offer choice of A or B}\\
-          & \alt & ! A & \key{server accept}\\
-          & \alt & ? A & \key{client request}\\
-          & \alt & \exists X . B & \key{output a type}\\
-          & \alt & \forall X . B & \key{input a type}\\
-          & \alt & 1 & \key{unit for $\otimes$}\\
-          & \alt & \bot & \key{unit for $\parr$}\\
-          & \alt & 0 & \key{unit for $\oplus$}\\
-          & \alt & \top & \key{unit for $\with$}
+    \tp{A,B,C} & \bnf & \tp{X} & \key{propositional variable (prop. var)}\\
+          & \alt & \tp{\dualbt{X}} & \key{dual of a prop. var}\\
+          & \alt & \tp{A \otimes B} & \key{times: output A then behave as B}\\
+          & \alt & \tp{A \parr B} & \key{par: input A then behave as B}\\
+          & \alt & \tp{A \oplus B} & \key{plus: select from A or B}\\
+          & \alt & \tp{A \with B} & \key{with: offer choice of A or B}\\
+          & \alt & \tp{! A} & \key{server accept}\\
+          & \alt & \tp{? A} & \key{client request}\\
+          & \alt & \tp{\exists X . B} & \key{output a type}\\
+          & \alt & \tp{\forall X . B} & \key{input a type}\\
+          & \alt & \tp{1} & \key{unit for $\otimes$}\\
+          & \alt & \tp{\bot} & \key{unit for $\parr$}\\
+          & \alt & \tp{0} & \key{unit for $\oplus$}\\
+          & \alt & \tp{\top} & \key{unit for $\with$}
   \end{array}
   \qquad
   \begin{array}{rclc}
-    P,Q,R & \bnf & w \link x & \key{link}\\
-          & \alt & \nu x \of{A}.(P \mid Q) & \key{par}\\
-          & \alt & x[y].(P \mid Q) & \key{output}\\
-          & \alt & x(y).P & \key{input}\\
-          & \alt & x[\inlterm].P & \key{left selection}\\
-          & \alt & x[\inrterm].P & \key{right selection}\\
-          & \alt & x.\caseterm(P,Q) & \key{choice}\\
-          & \alt & !x(y).P & \key{server accept}\\
-          & \alt & ?x(y).P & \key{client request}\\
-          & \alt & x[A].P & \key{output a type}\\
-          & \alt & x(X).P & \key{input a type}\\
-          & \alt & x[].0 & \key{empty output}\\
-          & \alt & x().P & \key{empty input}\\
-          & \alt & x.\caseterm() & \key{empty choice}
+    \tm{P,Q,R} & \bnf & \tm{w \link x} & \key{link}\\
+          & \alt & \tm{\nu x \of{A}.(P \mid Q)} & \key{par}\\
+          & \alt & \tm{x[y].(P \mid Q)} & \key{output}\\
+          & \alt & \tm{x(y).P} & \key{input}\\
+          & \alt & \tm{x[\inlterm].P} & \key{left selection}\\
+          & \alt & \tm{x[\inrterm].P} & \key{right selection}\\
+          & \alt & \tm{x.\caseterm(P,Q)} & \key{choice}\\
+          & \alt & \tm{!x(y).P} & \key{server accept}\\
+          & \alt & \tm{?x(y).P} & \key{client request}\\
+          & \alt & \tm{x[A].P} & \key{output a type}\\
+          & \alt & \tm{x(X).P} & \key{input a type}\\
+          & \alt & \tm{x[].0} & \key{empty output}\\
+          & \alt & \tm{x().P} & \key{empty input}\\
+          & \alt & \tm{x.\caseterm()} & \key{empty choice}
   \end{array}
 \end{gather*}
 \caption{CP Propositions and Processes}

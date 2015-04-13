@@ -1,0 +1,12 @@
+\begin{figure}
+\[\colored
+\inference{
+  \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{T \otimes U} &
+  \Tp{\Psi \comma \Tmof{x}T \comma \Tmof{y}U} \Tpvdash \Tmof{N} \Tp{V}
+}{\otimes\elim}{
+  \Tp{\Phi \comma \Psi} \Tpvdash \Tmof{\key{let}~(x,y) = M~\key{in}~N} \Tp{V}
+}
+\]
+\caption{Informal let rule}
+\label{fig:letscompare}
+\end{figure}

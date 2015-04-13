@@ -1,0 +1,54 @@
+\begin{figure*}
+\begin{tabular*}{\textwidth}{lc}
+\begin{coq}
+trans_case:
+  forall L $S_1$ $S_2$ M NL NR P QL QR G H z
+         (INFM: inferTy M G ($S_1$ $\with$ $S_2$))
+         (TR: transTm M G 0 P)
+         (TRNL: forall x (NIN: x $\notin$ L),
+                  transTm (open NL x) (x $\sim$ $S_1$ ++ H) z QL)
+         (TRNR: forall x (NIN: x $\notin$ L),
+                  transTm (open NR x) (x $\sim$ $S_2$ ++ H) z QR),
+  transTm (tm_case M NL NR) (G++H) z
+          ($\nu \sem{S_1 \with S_2}$t.(P $\mid$ 0 CASE QL OR QR))
+\end{coq} &
+\begin{math}
+\begin{array}{c}
+\colored
+\tmSem{
+    \inference{
+      \Tp{\Phi} \Tpvdash \Tmof{M} \Tp{S_1 \with S_2}  &
+      (\Tp{\Psi \comma \Tmof{x}S_i} \Tpvdash
+         \Tmof{N_i} \Tp{T})_{\Tp{i \in \set{1,2}}}
+    }{Case}{
+      \Tp{\Phi \comma \Psi} \Tpvdash
+        \Tmof{\key{case}~M~\key{of}~\set{ l_i : x . N_i }_{i \in \set{1,2}}}
+           \Tp{T}
+    }
+}\tm{z}
+\quad = \hfill \\ \hfill
+\colored
+  \inference{
+    \tm{\tmsem{M}x} \tpvdash
+      \tp{\tpsem{\Phi}^\bot \comma \tmof{x}\tmsem{S_1}\oplus\tmsem{S_2}}
+    \\ \vspace{0.1cm} \\
+    \inference{
+      (\tm{\tmsem{N_i}z} \tpvdash
+        \tp{\tpsem{\Psi}^\bot \comma \tmof{x}\tpsem{S_i}^\bot
+                               \comma \tmof{z}\tpsem{T}})_{i \in \set{1,2}}
+    }{\with}{
+      \tm{x.\caseterm(\tmsem{N_1}\tm{z},\tmsem{N_2}\tm{z})} \tpvdash
+        \tp{\tmof{x}\tpsem{S_1}\with\tpsem{S_2} \comma \tmof{z}\tpsem{T}}
+    }
+  }{Cut}{
+   \tm{\nu x.(\tmsem{M}x \mid
+              x.\caseterm(\tmsem{N_1}\tm{z},\tmsem{N_2}\tm{z}))} \tpvdash
+     \tp{\tpsem{\Phi}^\bot \comma \tpsem{\Psi}^\bot \comma \tmof{z}\tpsem{T}}
+  }
+\end{array}
+\end{math}
+\end{tabular*}
+\caption{Cut of server against client request: Coq version (left) and
+  \citeauthor{Wadler:2014}'s version (right).}
+\label{fig:trans}
+\end{figure*}
