@@ -604,11 +604,11 @@ choice is a central issue when formalising programming language
 metatheory. Decisions on how to define, for instance, types, calculi and
 translations impact on future definitions and properties dependent on
 them. Considerations range from how much expressive power provided by the
-theorem prover to exploit to the choice of encoding to use for the properties
-of interest. Some of these decisions may impact the correspondence between the
-formal and informal systems e.g. the empty choice rule and omission of
-contraction in CP, and the omission of n-ary branch and choice from GV, and
-such things are necessarily a tradeoff between simplicity and
+theorem prover to exploit to the choice of which encoding to use for the
+properties of interest. Some of these decisions may impact the correspondence
+between the formal and informal systems e.g. the empty choice rule and
+omission of contraction in CP, and the omission of $n$-ary branch and choice
+from GV, and such things are necessarily a tradeoff between simplicity and
 adequacy.
 
 Interplay between different decisions is an additional factor to consider. For
@@ -630,7 +630,8 @@ Foundations online book~\cite{SF}. The tactics helped in many ways including
 simplifying the introduction of assertions and providing convenient shorthands
 for commonly executed sequences of tactics. An example for simplifying
 assertions would be the \coqe!forwards! tactic permitting lemma
-instantiation. Consider the following example (during the proof of $assoc_1$):
+instantiation. Consider the following example (during the proof of
+\coqe!assoc_1!):
 \begin{tabular}{l}
 \begin{coq}
 1 subgoal
@@ -646,21 +647,22 @@ $\nu$ A.(P $\mid$ $\nu$ B.($\open{0}{1}{Q}$ $\mid$ R)) $\tpcp$ $\Gamma$
 
 In order to proceed with proving the goal, it is necessary to show that
 $\GD$P0++$\GD$Q0 is unique. The proof follows from \key{PER} and \key{UN} upon
-application of an appropriate lemma, and there are two possible ways to prove
+application of an appropriate lemma and there are two possible ways to prove
 this using plain Coq. One way is to apply the lemma to one of \key{PER} or
 \key{UN} thereby replacing the chosen hypothesis with the conclusion of the
 lemma (termed \textit{forward reasoning}). The opposite of forward reasoning,
 namely backward reasoning, does not apply since the goal has nothing to do
-uniqueness of $\GD$P0++$\GD$Q0. However, using the \coqe!assert! tactic one
-can utilise backward reasoning. An assertion temporarily focuses a different
-goal (the asserted goal) which may then be tackled using tactics in the
-standard way. Unfortunately, this approach requires the explicit writing of
-the goal, namely \coqe!uniq ($\GD$P0++$\GD$Q0)!, into the proof script of the
-lemma cluttering the proof script sensitive to change because \coqe!$\GD$P0!
-and \coqe!$\GD$Q0! are ephemeral names introduced by prover.
+with the uniqueness of $\GD$P0++$\GD$Q0. However, using the \coqe!assert!
+tactic one can utilise backward reasoning. An assertion temporarily focuses a
+different goal (the asserted goal) which may then be tackled using tactics in
+the standard way. Unfortunately, this approach requires the explicit writing
+of the goal, namely \coqe!uniq ($\GD$P0++$\GD$Q0)!, into the proof script
+cluttering it with unnecessary details and making it sensitive to change
+because \coqe!$\GD$P0! and \coqe!$\GD$Q0! are ephemeral names introduced by
+theorem prover.
 
 The \coqe!forwards! tactic avoids the problem of explicit names by allowing
-the uniqueness property to be proven succiently:
+the uniqueness property to be proven succinctly:
 \begin{coq}
 forwards UN1: uniq_perm PER UN.
 \end{coq}
