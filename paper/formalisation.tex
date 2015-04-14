@@ -520,57 +520,8 @@ value, and to do this the channel must input the value.
 The translation of GV terms to CP processes is given, following
 \citeauthor{Wadler:2014}, using continuation-passing style. In this style a
 well-typed term in GV is parameterised by a name representing the channel
-which communicates the result of the translation (a CP process). Due to the
-locally nameless representation, the translation of GV terms required a
-procedure to infer the type of terms in order to specify the binding type for
-the corresponding CP process. So, the translation takes the environment, in
-which the term is typed, as an argument to query the type of free
-variables. Unfortunately, this query returns a type of \coqe!option typ!
-(\coqe!option! is equivalent to \tm{Maybe} in Haskell) to account for it
-possibly not appearing in the environment, but in fact since only well-typed
-GV terms are translated it is guaranteed to return something! Therefore, the
-definition is unnecessarily cluttered with impossible error cases.
-
-The term translation was initially designed using a monadic approach to
-streamline handling of the possible error cases in retreiving names from the
-environment. The coq-ext-lib
-library~\footnote{https://github.com/coq-ext-lib/coq-ext-lib} provides
-definitions for monad, functor and applicative type classes and associated
-instances for basic Coq types. It is similar in style to Haskell's support for
-these objects. Unfortunately, this definition did not yield a suitable
-function to prove the translation well-typed because the function needs to be
-able to operate structurally on not only terms, but also the environment and
-the processes being constructed. An example, translating choice, is shown in
-Figure~\ref{fig:trans}. The translation of case considers \coqe!NL! and
-\coqe!NR! in a separate environment to \coqe!M! and types the resulting case
-term in the combined environment. Additionally, the subterms need to be
-considered as opened terms using cofinite quantification in order to yield a
-suitable induction principle.
-
-An alternative formulation, which avoids the need to handle error cases, is to
-first define only the positive cases using an inductive type, the so-called
-\textit{graph relation}, and then define a dependent function that only
-considers the positive cases for which the relation is
-defined~\cite{McKinna:2009}. However, several issues were encountered when
-attempting to specify the translation. The graph relation requires much of the
-clutter present in both the \coqe!cp_rule! and \coqe!wt_tm! definitions such
-as linear enviornments and cofinite quantification.  Consider again
-Figure~\ref{fig:trans}. unfortunately this definition is wrong because the
-process P is not being opened and therefore during the proof we are unable to
-reason about the typability of P opened with a sufficiently fresh variable the
-reason is that P is a subprocess and therefore is not locally closed note that
-I am using \citeauthor{Wadler:2014}'s style but using an LNCQ notation for
-clarity. In order to construct the cut and output processes, the type of
-\tm{M} and \tm{N} must be computed. the proof of cps translation using the
-graph relation is a work in progress. the main difficulty is that the
-representation requires opening both GV terms and CP processes in hypotheses
-which would appear to duplicate a lot of the overhead of their respective rule
-definitions.  again, representation is important even if the proof has still
-eluded us.  while it is remains to be seen whether or not the graph relation
-assists us in these matters it is nonetheless worth trying to express a
-property in multiple ways
-
-Roughly, the theorm aiming to prove is:
+which communicates the result of its translation (a CP process). The aim is to
+prove the following theorem about the translation:
 \begin{coq}
 Theorem cps_trans_wt:
   forall $\Phi$ M T z P $\Gamma$ $\GD$
@@ -581,6 +532,56 @@ Theorem cps_trans_wt:
          (CP: transTm M $\Phi$ z P),
     P $\tpcp$ $\Gamma$.
 \end{coq}
+where \coqe!z! is the channel parameterising the translation and
+\coqe!transTm! is described below. The theorem states that if a GV term
+\coqe!M! is well-typed then its translation will be a well-typed process in CP
+with some accompanying translations on environments.
+
+Due to the locally nameless representation, the translation of GV terms
+requires a procedure to infer the type of terms in order to specify binder(s)
+in the corresponding CP process (see the right-hand side of
+Figure~\ref{fig:trans}). So the translation takes the environment, in which
+the term is typed, as an argument to query the type of free
+variables. Unfortunately, this query returns a type of \coqe!option typ!
+(\coqe!option! is equivalent to \tm{Maybe} in Haskell) to account for the name
+possibly not appearing in the environment, but in fact since only well-typed
+GV terms are translated it is guaranteed to return something! Therefore, the
+definition is unnecessarily cluttered with impossible error cases.
+
+The term translation was initially designed using a monadic approach to
+streamline handling of the possible error cases. The coq-ext-lib
+library~\footnote{https://github.com/coq-ext-lib/coq-ext-lib} provides
+definitions for monad, functor and applicative type classes and associated
+instances for basic Coq types. It is similar in style to Haskell's support for
+these objects. Unfortunately, this definition did not yield a suitable
+function to prove the translation well-typed because the function needs to be
+able to operate structurally on not only terms, but also the environment and
+the processes being constructed.
+
+An alternative formulation, which avoids the need to handle error cases, is to
+first define only the positive cases using an inductive type, the so-called
+\textit{graph relation}, and then define a dependent function that only
+considers the positive cases for which the relation is
+defined~\cite{McKinna:2009}. An example, translating choice, is shown in
+Figure~\ref{fig:trans}. The translation of choice considers \coqe!NL! and
+\coqe!NR! in a separate environment to \coqe!M! and types the resulting case
+term in the combined environment. The \coqe!NL! and \coqe!NR! subterms need to
+be considered as opened terms using cofinite quantification in order to yield
+suitable induction hypotheses. The graph relation is able to specify these
+constraints in contrast to the monadic function definition. However, several
+issues were encountered when attempting to specify the translation. The graph
+relation requires much of the clutter present in both the \coqe!cp_rule! and
+\coqe!wt_tm! definitions such as linear enviornments and cofinite
+quantification, and unfortunately the specification of choice in
+Figure~\ref{fig:trans} is not quite correct. The process \coqe!P! is not being
+opened in the \key{TR} assumption yet in the conclusion it is not locally
+closed. It would appear that, in addition to opening GV subterms, the graph
+relation must also open CP subprocesses even in cases where there was no
+binder in the original GV term e.g. function
+application~\cite{Wadler:2014}. Attempts to resolve this issue are left for
+future work as is the proof of \coqe!cps_trans_wt!, but it appears the graph
+relation approach is the most promising. These difficulties again illustrate
+the importance of the representation choice.
 
 \subsection{Issues and Guidelines}
 
