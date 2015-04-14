@@ -30,8 +30,8 @@ $T$ and the other to receive it with continuing endpoint types $\Sbar{S}$ and
 $S$, respectively. Similarly, the remaining types $\Branch{l_i}{S_i}{i\in I}$
 and $\Choice{l_i}{S_i}{i\in I}$ are duals of each other. A channel of type
 $\Branch{l_i}{S_i}{i\in I}$ can receive a label $l_i$ which will select the
-corresponding session type $S_i$ as the continuing type of the channel. While
-a channel with type $\Choice{l_i}{S_i}{i\in I}$ can send a label $l_i$ and
+corresponding session type $S_i$ as the continuing type of the channel. A
+channel with type $\Choice{l_i}{S_i}{i\in I}$ can send a label $l_i$ and
 continues as $S_i$.
 
 \subsubsection{In the \texorpdfstring{$\pi$}{pi}-calculus}\label{sec:pis}
@@ -53,24 +53,24 @@ Figure~\ref{fig:sill-branching}, which have only two alternatives
 
 Note that branch and choice both have some notion of branching (R rules for
 $\oplus$/L rules for $\with$) and at least for \& this is counter-intuitive in
-a session-based setting, since the intuition for \& is that of
-\emph{offering} (receiving) a choice between alternatives rather than
-\emph{making} (sending) the choice. Here, however, the intuition should be
-extended to account for its location in the typing judgement. The channel is
-on the left of the sequent, and \citeauthor{Caires:2010:STI} suggest one
-consider the context as services being provided to the typed process. Thus,
-the type of channels in the context is really the type of the other endpoint
-of the channel, and the typed process behaves according to the dual
-protocol. For example, considering $\SILLbranchLTwo$, and taking $A^\bot$ to
-represent the dual of a protocol $A$ as defined by
+a session-based setting, since the intuition for \& is that of \emph{offering}
+(receiving) a choice between alternatives rather than \emph{making} (sending)
+the choice. Here, however, the intuition should be extended to account for its
+location in the typing judgement. The channel is in the context (on the left
+of the sequent) and \citeauthor{Caires:2010:STI} suggest one consider the
+context as services being provided to the typed process. Thus, the type of
+channels in the context is really the type of the other endpoint of the
+channel, and the typed process behaves according to the dual protocol. For
+example, consider $\SILLbranchLTwo$, taking $A^\bot$ to represent the
+dual of a protocol $A$ as defined by
 \citeauthor{Wadler:2014}~\cite{Wadler:2014}, the typed process is behaving
-according to the protocol $\BChoice{A^\bot}{B^\bot}$, selecting from
+according to the protocol $\BChoice{A^\bot}{B^\bot}$ selecting from
 alternatives (in this case, $\inrterm$) and then behaving according to the
 selected protocol (in this case, protocol $B^\bot$).
 
 As noted by Wadler~\cite{Wadler:2014} there is a certain amount of redundancy
 in the two-sided nature of the rules forcing one to commit to a certain
-convention when typing a communication system. Consider, an equivalent system
+convention when typing a communication system. Consider an equivalent system
 to the buy/quote example given by
 \citeauthor{Caires:2010:STI}~\cite[\S~3]{Caires:2010:STI}:
 \input{clientproto}
@@ -100,30 +100,29 @@ The typings for the client and server processes are given by:
 
 The derivation for \eqref{eq:cbtyp} is $T\1 R$, $\lfn{T}{R}$, $\tensor{T}{R}$,
 $\BChoice{T}{R_2}$ and \eqref{eq:sbtyp} is derivable from
-$\BChoice{T}{L}$. Except for the final rule, these are exact dual rules of the
-rules used in example by \citeauthor{Caires:2010:STI}. Indeed, consider the
-composite process:
+$\BChoice{T}{L}$. Except for rule $T\1 R$, these are exact dual rules of the
+rules used in the example by \citeauthor{Caires:2010:STI}. Indeed, consider
+the composite process:
 \begin{gather*}
 \sdef{QSimple}{\Spar{c}{ClientBody_c}{ServerBody_c}}\\
 \tsequent{\cdot}{\cdot}{QSimple}{\typedid{-}{\1}}
 \end{gather*}
 
-The final system is near identical to the one produced in the example given by
-\citeauthor{Caires:2010:STI} except the individual processes within the
-parallel composition have been swapped. Here the client communicates along the
-channel $c$ on the right-side of the sequent and the server utilises the
-channel $c$ on the left of the sequent. This typing, while correct, violates
-the intuition given by \citeauthor{Caires:2010:STI} of the context providing
-the services used by the process, since one would usually associate provision
-of services with the server not the client. Instead, the example above
-suggests the server utilises some channel provided by the client. On the other
-hand, one could imagine such a channel being setup between two communicating
-agents; the ``owner'' of the channel is largely irrelevant. Note that
-$ClientProto$ is in fact the dual of the $ServerProto$ definition by
-\citeauthor{Caires:2010:STI} using the definition of dual used in Wadler's
-classical process calculus~\cite{Wadler:2014}. In $\pi$DILL, the duality
-between endpoints of the same channel are obscured by the nature of the typing
-judgements.
+The final system is near identical to the original example except the
+individual processes within the parallel composition have been swapped. Here
+the client communicates along the channel $c$ on the right-side of the sequent
+and the server utilises the channel $c$ on the left of the sequent. This
+typing, while correct, violates the intuition given by
+\citeauthor{Caires:2010:STI} of the context providing the services used by the
+process, since one would usually associate provision of services with the
+server not the client. Instead, the example above suggests the server utilises
+some channel provided by the client. On the other hand, one could imagine such
+a channel being setup between two communicating agents; the ``owner'' of the
+channel is largely irrelevant. Note that $ClientProto$ is in fact the dual of
+the $ServerProto$ definition by \citeauthor{Caires:2010:STI} using the
+definition of dual from Wadler's classical process
+calculus~\cite{Wadler:2014}. In $\pi$DILL, the duality between endpoints of
+the same channel are obscured by the nature of the typing judgements.
 
 Process reduction steps are equated with proof reduction via cut
 elimination. The relationship with proof normalisation in DILL ensures
