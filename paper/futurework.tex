@@ -1,22 +1,48 @@
 \section{Future Work}
 
-Some areas of future work to look into would be the following. The issues
-regarding cut elimination suggest there should be greater study into calculi
-based on the sequent calculus.
+\textbf{CP-GV system.} The issues regarding cut elimination suggest there
+should be greater study into calculi based on the sequent calculus. It is
+unclear to what extent process calculi such as CP and lambda calculi can be
+unified to use the same framework or library. The different considerations of
+sequent and process calculi perhaps mandate a different library or
+framework. It would be interesting to consider CP in the setting described by
+\citeauthor{Tews:2013,Dawson:2010,Dawson:2002}, where explicit representation
+is given to derivations. The aim here would be to make progress in proving the
+cut elimination theorem for CP, but it is unclear how linearity and
+permutation of environments would be handled in this setting. Otherwise,
+defining an appropriate termination measure for the current version of CP may
+be possible, though it remains unclear how to obtain the desired relationship
+between subprocesses of cut (as explained in \S~\ref{sec:cutelim}).
 
-\subsection{Besides Linear}
+Further progress with the graph relation version of the translation could be
+made in the current setting aiming to limit the duplication discussed
+previously The translation would be substantially affected by the
+aforementioned change to CP because the derivations in the conlusions of the
+rules would have to be constructed. In this case, it may be worth
+investigating representing derivations in GV explicitly.
 
-The ``adoption and focus'' system~\cite{Fahndrich:2002} provides a notion of
-aliased access to linear resources. The type system requires special language
-features, e.g. to manage capabilities which can be thought as a form of object
-liveness mechanism, so GV typing judgements would need to be extended such
-that the capabilities can be included in soundness results. An extension to
-the translation to CP to incorporate the ``adopt'' and ``focus'' constructs
-would also need to be defined. It is not immediately clear how these features
-would assist in the management of session typed channels. The ``focus'' rule
-(and linearity generally) enforces an invariant on the focussed object
-(channel) such that the type is maintained during the focus operation:
-\input{../proposal/focus-rule}
+\citeauthor{Lindley:2014:SAP} extend \citeauthor{Wadler:2014}'s work to
+support polymorphism in GV and n-ary branch and choice in CP. Future work is
+to support these constructs.
+
+\textbf{Beyond Linear.} Most session-based type systems treat channels as
+linear resources which may not be aliased. The ``adoption and focus''
+system~\cite{Fahndrich:2002} provides a notion of aliased access to linear
+resources. The type system requires special language features, e.g. to manage
+capabilities. \citeauthor{Fahndrich:2002} do not provide operational semantics
+or soundness results for the type system. It would be interesting to
+investigate these properties formally in a session type setting. The ``focus''
+rule (and linearity generally) enforces an invariant on the focussed object
+(channel) such that the type is maintained during the focus operation. Such a
+rule would appear to only benefit recursive session types. Indeed, focussing
+on a non-recursive channel would appear pointless because one is prevented
+from communicating across it for the entire scope of the focus. Moreover, it
+would be undesirable to permit modification of a session type without
+guaranteeing exclusive access to the channel since this could lead to invalid
+communication.
+
+\begin{comment}
+ \input{../proposal/focus-rule}
 
 The typing judgements include \emph{capabilities} that track aliasing to heap
 objects, e.g. $\AFcap{\rho}{h}$ denotes a mapping from a static name $\rho$ to
@@ -41,30 +67,4 @@ guarded by $G$ for the during of $e_2$. The final capabilities after executing
 $e_2$ are required to be $\tensor{C_3}{\AFcap{\rho}{h}}$, enforcing that the
 type must remain as $h$. The typing of the $\letterm$ expression ensures that
 the guard $G$ (contained in $C_1$) is restored.
-
-Such a rule would appear to only benefit recursive session types. Indeed,
-focussing on a non-recursive channel would be pointless since one would be
-prevented from communicating across it since the focus rule requires
-maintenance of the channel type. Further, it would be undesirable to permit
-modification of a session type without guaranteeing exclusive access to the
-channel since this could lead to invalid communication e.g. trying to
-communicate on a closed channel. Additionally, a linear object is consumed
-upon being adopted and will be deallocated when its adopter's lifetime ends,
-although an alternative semantics could be defined which returned the linear
-resource to the context. Moreover, \citeauthor{Fahndrich:2002} do not provide
-operational semantics or soundness results for the ``adoption and focus'' type
-system.
-
-%% System F-pop and ``adoption and focus''
-%%  It would be interesting to see if one could encode the ``adopt'' and
-%% ``focus'' constructs in this system to compare its expressiveness to
-%% Alms. The ``adopt'' rule can be encoded similarly to the ShareRef
-%% example~\cite{Mazurak:2010:LLT}. It is not immediately clear how to encode
-%% the ``focus'' rule within the present semantics, as one needs to prevent
-%% non-linear access to its argument implying the presence of knowledge about
-%% aliasing within the typing judgements; absence of aliasing is not
-%% identified with linear kinded types in \fpop.
-
-\citeauthor{??} extend \citeauthor{Wadler:2014}'s work to support polymorphism
-in GV. (polymorphism in CP) Future work is to support reduction under these
-terms.
+\end{comment}
