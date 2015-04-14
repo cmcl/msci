@@ -21,7 +21,7 @@ to receive a message the other is expecting to send a message; both session
 types agree on the type of message to be exchanged. In this way, correctness
 of communication can be statically assured by providing communicating agents
 with a \textit{channel} whose endpoints have dual session types. A channel is
-defined as a bi-directional conduit for exchanging messages, not unlike a
+defined as a bidirectional conduit for exchanging messages, not unlike a
 socket in network programming. In contrast to sockets however, a channel is
 associated with an explicit type which provides a description of its
 protocol. Thus, in session-based systems a channel is usually provided as a
@@ -32,7 +32,7 @@ presented on paper complete with informal proofs of correctness for the system
 properties. Most types systems in the session types community have been
 developed in this way. However, it is more difficult to extend work using this
 approach, as it may be unclear how changes affect proofs and one will
-typically have to re-consider all proofs to be convinced the properties still
+typically have to reconsider all proofs to be convinced the properties still
 hold. More generally, unassisted formalisms are error-prone to develop and do
 not provide a firm basis upon which other researchers can experiment.
 
@@ -60,7 +60,8 @@ with little extra proof effort and is inspired by previous work on a
 mechanised framework for $\pi$-calculus type systems~\cite{Gay:2001:FFP}. The
 current work focuses on the $\lambda$-calculus to provide a basis on which
 session types for mainstream programming languages can be studied, taking
-advantage of previous proof effort through the reuse of existing libraries
-for programming language metatheory. The work has presented a number of
-interesting challenges for the formalisation of programming languages and as a
-result generated a number of useful guidelines and issues to consider.
+advantage of previous proof effort through the reuse of existing libraries for
+programming language metatheory. This work has presented a number of
+interesting challenges for the formalisation of programming languages coupled
+with process calculi, and as a result generated a number of useful guidelines
+and issues to consider.
