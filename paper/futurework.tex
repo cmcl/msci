@@ -28,19 +28,20 @@ to support these constructs.
 \textbf{Beyond Linear.} Most session-based type systems treat channels as
 linear resources which may not be aliased. The ``adoption and focus''
 system~\cite{Fahndrich:2002} provides a notion of aliased access to linear
-resources.\todo{say what adopt and focus do} The type system requires special
-language features, e.g. to manage capabilities. \citeauthor{Fahndrich:2002} do
-not provide operational semantics or soundness results for the type system. It
-would be interesting to investigate these properties formally in a session
-type setting. The ``focus'' rule enforces an invariant on the focussed object
-(channel) such that the type is maintained during the focus operation. The
-object may be aliased while it is under a focus operation. Such a rule would
-appear to only benefit recursive session types. Indeed, focussing on a
-non-recursive channel would appear pointless because one is prevented from
-communicating across it for the entire scope of the focus. Moreover, it would
-be undesirable to permit modification of a session type without guaranteeing
-exclusive access to the channel since this could lead to invalid
-communication.
+resources. The ``adopt'' permits aliases on linear resources and ``focus'' is
+used to access a linear resource through one of the aliases. The type system
+requires special language features to manage
+capabilities. \citeauthor{Fahndrich:2002} do not provide operational semantics
+or soundness results for the type system. It would be interesting to
+investigate these properties formally in a session type setting. The ``focus''
+rule enforces an invariant on the focussed object (channel) such that the type
+is maintained during the focus operation. The object may be aliased while it
+is under a focus operation. Such a rule would appear to only benefit recursive
+session types. Indeed, focussing on a non-recursive channel would appear
+pointless because one is prevented from communicating across it for the entire
+scope of the focus. Moreover, it would be undesirable to permit modification
+of a session type without guaranteeing exclusive access to the channel since
+this could lead to invalid communication.
 
 \begin{comment}
  \input{../proposal/focus-rule}

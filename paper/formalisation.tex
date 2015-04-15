@@ -27,30 +27,32 @@ on the metalanguage (Coq, in this case) for handling binders and substitution
 so has less overhead in managing syntax than the locally nameless
 approach. However, it is less clear how to handle linearity using this
 approach and has the disadvantage of being able to represent terms not valid
-in the language being mechanised (so called ``exotic'' terms). Further, a
+in the language being mechanised (so called ``exotic'' terms). Furthermore, a
 higher-order approach would prevent the use of the Metatheory library which
 provides a number of useful tactics for manipulating typing contexts.
 
 Previous efforts to mechanise \fpop~\cite{Park:2014:MMW} illustrate how to
 handle a language containing both linear and non-linear contexts. However, to
-stay true to CP/GV, I maintain a single context. Interestingly, it became
-clear that the mechanised version of CP required explicit weakening and
-contraction to facilitate the reduction rules (\S~\ref{sec:cp}).
+stay true to CP/GV, I maintain a single context. \citeauthor{Park:2014:MMW}
+describe a technique for removing non-linear contexts from typing
+judgements. While their work extended to \fpop it is not clear how to modify
+their technique to apply to an environment containing both non-linear and
+linear types.
 
 For handling binder freshness, I chose to adopt the cofinite quantification
 approach described by~\citeauthor{Aydemir:2008:EFM}, which excludes a finite
 set of variables from being considered as the binder. In contrast, the
 traditional ``exists-fresh'' approach, where the binder is only required to be
 fresh within the abstraction's body, does not produce strong enough induction
-principles in some cases, e.g. weakening~\cite{Aydemir:2008:EFM}. This
-decision impacts upon the premises of the CP/GV typing rules (\S~\ref{sec:cp}
-and \S~\ref{sec:gv}), however these changes do not alter the typing of
-processes nor the semantics of the translation from GV to CP. An equivalence
-between ``exists-fresh'' and cofinite quantification definitions for the
-simply-typed $\lambda$-calculus ($\stlc$) is given by
-\citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM}, and I suspect a similar
-result could be derived straightforwardly (but tediously) for the CP/GV
-system.
+principles in some cases, e.g. environment
+weakening~\cite{Aydemir:2008:EFM}. This decision impacts upon the premises of
+the CP/GV typing rules (\S~\ref{sec:cp} and \S~\ref{sec:gv}), however these
+changes do not alter the typing of terms or processes nor the semantics of the
+translation from GV to CP. An equivalence between ``exists-fresh'' and
+cofinite quantification definitions for the simply-typed $\lambda$-calculus
+($\stlc$) is given by \citeauthor{Aydemir:2008:EFM}~\cite{Aydemir:2008:EFM},
+and I suspect a similar result could be derived straightforwardly (but
+tediously) for the CP/GV system.
 
 Another aspect of the encoding is how to define terms. The intrinsic encoding
 described by~\citeauthor{Benton:2012:STT}~\cite{Benton:2012:STT} is one
@@ -82,29 +84,6 @@ the contributions of this work is to articulate what one needs from state of
 the art metatheory libraries in order to handle session-based languages, and
 more generally, linear type systems.
 
-\citeauthor{Park:2014:MMW} describe a technique for removing non-linear
-contexts from typing judgements. While their work extended to \fpop it is not
-clear how to handle an environment containing both non-linear and linear types
-as in CP/GV. I wish to maintain as close a relationship as possible to the
-pen-and-paper system presented by \citeauthor{Wadler:2014}, so separating out
-the non-linear and linear components (as in \fpop) is not an option at this
-stage.
-
-\begin{comment}
-\section{Issues}
-
-\begin{itemize}
-\item What is required of a Metatheory library for linear type systems?
-  Permutation reasoning? Weakening/Contraction for non-linear components?
-\item Discuss the different approaches that were taken to maintain close
-  correspondence with the paper presentation
-\item Make sure to note that the paper leaves details (a lot of the ``cruft'')
-  out of the proofs e.g. where weakening is applied in the typing derivations
-\item Mention the use of Metatheory and its limitations when mechanising
-  linear type systems like GV/CP
-\end{itemize}
-\end{comment}
-
 \subsection{The process calculus CP}\label{sec:cp}
 
 \input{cp}
@@ -112,19 +91,19 @@ stage.
 
 Figure~\ref{fig:cll} presents the well-typed process relation for CP as an
 inductive type in Coq. Each typing rule in CP is represented as a constructor
-of the inductive type \coqe$cp_rule$. The inductive type is indexed by a
-process (\coqe$proc$) and an environment (\coqe$penv$) indicated by them
-appearing after the colon on the first line. \coqe$forall$ quantifies over
+of the inductive type \coqe!cp_rule!. The inductive type is indexed by a
+process (\coqe!proc!) and an environment (\coqe!penv!) indicated by them
+appearing after the colon on the first line. \coqe!forall! quantifies over
 hypotheses in a constructor; everything before the comma. Compound hypotheses
 are given labels, such as \key{PER}, which is the default name used to
 introduce them into the proof context during theorem proving. Some details
-such as environment uniqueness have been elided, but notice the use of LNCQ
-form within the hypotheses of the rules with binders. These rules exclude a
-finite set of names \coqe$L$ from opening the subprocesses where opening a
-process \coqe$P$ with name \coqe$x$ is denoted by \coqe$open_proc P x$ and
+such as environment uniqueness have been elided, but LNCQ form within
+hypotheses for the rules with binders has been kept. These rules exclude a
+finite set of names \coqe!L! from opening the subprocesses where opening a
+process \coqe!P! with name \coqe!x! is denoted by \coqe!open_proc P x! and
 corresponds to replacing de Bruijn index 0 with \coqe!x!. Bound variables are
 represented using de Bruijn indices and free variables are represented using
-an abstract type, \coqe$atom$, provided by the Metatheory library. The rules
+an abstract type, \coqe!atom!, provided by the Metatheory library. The rules
 with binders specify the type of a bound variable in the constructor rather
 than a name.
 
@@ -155,9 +134,9 @@ and custom tactics were developed to automatically solve certain permutation
 goals via simple proof search. Even so, there are still many cases where
 sequences of primitive lemmata, such as those handling append, commutativity
 and transitivity, need to be applied manually. A lot of these cases are
-similar but there would not appear to be an advantage in developing a tactic
-to do the work. Doing so would create a dependency between a hard-to-debug and
-obscure Ltac definition and the proofs which utilise it, becoming a burden to
+similar but it would not be advantageous to develop a tactic to do the
+work. Doing so would create a dependency between a hard-to-debug and obscure
+Ltac definition and the proofs which utilise it, becoming a burden to
 change. Further, such a development philosophy treats Ltac tactics akin to
 macros, a shorthand for expressing an oft-repeated sequence of tactics, and it
 is doubtful much can be gained from it unless the execution of Ltac tactics
@@ -205,9 +184,9 @@ cut reductions and commuting conversions on processes. The inductive cases in
 composed of multiple constructor instances, differing significantly from the
 standard operational semantics typically dealt with in $\lambda$-calculus
 formalisms. To mitigate the complexity, the proof for each case was written as
-a separate lemma (termed ``reduction lemmata''). The last step in the proof of
-\coqe$proc_sub_red$, \coqe$eauto$, solves the goals generated by the induction
-using the reduction lemmata.
+a separate lemma (collectively termed ``reduction lemmata''). The last step in
+the proof of \coqe$proc_sub_red$, \coqe$eauto$, solves the goals generated by
+the induction using the reduction lemmata.
 
 An example of a reduction lemma, and its counterpart in
 \citeauthor{Wadler:2014}'s presentation, is shown in
@@ -243,12 +222,12 @@ empty choice.
 was chosen so as to be in line with \citeauthor{Wadler:2014}'s
 definitions. However, explicit weakening is required to differentiate the
 principal cut elimination rules for the interactions between servers and
-clients; spawning and garbage collection (weakening). The paper presentation
-does not specify where weakening could occur due to its implicit nature; it is
-tacitly assumed weakening can always be pushed further up the derivation tree
-to a base rule e.g. \coqe$cp_fwd$ rule. The same is true of contraction where
-it is defined as a substitution of names on process terms, not a
-syntax-directed rule.
+clients; spawning and garbage collection of a server with no clients
+(weakening). The paper presentation does not specify where weakening could
+occur due to its implicit nature and it is tacitly assumed weakening can
+always be pushed further up the derivation tree to a base rule
+e.g. \coqe$cp_fwd$ rule. The same is true of contraction where it is defined
+as a substitution of names on process terms, not a syntax-directed rule.
 
 \begin{samepage}
 Contraction is not supported in the formalisation due to the difficulty in
@@ -256,16 +235,19 @@ specifying its principal cut elimination rule.  In order to specify the rule
 one requires knowledge of the environment typing process \coqe$P$ with the
 rule of the form:
 \begin{gather*}
-\tm{\nu A.(!0(A).P \mid ?z[[A]].Q)}
+\colored
+\tm{\nu \tp{A}.(!0(\tp{A}).P \mid ?z[[\tp{A}]].Q)}
 \quad \becomes \quad \\
-\tm{\nu A.(!0(A).P \mid \nu A.(!0(A).P \mid \key{contract}_{\Gamma} Q))}
+\colored
+\tm{\nu \tp{A}.(!0(\tp{A}).P \mid \nu
+                \tp{A}.(!0(\tp{A}).P \mid \key{contract}_{\Gamma} Q))}
 \end{gather*}
 
-where $\Gamma$ is the assumed environment typing \coqe$P$, $\tm{?z[[A]].Q}$
-denotes contraction by $z$ of two channels of type $A$ in $Q$ and
-$\key{contract}_{\Gamma} \tm{Q}$ contracts $\tm{Q}$ with the bindings in
-$\Gamma$. Unfortunately, as explained above, there is no way for the reduction
-relation to obtain the environment $\Gamma$.
+where $\Gamma$ is the assumed environment typing $P$,
+$\colored\tm{?z[[\tp{A}]].Q}$ denotes contraction by $z$ of two channels of
+type $A$ in $Q$ and $\key{contract}_{\Gamma} \tm{Q}$ contracts $\tm{Q}$ with
+the bindings in $\Gamma$. Unfortunately, as explained above, there is no way
+for the reduction relation to obtain the environment $\Gamma$.
 \end{samepage}
 
 The reader may wonder how weakening is supported if not
@@ -341,27 +323,29 @@ environment in the conclusion; splitting is non-deterministic. So, in order to
 prove the above statement, it must be true in \key{WT} that \coqe$Q$ takes the
 binder of type \coqe$B$ and not \coqe$P$, hence the local closure assumption
 on \coqe$open_proc P x$. Similarly, to prove the converse statement
-\coqe$forall x, open_proc R x$ must be assumed. For commuting conversions,
-permutating binders is essential in formulating the majority of the rules.
+\coqe$forall x, open_proc R x$ must be assumed. A different associativity rule
+would occur if \coqe!Q! was locally closed in the above. For commuting
+conversions, permutating binders is essential in formulating the majority of
+the rules.
 
 \input{extract}
 
 Regarding commuting conversions, many require analysing permutations
-containing singleton bindings. Consider the following the Coq encoding of the
+containing singleton bindings. Consider the following Coq encoding of the
 commuting conversion for output (cf. Figure~\ref{fig:ccoutput}):
 \begin{coq}
 Lemma reduce_cc_multi_one:
   forall P Q R (x:atom) A B $\Gamma$ (LCQ: lc_proc Q)
-         (WT: $\nu$ A.([B] x.(P $\mid$ Q) $\mid$ R) $\tpcp$ $\Gamma$),
-    [B] x.($\nu$ A.($\permb{0}{1}{P}$ $\mid$ R) $\mid$ Q) $\tpcp$ $\Gamma$.
+         (WT: $\nu$ A.(x[B].(P $\mid$ Q) $\mid$ R) $\tpcp$ $\Gamma$),
+    x[B].($\nu$ A.($\permb{0}{1}{P}$ $\mid$ R) $\mid$ Q) $\tpcp$ $\Gamma$.
 \end{coq}
 
 Notice again, as in the case for \coqe!assoc_1!, it necessary to stipulate
 that \coqe!Q! is locally closed to ensure \coqe!P! receives the channel
 created by the outer cut as part of its environment.
 
-After inverting \key{WT} and specialising the resulting hypotheses, regarding
-the subprocesses, with fresh variables the proof state is as follows:
+After inverting \key{WT} and specialising the resulting hypotheses regarding
+the subprocesses with fresh variables the proof state is as follows:
 
 \begin{tabular}{l}
 \begin{coq}
@@ -375,7 +359,7 @@ PER : Permutation $\Gamma$ ($\GD$P++$\GD$Q)
 PER0 : Permutation ($\GD$P++y$\sim$A) (x$\sim$B$\otimes$C++$\GD$P0++$\GD$Q0)
 \end{coq}\\ \hline
 \begin{coq}
-x(B).($\nu$ A.($\open{0}{1}{P}$ $\mid$ Q)) $\tpcp$ $\Gamma$
+x[B].($\nu$ A.($\open{0}{1}{P}$ $\mid$ Q)) $\tpcp$ $\Gamma$
 \end{coq}
 \end{tabular}
 \\~\\
@@ -386,7 +370,7 @@ such that the left-hand side is $\GD$P and the right-hand side has
 \coqe!y$\sim$A!  removed. In other words, the binding of \coqe!y! within
 \coqe!$\GD$P0! must be extracted (by \coqe!NIN!, \coqe!y! must be in
 \coqe!$\GD$P0!). Since many of the commuting conversion rules required this
-sort of reasoning, separating the work out into a tactic appears
+sort of reasoning, separating the work out into a tactic proved
 beneficial. Indeed, Ltac is well-suited for this type of work, searching the
 context and manipulating hypotheses of a particular form. The Ltac script in
 Figure~\ref{fig:extract} does the job and after executing
@@ -399,7 +383,7 @@ where E1 and E2 are sublists of $\GD$P0.
 However, the task of removing the binding from the permutation is not
 automated to keep information loss within the context transparent to an
 individual proof. The tactic is more modular and general in this form,
-permitting composition and permutation of tactic sequences.
+permitting composition and permutation with other tactics.
 
 \subsubsection{Top-level Cut Elimination}\label{sec:cutelim}
 
@@ -424,7 +408,7 @@ theorem. For instance, the \coqe$cp_cut$ constructor requires a
 operate dually on the bound variable. The condition is required after
 induction on \key{WT} yields a goal similar to the following:
 \begin{coq}
-exists R, ($\nu$A.([B]0.($P_1$ $\mid$ $P_2$) $\mid$ Q)) $\becomes^\star$ R
+exists R, ($\nu$A.(0[B].($P_1$ $\mid$ $P_2$) $\mid$ Q)) $\becomes^\star$ R
           /\ (is_cut R -> False)
 \end{coq}
 
@@ -433,7 +417,7 @@ on the bound variable of the cut, but since there is no relationship between
 the two subprocesses it is impossible to prove the goal.
 
 Following informal proofs, it seems likely that the proof requires a
-termination measure involving the length of the derivation. In hindsight,
+termination measure involving the length of the derivation. In hindsight
 however, I do not believe the current encoding is the best for this sort of
 reasoning. Formalised efforts for proving cut elimination for other logics
 have adopted an approach which permits reasoning on the structure of
@@ -498,20 +482,23 @@ chosen representation and its effect on later expressiveness.
 \subsection{CPS translation from GV to CP}\label{sec:trans}
 
 Following the original work by \citeauthor{Wadler:2014}, the translation from
-GV to CP requires defining translations on types and terms of GV.
+GV to CP requires defining translations on types, environments and terms of
+GV. The translation on environments simply maps the translation on types over
+the bindings. The other two translations require more detailed explanation.
 
 \subsubsection{Types}
 
 \input{gv-trans-types}
 
-The translation of from GV types to CP propositons is shown in
+The translation of from GV types to CP propositions is shown in
 Figure~\ref{fig:typtrans}. Translation of session types is noteworthy for
 taking a GV session type to its notional dual in CP, reflecting the semantic
 difference between channels in GV and those in CP. For GV, the type refers to
 the action on the channel endpoint. For CP, the proposition refers to the
 \textit{interface} exposed to a user of the channel. For example, output in GV
 corresponds to input in CP; the action on the channel endpoint is to output a
-value, and to do this the channel must input the value.
+value, and to do this the channel must input the value provided by the
+programmer.
 
 \subsubsection{Terms}
 
@@ -549,7 +536,7 @@ GV terms are translated it is guaranteed to return something! Therefore, the
 definition is unnecessarily cluttered with impossible error cases.
 
 The term translation was initially designed using a monadic approach to
-streamline handling of the possible error cases. The coq-ext-lib
+streamline handling of the error cases. The coq-ext-lib
 library~\footnote{https://github.com/coq-ext-lib/coq-ext-lib} provides
 definitions for monad, functor and applicative type classes and associated
 instances for basic Coq types. It is similar in style to Haskell's support for
@@ -658,7 +645,7 @@ different goal (the asserted goal) which may then be tackled using tactics in
 the standard way. Unfortunately, this approach requires the explicit writing
 of the goal, namely \coqe!uniq ($\GD$P0++$\GD$Q0)!, into the proof script
 cluttering it with unnecessary details and making it sensitive to change
-because \coqe!$\GD$P0! and \coqe!$\GD$Q0! are ephemeral names introduced by
+because \coqe!$\GD$P0! and \coqe!$\GD$Q0! are mercurial names introduced by
 theorem prover.
 
 The \coqe!forwards! tactic avoids the problem of explicit names by allowing

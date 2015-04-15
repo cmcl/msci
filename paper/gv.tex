@@ -12,7 +12,6 @@ Inductive wt_tm : tenv -> term -> typ -> Prop :=
       $\Phi$ ++ $\Psi$ $\tpgv$ (tm_app M N)$\of{U}$
   | wt_tm_iabs : forall $\Phi$ T U M
         (WF: wf_typ ($\fn{T}{U}$) un)
-        (UN: uniq $\Phi$)
         (WT: $\Phi$ $\tpgv$ M$\of{\fn{T}{U}}$)
         (UL: un_env $\Phi$),
                   $\Phi$ $\tpgv$ $\lambda$! M $\of{\fn{T}{U}}$
