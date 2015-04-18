@@ -26,3 +26,18 @@ following questions I have:
 
 Regards,
 Craig
+------------
+Hi Simon,
+
+I have attached another draft of the paper. I don't think I have any specific
+questions to ask. I'm a little concerned my terminology is confusing; I use
+"well-typed" and "typed in environment X" when referring to CP processes but I
+can't think of any other when to say it, "communicates using environment X" is
+a bit unwieldy.
+
+Regarding the talk, should I be going into a similar depth as in the paper? Or
+should I curtail the amount of Coq code I show. I think a slide full of typing
+rules tends to strain the attention of the audience.
+
+Regards,
+Craig

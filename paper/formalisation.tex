@@ -80,9 +80,9 @@ their language proof infrastructure is proportional to the number of binding
 constructs. In the case of a $\stlc$ this is not onerous, but GV has four
 binding constructs, CP has six and propositions have two. Indeed, a lot of
 effort was expended setting up this infrastructure. However, I believe one of
-the contributions of this work is to articulate what one needs from state of
-the art metatheory libraries in order to handle session-based languages, and
-more generally, linear type systems.
+the contributions of this work is to articulate what one needs from
+state-of-the-art metatheory libraries in order to handle session-based
+languages, and more generally, linear type systems.
 
 \subsection{The process calculus CP}\label{sec:cp}
 
@@ -128,7 +128,7 @@ setting~\cite{Lee:2012}.
 
 Ordering in environments is ignored so the development required operations for
 handling permutations of environments as shown in the \coqe$cp_rule$
-definition. The Metatheory library does not currently support permutating
+definition. The Metatheory library does not currently support permuting
 environments, however some basic lemmata were added as a result of this work,
 and custom tactics were developed to automatically solve certain permutation
 goals via simple proof search. Even so, there are still many cases where
@@ -165,15 +165,14 @@ Proof. ii; gen $\Gamma$; induction RED; subst; eauto. Qed.
 proved (Coq makes no distinction between the two keywords). The statement to
 prove is that if \coqe$P$ is a well-typed process in a context $\Gamma$ and
 \coqe$P$ reduces to \coqe$Q$ then \coqe$Q$ is well-typed in $\Gamma$. The
-proof environment is started using \coqe$Proof.$ and then followed by a
-sequence of tactics until all goals have been proven. After execution of
-\coqe$Qed.$ the Coq system inspects the validity of the proof object
-constructed by the tactics and, if valid, will add the theorem to the
-environment.
+proof environment is started using \coqe$Proof.$ then followed by a sequence
+of tactics until all goals have been proven. After execution of \coqe$Qed.$
+the Coq system inspects the validity of the proof object constructed by the
+tactics and, if valid, will add the theorem to the environment.
 
 Some tactics used above are shorthands for commonly combined tactics, for
 example \coqe$ii$ repeatedly performs hypothesis introduction then
-simplification until no more can be peformed, and \coqe$gen$ $\Gamma$
+simplification until no more can be performed, and \coqe$gen$ $\Gamma$
 generalises the goal over the typing environment $\Gamma$.
 
 \input{principalcp}
@@ -211,7 +210,7 @@ unavailable in the conclusion. For example, \coqe$reduce_spawn$ provides no
 information about the environment which types \coqe$P$ in the statement of the
 lemma. The derivation for \coqe$P$ (similarly, \coqe$Q$) is obtained by
 inverting the hypothesis \key{WT} and specialising the resulting assumptions
-to a newly introduced fresh variable (to replace the de Bruijn index). In the
+to a newly introduced fresh variable (replacing the de Bruijn index). In the
 case of \coqe$reduce_spawn$, two inversions are required to get derivations
 for \coqe$P$ and \coqe$Q$. This property of the reduction relation affects the
 definitions of the typing rules for CP, though it was not obvious at the time.
@@ -222,7 +221,7 @@ empty choice.
 was chosen so as to be in line with \citeauthor{Wadler:2014}'s
 definitions. However, explicit weakening is required to differentiate the
 principal cut elimination rules for the interactions between servers and
-clients; spawning and garbage collection of a server with no clients
+clients: spawning and garbage collection of a server with no clients
 (weakening). The paper presentation does not specify where weakening could
 occur due to its implicit nature and it is tacitly assumed weakening can
 always be pushed further up the derivation tree to a base rule
@@ -254,7 +253,7 @@ The reader may wonder how weakening is supported if not
 contraction. Fortunately, weakening only requires the names (not the types in
 the bindings) within the environment, and these may be obtained by relying on
 the following lemma relating the free variables of a process and the domain of
-its environment:
+its environment:\pagebreak
 \begin{coq}
 Lemma in_env_fv:
   forall P $\Gamma$ x (WT: P $\tpcp$ $\Gamma$),
@@ -325,7 +324,7 @@ binder of type \coqe$B$ and not \coqe$P$, hence the local closure assumption
 on \coqe$open_proc P x$. Similarly, to prove the converse statement
 \coqe$forall x, open_proc R x$ must be assumed. A different associativity rule
 would occur if \coqe!Q! was locally closed in the above. For commuting
-conversions, permutating binders is essential in formulating the majority of
+conversions, permuting binders is essential in formulating the majority of
 the rules.
 
 \input{extract}
@@ -345,7 +344,7 @@ that \coqe!Q! is locally closed to ensure \coqe!P! receives the channel
 created by the outer cut as part of its environment.
 
 After inverting \key{WT} and specialising the resulting hypotheses regarding
-the subprocesses with fresh variables the proof state is as follows:
+the subprocesses to fresh variables the proof state is as follows:
 
 \begin{tabular}{l}
 \begin{coq}
@@ -419,21 +418,21 @@ the two subprocesses it is impossible to prove the goal.
 Following informal proofs, it seems likely that the proof requires a
 termination measure involving the length of the derivation. In hindsight
 however, I do not believe the current encoding is the best for this sort of
-reasoning. Formalised efforts for proving cut elimination for other logics
-have adopted an approach which permits reasoning on the structure of
-derivations represented explicitly as
+reasoning. Formalised efforts for proving cut elimination for logics, rather
+than process calculi, have adopted an approach which permits reasoning on the
+structure of derivations represented explicitly as
 trees~\cite{Tews:2013,Dawson:2010,Dawson:2002}. Whereas, in the approach taken
 here, that information is limited and ephemeral in that it is only available
 during the proving of a derivation e.g. a reduction lemma. It is future work
-to investigate these and other strategies which will assist in formalising
-cut-elimination for CP.
+to investigate these and other strategies for formalising cut-elimination for
+CP.
 
 \subsection{The functional language GV}\label{sec:gv}
 
 \input{gv}
 \input{letscompare}
 
-The typing judgements for the functional language GV are shown in
+Some typing judgements for the functional language GV are shown in
 Figure~\ref{fig:gv}. Note that I have altered the $n$-ary branch and choice
 constructs to the restricted binary versions in order to avoid tricky
 formulations. The change is not restrictive however, since CP itself provides
@@ -463,10 +462,10 @@ unlimited kind. Initially the type definition was indexed by the kind and
 while this definition has the advantage of preventing certain ill-formed
 types, such as a non-linear session type, it complicated later definitions and
 proofs. For instance, the decidability of equality on types now relied on an
-axiom permitting heterogeneous equality~\cite{McBride:1999}. Generally, it is
-better to avoid unnecessary postulates if possible. Further, when formulating
-the typing rules, the kind must be given to each type hypothesised and most
-rules are polymorphic in the kind, requring an awkward kind inspection
+axiom for heterogeneous equality~\cite{McBride:1999}. Generally, it is better
+to avoid unnecessary postulates if possible. Further, when formulating the
+typing rules, the kind had to be given to each type hypothesised and most
+rules are polymorphic in the kind, requiring an awkward kind inspection
 function to be applied to each type within a binding. The alternative approach
 taken was to define a well-formed type relation and remove the kind index from
 the type definition. Figure~\ref{fig:wft} shows the well-formedness for the
@@ -490,7 +489,7 @@ the bindings. The other two translations require more detailed explanation.
 
 \input{gv-trans-types}
 
-The translation of from GV types to CP propositions is shown in
+The translation from GV types to CP propositions is shown in
 Figure~\ref{fig:typtrans}. Translation of session types is noteworthy for
 taking a GV session type to its notional dual in CP, reflecting the semantic
 difference between channels in GV and those in CP. For GV, the type refers to
@@ -547,23 +546,23 @@ the processes being constructed.
 
 An alternative formulation, which avoids the need to handle error cases, is to
 first define only the positive cases using an inductive type, the so-called
-\textit{graph relation}, and then define a dependent function that only
-considers the positive cases for which the relation is
-defined~\cite{McKinna:2009}. An example, translating choice, is shown in
-Figure~\ref{fig:trans}. The translation of choice considers \coqe!NL! and
-\coqe!NR! in a separate environment to \coqe!M! and types the resulting case
-term in the combined environment. The \coqe!NL! and \coqe!NR! subterms need to
-be considered as opened terms using cofinite quantification in order to yield
-suitable induction hypotheses. The graph relation is able to specify these
-constraints in contrast to the monadic function definition. However, several
-issues were encountered when attempting to specify the translation. The graph
-relation requires much of the clutter present in both the \coqe!cp_rule! and
-\coqe!wt_tm! definitions such as linear enviornments and cofinite
+\textit{graph relation}, then define a dependent function that only considers
+the positive cases for which the relation is defined~\cite{McKinna:2009}. An
+example, translating choice, is shown in Figure~\ref{fig:trans}. The
+translation of choice considers \coqe!NL! and \coqe!NR! in a separate
+environment to \coqe!M! and types the resulting case term in the combined
+environment. The \coqe!NL! and \coqe!NR! subterms need to be considered as
+opened terms using cofinite quantification in order to yield suitable
+induction hypotheses. The graph relation is able to specify these constraints
+in contrast to the monadic function definition. However, several issues were
+encountered when attempting to specify the translation. The graph relation
+requires much of the clutter present in both the \coqe!cp_rule! and
+\coqe!wt_tm! definitions such as linear environments and cofinite
 quantification, and unfortunately the specification of choice in
-Figure~\ref{fig:trans} is not quite correct. The process \coqe!P! is not being
-opened in the \key{TR} assumption yet in the conclusion it is not locally
-closed. It would appear that, in addition to opening GV subterms, the graph
-relation must also open CP subprocesses even in cases where there was no
+Figure~\ref{fig:trans} is not quite correct. The process \coqe!P! in the
+conclusion is not locally closed yet it is not being opened in the \key{TR}
+assumption. It would appear that, in addition to opening GV subterms, the
+graph relation must also open CP subprocesses even in cases where there was no
 binder in the original GV term e.g. function
 application~\cite{Wadler:2014}. Attempts to resolve this issue are left for
 future work as is the proof of \coqe!cps_trans_wt!, but it appears the graph

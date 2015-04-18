@@ -2,26 +2,26 @@
 \begin{coq}
 Inductive cp_rule : proc -> penv -> Prop :=
   | cp_fwd : forall $\Gamma$ (x w:atom) A
-             (PER: Permutation $\Gamma$ (w $\sim$ $\dualbt{A}$ ++ x $\sim$ A))
-           w $\link$ x $\tpcp$ $\Gamma$
+        (PER: Permutation $\Gamma$ (w $\sim$ $\dualbt{A}$ ++ x $\sim$ A)),
+      w $\link$ x $\tpcp$ $\Gamma$
   | cp_cut :
       forall (L:atoms) P Q A $\Gamma$ $\Delta$P $\Delta$Q
              (PER: Permutation $\Gamma$ ($\Delta$P ++ $\Delta$Q))
-             (CPP: forall (x:atom) (NL: x `notin` L),
+             (CPP: forall (x:atom) (NL: x $\notin$ L),
                      (open_proc P x) $\tpcp$ (x $\sim$ A) ++ $\Delta$P)
-             (CPQ: forall (x:atom) (NL: x `notin` L),
+             (CPQ: forall (x:atom) (NL: x $\notin$ L),
                 (open_proc Q x) $\tpcp$ (x $\sim$ $\dualbt{A}$) ++ $\Delta$Q),
         $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$
   | cp_output : forall (L:atoms) P Q $\Gamma$ $\Delta$P $\Delta$Q x A B
              (PER: Permutation $\Gamma$ ((x $\sim$ A $\otimes$ B) ++
                                              $\Delta$P ++ $\Delta$Q))
-             (CPP: forall (y:atom) (NL: y `notin` L),
+             (CPP: forall (y:atom) (NL: y $\notin$ L),
                      (open_proc P y) $\tpcp$ (y $\sim$ A) ++ $\Delta$P)
              (CPQ: Q $\tpcp$ (x $\sim$ B) ++ $\Delta$Q),
         x[A].(P $\mid$ Q) $\tpcp$ $\Gamma$
   | cp_input : forall (L:atoms) P $\Gamma$ $\Delta$P x A B
          (PER: Permutation $\Gamma$ ((x $\sim$ A $\parr$ B) ++ $\Delta$P))
-         (CPP: forall (y:atom) (NL: y `notin` L),
+         (CPP: forall (y:atom) (NL: y $\notin$ L),
             open_proc P y) $\tpcp$ (y $\sim$ A) ++ (x $\sim$ B) ++ $\Delta$P),
         x(A).P $\tpcp$ $\Gamma$
   | cp_left : forall P $\Gamma$ $\Delta$ x A B
@@ -37,12 +37,12 @@ Inductive cp_rule : proc -> penv -> Prop :=
   | cp_accept : forall (L:atoms) P $\Gamma$ $\Delta$ (x:atom) A
          (PER: Permutation $\Gamma$ (x $\sim$ ! A ++ $\Delta$))
          (REQS$\Gamma$: all_requests $\Delta$)
-         (CPP: forall (y:atom) (NL: y `notin` L),
+         (CPP: forall (y:atom) (NL: y $\notin$ L),
                  (open_proc P y) $\tpcp$ (y $\sim$ A) ++ $\Delta$),
        !x(A).P $\tpcp$ $\Gamma$
   | cp_request : forall (L:atoms) P $\Gamma$ $\Delta$ (x:atom) A
          (PER: Permutation $\Gamma$ (x $\sim$ ? A ++ $\Delta$))
-         (CPP: forall (y:atom) (NL: y `notin` L),
+         (CPP: forall (y:atom) (NL: y $\notin$ L),
                  (open_proc P y) $\tpcp$ (y $\sim$ A) ++ $\Delta$),
        ?x[A].P $\tpcp$ $\Gamma$
   | cp_weaken : forall P $\Gamma$ $\Delta$ (x:atom) A

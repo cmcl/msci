@@ -17,7 +17,7 @@ between subprocesses of cut (as explained in \S~\ref{sec:cutelim}).
 Further progress with the graph relation version of the translation could be
 made in the current setting aiming to limit the duplication discussed
 previously. The translation would be substantially affected by the
-aforementioned change to CP because the derivations in the conlusions of the
+aforementioned change to CP because the derivations in the conclusions of the
 rules would have to be constructed. In this case, it may be worth
 investigating representing derivations in GV explicitly.
 
@@ -35,13 +35,12 @@ capabilities. \citeauthor{Fahndrich:2002} do not provide operational semantics
 or soundness results for the type system. It would be interesting to
 investigate these properties formally in a session type setting. The ``focus''
 rule enforces an invariant on the focussed object (channel) such that the type
-is maintained during the focus operation. The object may be aliased while it
-is under a focus operation. Such a rule would appear to only benefit recursive
-session types. Indeed, focussing on a non-recursive channel would appear
-pointless because one is prevented from communicating across it for the entire
-scope of the focus. Moreover, it would be undesirable to permit modification
-of a session type without guaranteeing exclusive access to the channel since
-this could lead to invalid communication.
+is maintained during the focus operation. Such a rule would appear to only
+benefit recursive session types. Indeed, focussing on a non-recursive channel
+would appear pointless because one is prevented from communicating across it
+for the entire scope of the focus. Moreover, it would be undesirable to permit
+modification of a session type without guaranteeing exclusive access to the
+channel since this could lead to invalid communication.
 
 \begin{comment}
  \input{../proposal/focus-rule}
