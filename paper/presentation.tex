@@ -61,12 +61,11 @@ CP -> GV translation (interprets classical linear logic operators as session
 types)
 \end{frame}
 
-the formalisation i present here is based on recent work providing a logical
-foundation for understanding session types. in particular i present work
-towards a formalisation of Wadler's original CP/GV system which describes a
-two-tier type system with session types. A high-level overview of the system
-is as follows: we have a process calculus CP with operators from classical
-linear logic, a high-level functional language GV with session types, and a
+the formalisation i present here is an encoding of a system in the Coq proof
+assistant. it is based on a two-tier system providing a logical foundation for
+understanding session types. A high-level overview of the system is as
+follows: we have a process calculus CP with operators from classical linear
+logic, a high-level functional language GV with session types, and a
 translation from GV to CP which interprets operators in classical linear logic
 as session types.
 
@@ -79,10 +78,11 @@ by classical linear logic i mean a logic where negation is an involution which
 restricts the use of certain rules on resources, namely that all linear
 resources must be used (corresponding to prohibiting weakening) and that one
 cannot duplicate a linear resource (corresponding to contraction). some
-operators in the CP calculus are presented. the interpretation of tensor
-product is output of A and continue as B. The dual of this is input of A and
-continue as the negation of B. Thus negation in classical linear logic
-corresponds to session duality.
+operators in the CP calculus are presented as they appear in the Coq encoding
+(note that they are very similar to their informal counterparts). the
+interpretation of tensor product is output of A and continue as B. The dual of
+this is input of A and continue as the negation of B. Thus negation in
+classical linear logic corresponds to session duality.
 
 \begin{frame}
 an example of GV and a translation???
@@ -104,25 +104,24 @@ cut-elimination and translation preserving well-typedness. One out of the
 three has been formalised and some issues and guidelines have been developed
 accordingly. some comments on progress towards the other two is offered
 
-The system
-enjoys freedom from deadlock cut elimination in CP corresponds to
+The system enjoys freedom from deadlock cut elimination in CP corresponds to
 communication in GV.
 
-the formalisation i will describe today regards this
-connection, I will present work towards a formalisation of the system GV/CP
-originally described by Phil Wadler was the aim of this project to mechanise
-it. it provides a basis for further additions and also provides some
-properties that may be desirable such as deadlock freedom. the formalisation
-provides a means to gain more confidence in the proofs but also assists in
-extending them to account for the effects of additions.
+subject reduction is formalised using a relation on processes
 
-\begin{comment}
-whats the problem
-what have others done
-why are we doing it
-what did we do
-what have we learned
-\end{comment}
+cut elimination is not currently proven since we require a termination measure
+on the length of a derivation and a relationship between the subprocesses of a
+cut. other work based on formalising logics where the derivations are explicit
+may be inspirational
+
+the translation seems to require a duplication of the specifications for cp
+and gv typing rules not done
+
+what can we show them for the failures?
+
+here are some issues and things learnt! -- our guidelines are all about
+modularisation, representation, library reuse, automation!
+
 \begin{frame}
 \frametitle{Preamble}
 \item Propositions as Sessions
