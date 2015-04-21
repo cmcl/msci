@@ -1,9 +1,15 @@
 % $Id: macros.tex,v 1.31 2007/05/21 11:52:37 stfm Exp $
+\iftoggle{tdlp}{
 
+}{
+\toggletrue{tdlp}
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\alt}{~|~}
+\newenvironment{note}{\begin{trivlist} \item \textbf{Note. }}{\end{trivlist}}
+}
 
 \hfuzz1pc % Don't bother to report overfull boxes if overage is < 1pc
 
@@ -192,7 +198,7 @@
 \newcommand{\after}[2]{{#1}/{#2}}
 %BNF definition
 \newcommand{\bnf}{::=}
-\newcommand{\alt}{~|~}
+
 %Reduction
 \newcommand{\vredrel}{\longrightarrow_{\mathsf{v}}}
 \newcommand{\vred}[2]{{#1}\vredrel{#2}}
@@ -459,8 +465,6 @@
 \newcommand{\Tpvdash}{\Tp{{} \vdash {}}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newenvironment{note}{\begin{trivlist} \item \textbf{Note. }}{\end{trivlist}}
 
 \newcommand{\etal}{\emph{et~al.}}
 

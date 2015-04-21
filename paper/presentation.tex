@@ -1,16 +1,23 @@
 \documentclass{beamer}
 
 \usepackage[latin1]{inputenc}
+\usepackage{lstmacros}
 \usepackage{graphicx}
+\usepackage{array}
 \usepackage{subfigure}
 \usepackage{amsmath}
-\usepackage{listings}
 \usepackage{comment}
+\usepackage{etoolbox}
 \usepackage{tikz}
 \usetikzlibrary{arrows,positioning}
 \usepackage[style=alphabetic,natbib=true]{biblatex}
 
 \usetheme{Warsaw}
+
+\newtoggle{tdlp}
+\toggletrue{tdlp}
+\input{propmacros}
+\newcommand{\altt}{~|~}
 
 \title[Project Presentation]{Propositions as Sessions, Mechanically}
 \author{Craig McLaughlin}
@@ -23,7 +30,7 @@
 \titlepage
 \end{frame}
 
-
+\begin{comment}
 today i am going to talk about a formalisation effort based on an existing
 type system whose properties have previously only been studied
 informally. first in order to motivate the previous and current work i shall
@@ -31,20 +38,35 @@ make two general observations here. one: distributed communication systems are
 becoming increasingly prevalent in modern society. two: the correct
 functioning of these systems hinges on the protocol between any two
 communicating agents to be well-defined and correctly implemented.
+\end{comment}
 
 \begin{frame}
-Session types by example
+\frametitle{Session Types}
+\begin{math}
+  \begin{array}{rclc}
+    S & \bnf  & \inpt{T}{S} & \mbox{input value of type T, continue as S}\\
+      & \altt & \outpt{T}{S} & \mbox{output value of type T, continue as S}\\
+      & \altt & \Branch{l_i}{S_i}{i\in I} &
+                           \mbox{offer between $i$ alternatives}\\
+      & \altt & \Choice{l_i}{S_i}{i\in I} &
+                           \mbox{choose between $i$ alternatives}\\
+      & \altt & \mbox{\lstinline{end}} & \mbox{terminate session}
+ \end{array}
+\end{math}
 \end{frame}
 
+\begin{comment}
 one approach to achieve such correctness guarantees is by using binary session
 types. [INTRODUCE BINARY SESSION TYPES HERE]. specifying a communication
 protocol then involves providing mutual dual types to the communicating
 parties. [a simple example with two processes is displayed].
+\end{comment}
 
 \begin{frame}
 Hand-written (informal) proofs $=$ Error-prone $+$ Difficult to update
 \end{frame}
 
+\begin{comment}
 there has been a lot of activity in this area producing a variety of different
 session-based type systems. many systems build on top of previous work adding
 more complex features such as asynchronous, polymorphic and recursive session
@@ -53,6 +75,7 @@ not always clear which parts of a system's metatheory is affected by a
 change. a formalised system would reduce likelihood of errors in the proofs
 and aid extension since the theorem prover would highlight changes to the
 metatheory
+\end{comment}
 
 \begin{frame}
 CP - process calculus with operators from classical linear logic
@@ -61,6 +84,7 @@ CP -> GV translation (interprets classical linear logic operators as session
 types)
 \end{frame}
 
+\begin{comment}
 the formalisation i present here is an encoding of a system in the Coq proof
 assistant. it is based on a two-tier system providing a logical foundation for
 understanding session types. A high-level overview of the system is as
@@ -68,30 +92,44 @@ follows: we have a process calculus CP with operators from classical linear
 logic, a high-level functional language GV with session types, and a
 translation from GV to CP which interprets operators in classical linear logic
 as session types.
+\end{comment}
 
 \begin{frame}
+negation as involution
 an example of CP classical linear logic operators and their session type
-interpretation
+interpretation (times/with)
 \end{frame}
 
+\begin{comment}
 by classical linear logic i mean a logic where negation is an involution which
 restricts the use of certain rules on resources, namely that all linear
 resources must be used (corresponding to prohibiting weakening) and that one
-cannot duplicate a linear resource (corresponding to contraction). some
-operators in the CP calculus are presented as they appear in the Coq encoding
+cannot duplicate a linear resource (corresponding to contraction). some typing
+rules for the CP calculus are presented as they appear in the Coq encoding
 (note that they are very similar to their informal counterparts). the
 interpretation of tensor product is output of A and continue as B. The dual of
 this is input of A and continue as the negation of B. Thus negation in
 classical linear logic corresponds to session duality.
+\end{comment}
 
 \begin{frame}
-an example of GV and a translation???
+an example of GV
 \end{frame}
 
+\begin{comment}
 GV has built-in support for session types. consider the rule for sending a
-value of type T along a channel N of type !T.S. the translation to CP is
+value of type T along a channel N of type !T.S.
+\end{comment}
+
+\begin{frame}
+something about a translation
+\end{frame}
+
+\begin{comment}
+the translation to CP is
 presented. blah blah something about the session types being a little odd or
 overlook this probably
+\end{comment}
 
 \begin{frame}
 - subject reduction of CP
@@ -99,33 +137,42 @@ overlook this probably
 - translation preserving well-typedness
 \end{frame}
 
+\begin{comment}
 the system has three main properties. subject reduction of CP, top-level
-cut-elimination and translation preserving well-typedness. One out of the
-three has been formalised and some issues and guidelines have been developed
-accordingly. some comments on progress towards the other two is offered
-
-The system enjoys freedom from deadlock cut elimination in CP corresponds to
-communication in GV.
+cut-elimination and translation preserving well-typedness. of which subject
+reduction is the only one fully formalised. the other two presented some
+challenges but some comments on progress towards the other two is
+offered. i also highlight some issues and guidelines
+\end{comment}
 
 \begin{frame}
 subject reduction
 \end{frame}
 
+\begin{comment}
 subject reduction is formalised using a relation on processes
+\end{comment}
 
 \begin{frame}
 problems for cut elimination
 \end{frame}
 
+\begin{comment}
+sessions correspond to propositions
+processes correspond to proofs
+cut elimination corresponds to communication
+
 cut elimination is not currently proven since we require a termination measure
 on the length of a derivation and a relationship between the subprocesses of a
 cut. other work based on formalising logics where the derivations are explicit
 may be inspirational
+\end{comment}
 
 \begin{frame}
 problems of the translation
 \end{frame}
 
+\begin{comment}
 the translation seems to require a duplication of the specifications for cp
 and gv typing rules not done
 
@@ -133,9 +180,11 @@ what can we show them for the failures?
 
 here are some issues and things learnt! -- our guidelines are all about
 modularisation, representation, library reuse, automation!
+\end{comment}
 
 \begin{frame}
 \frametitle{Preamble}
+\begin{itemize}
 \item Propositions as Sessions
 \item system features
 \item Coq
@@ -144,6 +193,7 @@ modularisation, representation, library reuse, automation!
 \item difficulties in formalisation
 \item implications
 \item future work
+\end{itemize}
 \end{frame}
 
 \printbibliography

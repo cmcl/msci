@@ -8,6 +8,7 @@
 \usepackage{prooftree}
 \usepackage{amsmath}
 \usepackage[all]{nowidow}
+\usepackage{etoolbox}
 \newcommand{\typestate}[2]{{#1}\gg{#2}}
 \usepackage[style=alphabetic,sorting=nymt,natbib=true,firstinits=true,
   maxbibnames=100]{biblatex}
@@ -24,6 +25,8 @@
   }
 }
 
+\newtoggle{tdlp}
+\togglefalse{tdlp}
 \input{propmacros}
 
 \newcommand{\fpop}{System F${}^\circ$\xspace}
