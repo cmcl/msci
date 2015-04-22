@@ -1,6 +1,7 @@
 \documentclass{beamer}
 
 \usepackage[latin1]{inputenc}
+\usepackage{cmll}
 \usepackage{lstmacros}
 \usepackage{graphicx}
 \usepackage{array}
@@ -19,6 +20,11 @@
 \input{propmacros}
 \newcommand{\altt}{~|~}
 
+\let\oldframetitle\frametitle
+\renewcommand{\frametitle}[1]{
+  \oldframetitle{#1}\vspace{-3.5cm}
+}
+
 \title[Project Presentation]{Propositions as Sessions, Mechanically}
 \author{Craig McLaughlin}
 \institute{University Of Glasgow}
@@ -29,6 +35,8 @@
 \begin{frame}
 \titlepage
 \end{frame}
+
+\section{Preamble}
 
 \begin{comment}
 today i am going to talk about a formalisation effort based on an existing
@@ -41,16 +49,20 @@ communicating agents to be well-defined and correctly implemented.
 \end{comment}
 
 \begin{frame}
-\frametitle{Session Types}
+\oldframetitle{Session Types}
 \begin{math}
-  \begin{array}{rclc}
-    S & \bnf  & \inpt{T}{S} & \mbox{input value of type T, continue as S}\\
-      & \altt & \outpt{T}{S} & \mbox{output value of type T, continue as S}\\
+  \begin{array}{cccc}
+    S & \bnf  & \inpt{T}{S} & \mbox{receive value of type T, continue as S}\\
+      & \altt & \outpt{T}{S} & \mbox{send value of type T, continue as S}\\
       & \altt & \Branch{l_i}{S_i}{i\in I} &
-                           \mbox{offer between $i$ alternatives}\\
+                           \mbox{offer between $|I|$ alternatives}\\
       & \altt & \Choice{l_i}{S_i}{i\in I} &
-                           \mbox{choose between $i$ alternatives}\\
-      & \altt & \mbox{\lstinline{end}} & \mbox{terminate session}
+                           \mbox{choose between $|I|$ alternatives}\\
+      & \altt & \mbox{\lstinline{end}} & \mbox{terminate session}\\
+ \dual{S} & \bnf & \mbox{dual of S}\\
+ \dual{(\inpt{T}{S})} & \bnf & \outpt{T}{\dual{S}}\\
+ \dual{\Branch{l_i}{S_i}{i\in I}} & \bnf & \Choice{l_i}{\dual{S_i}}{i\in I}\\
+            \vdots                & \cdots & \vdots
  \end{array}
 \end{math}
 \end{frame}
@@ -63,6 +75,7 @@ parties. [a simple example with two processes is displayed].
 \end{comment}
 
 \begin{frame}
+\frametitle{Motivation}
 Hand-written (informal) proofs $=$ Error-prone $+$ Difficult to update
 \end{frame}
 
@@ -78,10 +91,12 @@ metatheory
 \end{comment}
 
 \begin{frame}
-CP - process calculus with operators from classical linear logic
-GV - functional language with session type
-CP -> GV translation (interprets classical linear logic operators as session
-types)
+\frametitle{System Overview}
+CP $=$ process calculus with operators from classical linear logic
+
+GV $=$ functional language with session types
+
+GV $\to$ CP translation
 \end{frame}
 
 \begin{comment}
@@ -95,9 +110,18 @@ as session types.
 \end{comment}
 
 \begin{frame}
-negation as involution
-an example of CP classical linear logic operators and their session type
-interpretation (times/with)
+\frametitle{CP Propositions}
+\begin{math}
+\begin{array}{rclc}
+    \tp{A,B,C} & \bnf
+          & \tp{A \otimes B} & \key{times: output A then behave as B}\\
+          & \altt & \tp{A \parr B} & \key{par: input A then behave as B}\\
+          & \altt & \cdots
+\end{array}
+\end{math}
+
+For all propositions $A$, $\dualbt{(\dualbt{A})} = A$ (negation is an
+involution)
 \end{frame}
 
 \begin{comment}
@@ -110,6 +134,92 @@ rules for the CP calculus are presented as they appear in the Coq encoding
 interpretation of tensor product is output of A and continue as B. The dual of
 this is input of A and continue as the negation of B. Thus negation in
 classical linear logic corresponds to session duality.
+\end{comment}
+
+\section{Formalisation}
+
+\begin{frame}
+\frametitle{Goals}
+\begin{itemize}
+\item Reuse where possible
+\item Minimise difference between informal/formal variants
+\item Avoid known pitfalls
+\end{itemize}
+\end{frame}
+
+\begin{comment}
+The encoding follows practices in formalising programming language metatheory
+with a principal design goal of reusing existing libraries from previous
+developments. Additionally, I want to keep as close a correspondence as
+possible between the development and the pen-and-paper presentation in order
+to mitigate questions of adequacy, you know, whether the formal system is what
+you intended to formalise. And lastly, I aimed to exploit the features of the
+Coq system without over complicating the development such as taking careful
+consideration over representation choices.
+\end{comment}
+
+\begin{frame}
+\oldframetitle{Preliminaries}
+\begin{itemize}
+\item Locally Nameless
+  \begin{itemize}
+  \item Avoids variable capture
+  \item de Bruijn indices for bound variables
+    ($\lambda~(\lambda~1) \equiv \lambda x. \lambda y. x$)
+  \end{itemize}
+\item Cofinite Quantification
+  \begin{itemize}
+  \item stronger induction principle
+  \item
+    \begin{math}
+    \begin{array}{lcl}
+      \mbox{Exists-Fresh} & & \mbox{Cofinite}\\
+      \inference{
+        x \notin FV(N) &
+        \Tp{\Gamma \comma \Tmof{x}T} \Tpvdash \Tmof{N^x}\Tp{U}
+      }{}{
+        \Tp{\Gamma} \Tpvdash \Tmof{abs~N}\Tp{T \to U}
+      }
+    & \mbox{vs}. &
+      \inference{
+        \forall x \notin L.
+        (\Tp{\Gamma \comma \Tmof{x}T} \Tpvdash \Tmof{N^x}\Tp{U})
+      }{}{
+        \Tp{\Gamma} \Tpvdash \Tmof{abs~N}\Tp{T \to U}
+      }
+    \end{array}
+    \end{math}
+  \end{itemize}
+\item Metatheory library for representation
+\end{itemize}
+\end{frame}
+
+\begin{comment}
+one of the key issues when formalising programming language metatheory is how
+to represent variables both bound and free. I chose the locally nameless
+representation which separates bound and free variables into distinct
+entities. Thus it avoids the variable capture problem in contrast to other
+approaches.
+
+In this approach, a de Bruijn index is a number used to represent a bound
+variable which indicates the position of its binder (starting from zero for
+the innermost binder).
+
+Constructs with binders have to open the term with a free variable and this
+requires some technique for handling freshness of the opening variable. I
+chose to adopt the cofinite quantification approach which allows to exclude a
+finite set of names from consideration. in contrast to the sometimes weaker
+notion of a single sufficiently fresh name
+\end{comment}
+
+\begin{frame}
+another frame for cp this time its well typing time
+\end{frame}
+
+\begin{comment}
+lets take a look at cp's typing rules. here we used a well typed relation on
+the process terms of cp. we require additional assumptions for environment
+ordering and
 \end{comment}
 
 \begin{frame}
@@ -183,7 +293,6 @@ modularisation, representation, library reuse, automation!
 \end{comment}
 
 \begin{frame}
-\frametitle{Preamble}
 \begin{itemize}
 \item Propositions as Sessions
 \item system features
