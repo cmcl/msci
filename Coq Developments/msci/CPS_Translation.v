@@ -339,6 +339,5 @@ Proof.
     eapply IHWT with (z:=z); auto; []; fsetdec.
   - eapply ignore_env_order; [apply Permutation_app_comm|].
     pick fresh y and apply cp_input; try (by solve_uniq); []; destruct_notin.
-    eapply H.
     admit.
 Admitted.
