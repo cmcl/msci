@@ -212,14 +212,31 @@ finite set of names from consideration. in contrast to the sometimes weaker
 notion of a single sufficiently fresh name
 \end{comment}
 
+\defverbatim\cprule{
+\begin{coq}
+Inductive cp_rule : proc -> penv -> Prop :=
+  | $\cdots$
+  | cp_cut :
+      forall (L:atoms) P Q A $\Gamma$ $\Delta$P $\Delta$Q
+             (PER: Permutation $\Gamma$ ($\Delta$P ++ $\Delta$Q))
+             (CPP: forall (x:atom) (NL: x $\notin$ L),
+                     (open_proc P x) $\tpcp$ (x $\sim$ A) ++ $\Delta$P)
+             (CPQ: forall (x:atom) (NL: x $\notin$ L),
+                (open_proc Q x) $\tpcp$ (x $\sim$ $\dualbt{A}$) ++ $\Delta$Q),
+        $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$
+  | $\cdots$
+\end{coq}
+}
+
 \begin{frame}
-another frame for cp this time its well typing time
+\cprule
 \end{frame}
 
 \begin{comment}
 lets take a look at cp's typing rules. here we used a well typed relation on
 the process terms of cp. we require additional assumptions for environment
-ordering and
+ordering and more attention is paid to the opening of subprocesses. this
+presents the informal and formal definitions of cut.
 \end{comment}
 
 \begin{frame}
