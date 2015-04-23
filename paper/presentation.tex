@@ -25,6 +25,9 @@
   \oldframetitle{#1}\vspace{-3.5cm}
 }
 
+\setbeameroption{show notes}
+\setbeamertemplate{note page}[plain]
+
 \title[Project Presentation]{Propositions as Sessions, Mechanically}
 \author{Craig McLaughlin}
 \institute{University Of Glasgow}
@@ -34,11 +37,7 @@
 
 \begin{frame}
 \titlepage
-\end{frame}
-
-\section{Preamble}
-
-\begin{comment}
+\note{
 today i am going to talk about a formalisation effort based on an existing
 type system whose properties have previously only been studied
 informally. first in order to motivate the previous and current work i shall
@@ -46,7 +45,11 @@ make two general observations here. one: distributed communication systems are
 becoming increasingly prevalent in modern society. two: the correct
 functioning of these systems hinges on the protocol between any two
 communicating agents to be well-defined and correctly implemented.
-\end{comment}
+}
+
+\end{frame}
+
+\section{Preamble}
 
 \begin{frame}
 \oldframetitle{Session Types}
@@ -65,21 +68,18 @@ communicating agents to be well-defined and correctly implemented.
             \vdots                & \cdots & \vdots
  \end{array}
 \end{math}
-\end{frame}
-
-\begin{comment}
+\note{
 one approach to achieve such correctness guarantees is by using binary session
 types. [INTRODUCE BINARY SESSION TYPES HERE]. specifying a communication
 protocol then involves providing mutual dual types to the communicating
-parties. [a simple example with two processes is displayed].
-\end{comment}
+parties.
+}
+\end{frame}
 
 \begin{frame}
 \frametitle{Motivation}
 Hand-written (informal) proofs $=$ Error-prone $+$ Difficult to update
-\end{frame}
-
-\begin{comment}
+\note{
 there has been a lot of activity in this area producing a variety of different
 session-based type systems. many systems build on top of previous work adding
 more complex features such as asynchronous, polymorphic and recursive session
@@ -88,7 +88,8 @@ not always clear which parts of a system's metatheory is affected by a
 change. a formalised system would reduce likelihood of errors in the proofs
 and aid extension since the theorem prover would highlight changes to the
 metatheory
-\end{comment}
+}
+\end{frame}
 
 \begin{frame}
 \frametitle{System Overview}
@@ -97,9 +98,7 @@ CP $=$ process calculus with operators from classical linear logic
 GV $=$ functional language with session types
 
 GV $\to$ CP translation
-\end{frame}
-
-\begin{comment}
+\note{
 the formalisation i present here is an encoding of a system in the Coq proof
 assistant. it is based on a two-tier system providing a logical foundation for
 understanding session types. A high-level overview of the system is as
@@ -107,7 +106,8 @@ follows: we have a process calculus CP with operators from classical linear
 logic, a high-level functional language GV with session types, and a
 translation from GV to CP which interprets operators in classical linear logic
 as session types.
-\end{comment}
+}
+\end{frame}
 
 \begin{frame}
 \frametitle{CP Propositions}
@@ -122,19 +122,14 @@ as session types.
 
 For all propositions $A$, $\dualbt{(\dualbt{A})} = A$ (negation is an
 involution)
-\end{frame}
 
-\begin{comment}
-by classical linear logic i mean a logic where negation is an involution which
-restricts the use of certain rules on resources, namely that all linear
-resources must be used (corresponding to prohibiting weakening) and that one
-cannot duplicate a linear resource (corresponding to contraction). some typing
-rules for the CP calculus are presented as they appear in the Coq encoding
-(note that they are very similar to their informal counterparts). the
-interpretation of tensor product is output of A and continue as B. The dual of
-this is input of A and continue as the negation of B. Thus negation in
-classical linear logic corresponds to session duality.
-\end{comment}
+\note{
+Here are some exmaples of linear logic connectives with session type
+interpretations. The operator times corresponds to output and the operator par
+corresponds to input. Since it is based on the classical variant of linear
+logic we have that negation is an involution.
+}
+\end{frame}
 
 \section{Formalisation}
 
@@ -145,9 +140,7 @@ classical linear logic corresponds to session duality.
 \item Minimise difference between informal/formal variants
 \item Avoid known pitfalls
 \end{itemize}
-\end{frame}
-
-\begin{comment}
+\note{
 The encoding follows practices in formalising programming language metatheory
 with a principal design goal of reusing existing libraries from previous
 developments. Additionally, I want to keep as close a correspondence as
@@ -156,7 +149,8 @@ to mitigate questions of adequacy, you know, whether the formal system is what
 you intended to formalise. And lastly, I aimed to exploit the features of the
 Coq system without over complicating the development such as taking careful
 consideration over representation choices.
-\end{comment}
+}
+\end{frame}
 
 \begin{frame}
 \oldframetitle{Preliminaries}
@@ -192,9 +186,7 @@ consideration over representation choices.
   \end{itemize}
 \item Metatheory library for representation
 \end{itemize}
-\end{frame}
-
-\begin{comment}
+\note{
 one of the key issues when formalising programming language metatheory is how
 to represent variables both bound and free. I chose the locally nameless
 representation which separates bound and free variables into distinct
@@ -208,9 +200,13 @@ the innermost binder).
 Constructs with binders have to open the term with a free variable and this
 requires some technique for handling freshness of the opening variable. I
 chose to adopt the cofinite quantification approach which allows to exclude a
-finite set of names from consideration. in contrast to the sometimes weaker
+finite set of names from consideration in contrast to the sometimes weaker
 notion of a single sufficiently fresh name
-\end{comment}
+
+I utilise the metatheory library developed by a team of researchers at the
+university of pennslevennia which handles these representation choices.
+}
+\end{frame}
 
 \subsection{CP}
 
@@ -241,33 +237,25 @@ Inductive cp_rule : proc -> penv -> Prop :=
 }
 \end{math}
 \end{tabular}
-\end{frame}
+\note{
 
-\begin{comment}
 CP rules were encoded as an inductive in Coq and an example for cut is shown
-here. CP provided challenges for metatheory library since it differ in many
-respects to lambda calculi. for example, in the lambda calculus one does not
-work up to permutation of binders whereas in a process calculus these kinds of
-structural equivalences are standard. we require additional assumptions for
-environment ordering and more attention is paid to the opening of
-subprocesses. metatheory did not support permutations and as a result of this
-work some basic operations and custom tactics were developed. the custom
-tactics can solve simple permutation goals via simple proof search. this slide
-presents the informal and formal definitions of cut. There is no overhead when
-introducing binders to the subprocesses or for environment ordering, but apart
-from these representation issues the rules look similar which could assist the
-uptake of such formal tools by programming language researchers.
-\end{comment}
+here. CP provided challenges for the metatheory library since it differs in
+many respects to lambda calculi. for example, in the lambda calculus one does
+not work up to permutation of binders whereas in a process calculus these
+kinds of structural equivalences are standard as we shall see. we require
+additional assumptions for environment ordering and more attention is paid to
+the opening of subprocesses. the metatheory library did not support
+permutations and as a result of this work some basic operations and custom
+tactics were developed. the custom tactics can solve simple permutation goals
+via simple proof search. this slide presents the informal and formal
+definitions of cut. notice there is no overhead when introducing binders to
+the subprocesses or for environment ordering, but apart from these
+representation issues the rules look similar which could assist the uptake of
+such formal tools by programming language researchers.
 
-\defverbatim[colored]\subred{
-\begin{coq}
-Theorem proc_sub_red:
-  forall $\Gamma$ P Q
-         (WT: P $\tpvdash_{cp}$ $\Gamma$)
-         (RED: P $\becomes$ Q),
-    Q $\tpvdash_{cp}$ $\Gamma$.
-\end{coq}
 }
+\end{frame}
 
 \begin{frame}[fragile]
 \oldframetitle{Subject Reduction in CP}
@@ -286,23 +274,20 @@ Theorem proc_sub_red:
                    \end{array} \right.
 \end{math}
 \end{tabular}
-\begin{itemize}
-\item {\fontsize{6}{7.2}\selectfont blah one}
-\item blah two
-\item blah three
-\item blah four
-\item blah five
-\item blah six
-\end{itemize}
-\end{frame}
-
-\begin{comment}
+\[\colored
+(\kappa_{\otimes1}) \quad
+\tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)}
+\quad \becomes \quad
+\tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)}
+\]
+\note{
 Subject reduction in CP proceeds by cut reductions of the logical operators
 against their duals and \textit{commuting conversions} as well as some other
 rules. Commuting conversions push a cut inside a logical operator and the
 intuition is that they permit further communication to occur which was guarded
 by a cut.
-\end{comment}
+}
+\end{frame}
 
 \begin{frame}[fragile]
 \oldframetitle{Principal Cut Reduction ($\beta_{!?}$)}
@@ -347,6 +332,12 @@ Lemma reduce_spawn:
 \end{array}
 \end{math}
 \end{tabular}
+\note{
+An example of a principal cut reduction: cut of server accept against client
+request. Comparing the formal and informal versions, the informal version
+describes the cut reductions using derivation trees while this structure is
+left implicit in the Coq encoding.
+}
 \end{frame}
 
 \begin{frame}
@@ -365,58 +356,57 @@ Lemma reduce_spawn:
 \]
 \end{frame}
 
+\begin{frame}[fragile]
+\begin{coq}
+Theorem proc_cut_elim:
+  forall P $\Gamma$
+         (WT: P $\tpcp$ $\Gamma$),
+    exists Q, P $\becomes^\star$ Q /\ $\sim$ is_cut Q.
+\end{coq}
+\note{
+mention star being the reflexive and transitive closure of reduction
+
+Well-typed relation alone is insufficient to prove the theorem. The cut typing
+rule does not specify the subprocesses are related i.e. are eventually dual
+logical operators which would be necessary to proceed using the current
+definition.
+
+It seems necessary to define a termination measure on the length of the
+derivation but this has not yet been done. Additionally, work on formalising
+logics with cut elimination take an entirely different approach favouring an
+explicit representation of derivations as trees. Adopting this approach for CP
+may prove fruitful not just in this instance but also in other areas of the
+development (what? contraction?)
+
+}
+\end{frame}
+
 \subsection{GV}
 
 \begin{frame}
 GV
-\end{frame}
-
-\begin{comment}
+\note{
 GV has built-in support for session types. consider the rule for sending a
 value of type T along a channel N of type !T.S.
-\end{comment}
+}
+\end{frame}
 
 \subsection{Translation}
 
 \begin{frame}
 something about a translation
-\end{frame}
-
-\begin{comment}
+\note{
 the translation to CP is
 presented. blah blah something about the session types being a little odd or
 overlook this probably
-\end{comment}
-
-\begin{frame}
-- subject reduction of CP
-- top-level cut elimination
-- translation preserving well-typedness
+}
 \end{frame}
 
 \subsection{Issues}
 
-\begin{comment}
-the system has three main properties. subject reduction of CP, top-level
-cut-elimination and translation preserving well-typedness. of which subject
-reduction is the only one fully formalised. the other two presented some
-challenges but some comments on progress towards the other two is
-offered. i also highlight some issues and guidelines
-\end{comment}
-
-\begin{frame}
-subject reduction
-\end{frame}
-
-\begin{comment}
-subject reduction is formalised using a relation on processes
-\end{comment}
-
 \begin{frame}
 problems for cut elimination
-\end{frame}
-
-\begin{comment}
+\note{
 sessions correspond to propositions
 processes correspond to proofs
 cut elimination corresponds to communication
@@ -425,13 +415,12 @@ cut elimination is not currently proven since we require a termination measure
 on the length of a derivation and a relationship between the subprocesses of a
 cut. other work based on formalising logics where the derivations are explicit
 may be inspirational
-\end{comment}
+}
+\end{frame}
 
 \begin{frame}
 problems of the translation
-\end{frame}
-
-\begin{comment}
+\note{
 the translation seems to require a duplication of the specifications for cp
 and gv typing rules not done
 
@@ -439,17 +428,13 @@ what can we show them for the failures?
 
 here are some issues and things learnt! -- our guidelines are all about
 modularisation, representation, library reuse, automation!
-\end{comment}
+}
+\end{frame}
 
 \section{Future Work}
 
 \begin{frame}
 \begin{itemize}
-\item Propositions as Sessions
-\item system features
-\item Coq
-\item encoding
-\item subject reduction theorem
 \item difficulties in formalisation
 \item implications
 \item future work
