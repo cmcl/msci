@@ -212,8 +212,12 @@ finite set of names from consideration. in contrast to the sometimes weaker
 notion of a single sufficiently fresh name
 \end{comment}
 
-\defverbatim\cprule{
-\begin{coq}
+\subsection{CP}
+
+\begin{frame}[fragile]
+\oldframetitle{CP Rules: Formal vs. Informal Comparison}
+\begin{tabular}{lc}
+\begin{coqp}
 Inductive cp_rule : proc -> penv -> Prop :=
   | $\cdots$
   | cp_cut :
@@ -225,28 +229,104 @@ Inductive cp_rule : proc -> penv -> Prop :=
                 (open_proc Q x) $\tpcp$ (x $\sim$ $\dualbt{A}$) ++ $\Delta$Q),
         $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$
   | $\cdots$
-\end{coq}
+\end{coqp} &
+\begin{math}
+\colored
+\inference{
+  \tm{P} \tpvdash \tp{\Gamma \comma \tmof{x}A}
+  &
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}\dualbt{A}}
+}{}{
+  \tm{\nu x \of{A}.(P \mid Q)} \tpvdash \tp{\Gamma \comma \Delta}
 }
+\end{math}
+\end{tabular}
 
-\begin{frame}
-\cprule
+%% \begin{coqp}
+%% Inductive cp_rule : proc -> penv -> Prop :=
+%%   | $\cdots$
+%%   | cp_cut :
+%%       forall (L:atoms) P Q A $\Gamma$ $\Delta$P $\Delta$Q
+%%              (PER: Permutation $\Gamma$ ($\Delta$P ++ $\Delta$Q))
+%%              (CPP: forall (x:atom) (NL: x $\notin$ L),
+%%                      (open_proc P x) $\tpcp$ (x $\sim$ A) ++ $\Delta$P)
+%%              (CPQ: forall (x:atom) (NL: x $\notin$ L),
+%%                 (open_proc Q x) $\tpcp$ (x $\sim$ $\dualbt{A}$) ++ $\Delta$Q),
+%%         $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$
+%%   | $\cdots$
+%% \end{coqp}
 \end{frame}
 
 \begin{comment}
 lets take a look at cp's typing rules. here we used a well typed relation on
 the process terms of cp. we require additional assumptions for environment
 ordering and more attention is paid to the opening of subprocesses. this
-presents the informal and formal definitions of cut.
+presents the informal and formal definitions of cut. There is no overhead when
+introducing binders to the subprocesses or for environment ordering, but apart
+from these representation issues the rules look similar which could assist the
+uptake of such formal tools by programming language researchers.
 \end{comment}
 
+\defverbatim[colored]\subred{
+\begin{coq}
+Theorem proc_sub_red:
+  forall $\Gamma$ P Q
+         (WT: P $\tpvdash_{cp}$ $\Gamma$)
+         (RED: P $\becomes$ Q),
+    Q $\tpvdash_{cp}$ $\Gamma$.
+\end{coq}
+}
+
 \begin{frame}
-an example of GV
+\oldframetitle{Subject Reduction in CP}
+\subred
+\begin{itemize}
+\item {\fontsize{6}{7.2}\selectfont blah one}
+\item blah two
+\item blah three
+\item blah four
+\item blah five
+\item blah six
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Subject Reduction in CP}
+\[\colored
+\begin{array}{c}
+\mbox{Subject reduction} = \left\{ \begin{array}{ll}
+                                   \mbox{Principal cut reductions}~(\beta)\\
+                                   \mbox{Commuting Conversions}~(\kappa)
+                                   \end{array} \right.
+\\~\\
+(\kappa_{\otimes1}) \quad
+\tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)}
+\quad \becomes \hfill
+\hfill \tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)}
+\end{array}
+\]
+\end{frame}
+
+\begin{comment}
+Subject reduction in CP proceeds by cut reductions of the logical operators
+against their duals and \textit{commuting conversions} as well as some other
+rules. Commuting conversions push a cut inside a logical operator and the
+intuition is that they permit further communication to occur which was guarded
+by a cut.
+\end{comment}
+
+\subsection{GV}
+
+\begin{frame}
+GV
 \end{frame}
 
 \begin{comment}
 GV has built-in support for session types. consider the rule for sending a
 value of type T along a channel N of type !T.S.
 \end{comment}
+
+\subsection{Translation}
 
 \begin{frame}
 something about a translation
@@ -263,6 +343,8 @@ overlook this probably
 - top-level cut elimination
 - translation preserving well-typedness
 \end{frame}
+
+\subsection{Issues}
 
 \begin{comment}
 the system has three main properties. subject reduction of CP, top-level
@@ -308,6 +390,8 @@ what can we show them for the failures?
 here are some issues and things learnt! -- our guidelines are all about
 modularisation, representation, library reuse, automation!
 \end{comment}
+
+\section{Future Work}
 
 \begin{frame}
 \begin{itemize}
