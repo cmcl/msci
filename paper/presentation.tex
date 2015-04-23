@@ -241,26 +241,18 @@ Inductive cp_rule : proc -> penv -> Prop :=
 }
 \end{math}
 \end{tabular}
-
-%% \begin{coqp}
-%% Inductive cp_rule : proc -> penv -> Prop :=
-%%   | $\cdots$
-%%   | cp_cut :
-%%       forall (L:atoms) P Q A $\Gamma$ $\Delta$P $\Delta$Q
-%%              (PER: Permutation $\Gamma$ ($\Delta$P ++ $\Delta$Q))
-%%              (CPP: forall (x:atom) (NL: x $\notin$ L),
-%%                      (open_proc P x) $\tpcp$ (x $\sim$ A) ++ $\Delta$P)
-%%              (CPQ: forall (x:atom) (NL: x $\notin$ L),
-%%                 (open_proc Q x) $\tpcp$ (x $\sim$ $\dualbt{A}$) ++ $\Delta$Q),
-%%         $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$
-%%   | $\cdots$
-%% \end{coqp}
 \end{frame}
 
 \begin{comment}
-lets take a look at cp's typing rules. here we used a well typed relation on
-the process terms of cp. we require additional assumptions for environment
-ordering and more attention is paid to the opening of subprocesses. this
+CP rules were encoded as an inductive in Coq and an example for cut is shown
+here. CP provided challenges for metatheory library since it differ in many
+respects to lambda calculi. for example, in the lambda calculus one does not
+work up to permutation of binders whereas in a process calculus these kinds of
+structural equivalences are standard. we require additional assumptions for
+environment ordering and more attention is paid to the opening of
+subprocesses. metatheory did not support permutations and as a result of this
+work some basic operations and custom tactics were developed. the custom
+tactics can solve simple permutation goals via simple proof search. this slide
 presents the informal and formal definitions of cut. There is no overhead when
 introducing binders to the subprocesses or for environment ordering, but apart
 from these representation issues the rules look similar which could assist the
@@ -277,9 +269,23 @@ Theorem proc_sub_red:
 \end{coq}
 }
 
-\begin{frame}
+\begin{frame}[fragile]
 \oldframetitle{Subject Reduction in CP}
-\subred
+\begin{tabular}{ll}
+\begin{coq}
+Theorem proc_sub_red:
+  forall $\Gamma$ P Q
+         (WT: P $\tpvdash_{cp}$ $\Gamma$)
+         (RED: P $\becomes$ Q),
+    Q $\tpvdash_{cp}$ $\Gamma$.
+\end{coq} &
+\begin{math}
+\becomes \defeq \left\{ \begin{array}{ll}
+                   \mbox{Principal cut reductions}~(\beta)\\
+                   \mbox{Commuting Conversions}~(\kappa)
+                   \end{array} \right.
+\end{math}
+\end{tabular}
 \begin{itemize}
 \item {\fontsize{6}{7.2}\selectfont blah one}
 \item blah two
@@ -290,23 +296,6 @@ Theorem proc_sub_red:
 \end{itemize}
 \end{frame}
 
-\begin{frame}
-\frametitle{Subject Reduction in CP}
-\[\colored
-\begin{array}{c}
-\mbox{Subject reduction} = \left\{ \begin{array}{ll}
-                                   \mbox{Principal cut reductions}~(\beta)\\
-                                   \mbox{Commuting Conversions}~(\kappa)
-                                   \end{array} \right.
-\\~\\
-(\kappa_{\otimes1}) \quad
-\tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)}
-\quad \becomes \hfill
-\hfill \tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)}
-\end{array}
-\]
-\end{frame}
-
 \begin{comment}
 Subject reduction in CP proceeds by cut reductions of the logical operators
 against their duals and \textit{commuting conversions} as well as some other
@@ -314,6 +303,67 @@ rules. Commuting conversions push a cut inside a logical operator and the
 intuition is that they permit further communication to occur which was guarded
 by a cut.
 \end{comment}
+
+\begin{frame}[fragile]
+\oldframetitle{Principal Cut Reduction ($\beta_{!?}$)}
+\begin{tabular}{c}
+\begin{coq}
+Lemma reduce_spawn:
+  forall P Q A dA $\Gamma$
+         (DUA: dual_props A dA)
+         (WT: $\nu$ !A.(!0(A).P $\mid$ ?0[dA].Q) $\tpcp$ $\Gamma$),
+    $\nu$ A.(P $\mid$ Q) $\tpcp$ $\Gamma$.
+\end{coq}
+\\~\\
+\begin{math}
+\begin{array}{c}
+\small
+\colored
+\inference{
+  \inference{
+    \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+  }{!}{
+    \tm{!x(y).P} \tpvdash \tp{{?\Gamma} \comma \tmof{x}{!A}}
+  }
+  &
+  \inference{
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}\dualbt{A}}
+  }{?}{
+    \tm{?x[y].Q} \tpvdash \tp{\Delta \comma \tmof{x}{?\dualbt{A}}}
+  }
+}{}{
+  \tm{\nu x \Of{!A}.(!x(y).P \mid {?x[y].Q})} \tpvdash
+    \tp{{?\Gamma} \comma \Delta}
+}
+\becomes
+\inference{
+  \tm{P} \tpvdash \tp{{?\Gamma} \comma \tmof{y}A}
+  \\
+  \tm{Q} \tpvdash \tp{\Delta \comma \tmof{y}\dualbt{A}}
+}{}{
+  \tm{\nu y\Of{A}.(P \mid Q)} \tpvdash \tp{{?\Gamma} \comma \Delta}
+}
+\normalsize
+\end{array}
+\end{math}
+\end{tabular}
+\end{frame}
+
+\begin{frame}
+\[\colored
+\begin{array}{c}
+(\beta_{!?}) \quad
+\tm{\nu x \Of{!A}.(!x(y).P \mid {?x[y].Q})}
+\quad \becomes \quad
+\tm{\nu y\Of{A}.(P \mid Q)}
+\\~\\
+(\kappa_{\otimes1}) \quad
+\tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)}
+\quad \becomes \quad
+\tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)}
+\end{array}
+\]
+\end{frame}
 
 \subsection{GV}
 
