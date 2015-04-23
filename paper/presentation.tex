@@ -340,20 +340,73 @@ left implicit in the Coq encoding.
 }
 \end{frame}
 
-\begin{frame}
-\[\colored
-\begin{array}{c}
-(\beta_{!?}) \quad
-\tm{\nu x \Of{!A}.(!x(y).P \mid {?x[y].Q})}
-\quad \becomes \quad
-\tm{\nu y\Of{A}.(P \mid Q)}
+\begin{frame}[fragile]
+\oldframetitle{Commuting Conversion ($\kappa_{\otimes1}$)}
+\begin{tabular}{c}
+\begin{coq}
+Lemma reduce_cc_multi_one:
+  forall P Q R (x:atom) A B $\Gamma$ (LCQ: lc_proc Q)
+         (WT: $\nu$ A.(x[B].(P $\mid$ Q) $\mid$ R) $\tpcp$ $\Gamma$),
+    x[B].($\nu$ A.($\permb{0}{1}{P}$ $\mid$ R) $\mid$ Q) $\tpcp$ $\Gamma$.
+\end{coq}
 \\~\\
-(\kappa_{\otimes1}) \quad
-\tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)}
-\quad \becomes \quad
-\tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)}
+\begin{math}
+\colored
+\begin{array}{c}
+
+% \spacer
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+    }{\otimes}{
+      \tm{x[y].(P \mid Q)} \tpvdash
+        \tp{\Gamma \comma \Delta \comma \tmof{x}A \otimes B \comma \tmof{z}C}
+    }
+    &
+    \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+  }{Cut}{
+    \tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+\quad \becomes \hfill \\~\\
+\hfill
+\vcenter{
+  \inference{
+    \inference{
+      \tm{P} \tpvdash \tp{\Gamma \comma \tmof{y}A \comma \tmof{z}C}
+      &
+      \tm{R} \tpvdash \tp{\Theta \comma \tmof{z}C^\bot}
+    }{Cut}{
+      \tm{\nu z\Of{C}.(P \mid R)} \tpvdash
+        \tp{\Gamma \comma \Theta \comma \tmof{y}A}
+    }
+    &
+    \tm{Q} \tpvdash \tp{\Delta \comma \tmof{x}B}
+  }{\otimes}{
+    \tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)} \tpvdash
+      \tp{\Gamma \comma \Delta \comma \Theta \comma \tmof{x}A \otimes B}
+  }
+}
+
 \end{array}
-\]
+%% \colored
+%% (\kappa_{\otimes1}) \quad
+%% \tm{\nu z\Of{C}.(x[y].(P \mid Q) \mid R)}
+%% \quad \becomes \quad
+%% \tm{x[y].(\nu z\Of{C}.(P \mid R) \mid Q)}
+\end{math}
+\end{tabular}
+\note{
+
+well, that looks ridiculous.\\~\\
+
+something about the choice of p or q and the local closure hypothesis...
+
+}
 \end{frame}
 
 \begin{frame}[fragile]
