@@ -28,6 +28,21 @@
 \setbeameroption{show notes}
 \setbeamertemplate{note page}[plain]
 
+% GV/CP example listing details
+\lstdefinelanguage{GV}{
+    mathescape=true,
+    morekeywords=[1]{case, connect, in, let, of, receive, select, send,
+      terminate, to, with},
+    sensitive=false,
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]",
+    basicstyle=\HappyMed,
+    keywordstyle=[1]{\color{magenta}},
+}
+
+\lstnewenvironment{gv}{\lstset{language=GV}}{}
+
 \title[Project Presentation]{Propositions as Sessions, Mechanically}
 \author{Craig McLaughlin}
 \institute{University Of Glasgow}
@@ -74,6 +89,34 @@ types. [INTRODUCE BINARY SESSION TYPES HERE]. specifying a communication
 protocol then involves providing mutual dual types to the communicating
 parties.
 }
+\end{frame}
+
+\begin{frame}[fragile]
+\oldframetitle{GV Example}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} cc}
+Process A ($A_x$) & Process B ($B_x$)\\
+$\colored\tp{\inpt{Int}{\outpt{String}{\key{end}_!}}}$ ($\colored\tp{S}$) &
+$\colored\tp{\outpt{Int}{\inpt{String}{\key{end}_?}}}$
+  ($\colored\tp{\overline{S}}$)\\
+\begin{gv}
+let (m,$x_1$) = receive $x$ in
+send thanks $x_1$
+\end{gv} &
+\begin{gv}
+let $x_1$ = send gift $x$ in
+let (resp,$x_2$) = receive $x_1$ in
+terminate $x_2$
+\end{gv}
+\end{tabular*}
+\[\colored
+\inference{
+  \Tp{thanks:\tp{String} \comma x:\tp{S}} \Tpvdash A_x:\tp{\key{end}_!} &
+  \Tp{gift:\tp{Int} \comma x:\tp{\overline{S}}} \Tpvdash B_x:\tp{\key{Unit}}
+}{Connect}{
+  \Tp{thanks:\tp{String} \comma gift:\tp{Int}} \Tpvdash
+    \Tm{with}~x~\Tm{connect}~A_x~\Tm{to}~B_x : \tp{Unit}
+}
+\]
 \end{frame}
 
 \begin{frame}
@@ -290,7 +333,7 @@ by a cut.
 \end{frame}
 
 \begin{frame}[fragile]
-\oldframetitle{Principal Cut Reduction ($\beta_{!?}$)}
+\oldframetitle{Principal Cut Reduction ($\beta_{!?}$): Formal vs. Informal}
 \begin{tabular}{c}
 \begin{coq}
 Lemma reduce_spawn:
@@ -341,7 +384,8 @@ left implicit in the Coq encoding.
 \end{frame}
 
 \begin{frame}[fragile]
-\oldframetitle{Commuting Conversion ($\kappa_{\otimes1}$)}
+\oldframetitle{Commuting Conversion ($\kappa_{\otimes1}$): Formal vs.
+  Informal}
 \begin{tabular}{c}
 \begin{coq}
 Lemma reduce_cc_multi_one:
@@ -402,14 +446,21 @@ Lemma reduce_cc_multi_one:
 \end{tabular}
 \note{
 
-well, that looks ridiculous.\\~\\
+(well, that looks ridiculous.)\\~\\
 
-something about the choice of p or q and the local closure hypothesis...
+Comparing formal and informal versions of a commuting conversion for output
+reveals some issues. it is necessary to stipulate that Q is locally closed to
+ensure that the P subprocess receives the channel from the outer cut as part
+of its environment -- since the environment splitting is in general
+non-deterministic. Additionally, we need to permute the binders of P in the
+conclusion and this is necessary for the majority of the commuting conversion
+rules.
 
 }
 \end{frame}
 
 \begin{frame}[fragile]
+\oldframetitle{Top-Level Cut Elimination}
 \begin{coq}
 Theorem proc_cut_elim:
   forall P $\Gamma$
@@ -419,8 +470,8 @@ Theorem proc_cut_elim:
 \note{
 mention star being the reflexive and transitive closure of reduction
 
-Well-typed relation alone is insufficient to prove the theorem. The cut typing
-rule does not specify the subprocesses are related i.e. are eventually dual
+Well-typed relation alone is insufficient to prove the theorem. The rule for
+cut does not specify the subprocesses are related i.e. are eventually dual
 logical operators which would be necessary to proceed using the current
 definition.
 
@@ -429,7 +480,8 @@ derivation but this has not yet been done. Additionally, work on formalising
 logics with cut elimination take an entirely different approach favouring an
 explicit representation of derivations as trees. Adopting this approach for CP
 may prove fruitful not just in this instance but also in other areas of the
-development (what? contraction?)
+development such as specifying environment splitting as in the rules for
+commuting conversions.
 
 }
 \end{frame}
@@ -439,8 +491,12 @@ development (what? contraction?)
 \begin{frame}
 GV
 \note{
+
+Typing rules again? Very similar to CP.\\~\\
+Representation issues?\\~\\
 GV has built-in support for session types. consider the rule for sending a
 value of type T along a channel N of type !T.S.
+
 }
 \end{frame}
 
@@ -448,50 +504,47 @@ value of type T along a channel N of type !T.S.
 
 \begin{frame}
 something about a translation
+
 \note{
+
 the translation to CP is
 presented. blah blah something about the session types being a little odd or
 overlook this probably
+
+the translation seems to require a duplication of the specifications for cp
+and gv typing rules not done
+
 }
 \end{frame}
 
 \subsection{Issues}
 
 \begin{frame}
-problems for cut elimination
+\frametitle{Issues and Guidelines}
+\begin{itemize}
+\item representation
+\item modularisation
+\item automation
+\item reuse
+\end{itemize}
 \note{
-sessions correspond to propositions
-processes correspond to proofs
-cut elimination corresponds to communication
-
-cut elimination is not currently proven since we require a termination measure
-on the length of a derivation and a relationship between the subprocesses of a
-cut. other work based on formalising logics where the derivations are explicit
-may be inspirational
-}
-\end{frame}
-
-\begin{frame}
-problems of the translation
-\note{
-the translation seems to require a duplication of the specifications for cp
-and gv typing rules not done
-
-what can we show them for the failures?
-
-here are some issues and things learnt! -- our guidelines are all about
-modularisation, representation, library reuse, automation!
+  representation, modularisation(?), automation, reuse
 }
 \end{frame}
 
 \section{Future Work}
 
 \begin{frame}
+\oldframetitle{Future Work}
 \begin{itemize}
 \item difficulties in formalisation
 \item implications
 \item future work
 \end{itemize}
+\note{
+
+
+}
 \end{frame}
 
 \printbibliography
