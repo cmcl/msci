@@ -24,6 +24,7 @@
 \renewcommand{\frametitle}[1]{
   \oldframetitle{#1}\vspace{-3.5cm}
 }
+\newcommand{\ftitle}[2]{\oldframetitle{#1}\vspace{-#2cm}}
 
 \setbeameroption{show notes}
 \setbeamertemplate{note page}[plain]
@@ -67,7 +68,7 @@ communicating agents to be well-defined and correctly implemented.
 \section{Preamble}
 
 \begin{frame}
-\oldframetitle{Session Types}
+\ftitle{Session Types}{1.5}
 \begin{math}
   \begin{array}{cccc}
     S & \bnf  & \inpt{T}{S} & \mbox{receive value of type T, continue as S}\\
@@ -91,8 +92,33 @@ parties.
 }
 \end{frame}
 
+\begin{frame}
+\ftitle{System Overview}{2}
+CP $=$ process calculus with operators from classical linear logic
+
+GV $=$ functional language with session types
+
+GV $\to$ CP translation
+\\~\\
+Relies on Curry-Howard variant:
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}ccc}
+Propositions & correspond to & Session Types\\
+Proofs & correspond to & Processes\\
+Cut Elimination & correponds to & Communication
+\end{tabular*}
+\note{
+the formalisation i present here is an encoding of a system in the Coq proof
+assistant. it is based on a two-tier system providing a logical foundation for
+understanding session types. A high-level overview of the system is as
+follows: we have a process calculus CP with operators from classical linear
+logic, a high-level functional language GV with session types, and a
+translation from GV to CP which interprets operators in classical linear logic
+as session types.
+}
+\end{frame}
+
 \begin{frame}[fragile]
-\oldframetitle{GV Example}
+\ftitle{GV Example}{2}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} cc}
 Process A ($A_x$) & Process B ($B_x$)\\
 $\colored\tp{\inpt{Int}{\outpt{String}{\key{end}_!}}}$ ($\colored\tp{S}$) &
@@ -121,7 +147,7 @@ terminate $x_2$
 
 \begin{frame}
 \frametitle{Motivation}
-Hand-written (informal) proofs $=$ Error-prone $+$ Difficult to update
+Informal proofs $=$ Error-prone $+$ Difficult to update
 \note{
 there has been a lot of activity in this area producing a variety of different
 session-based type systems. many systems build on top of previous work adding
@@ -131,24 +157,6 @@ not always clear which parts of a system's metatheory is affected by a
 change. a formalised system would reduce likelihood of errors in the proofs
 and aid extension since the theorem prover would highlight changes to the
 metatheory
-}
-\end{frame}
-
-\begin{frame}
-\frametitle{System Overview}
-CP $=$ process calculus with operators from classical linear logic
-
-GV $=$ functional language with session types
-
-GV $\to$ CP translation
-\note{
-the formalisation i present here is an encoding of a system in the Coq proof
-assistant. it is based on a two-tier system providing a logical foundation for
-understanding session types. A high-level overview of the system is as
-follows: we have a process calculus CP with operators from classical linear
-logic, a high-level functional language GV with session types, and a
-translation from GV to CP which interprets operators in classical linear logic
-as session types.
 }
 \end{frame}
 
@@ -489,7 +497,7 @@ commuting conversions.
 \subsection{GV}
 
 \begin{frame}
-GV
+GV is similar
 \note{
 
 Typing rules again? Very similar to CP.\\~\\
