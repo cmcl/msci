@@ -543,12 +543,21 @@ commuting conversions.
 
 \subsection{GV}
 
-\begin{frame}
-\ftitle{GV}{3.5}
+\begin{frame}[fragile]
+\ftitle{GV}{2.5}
 \begin{itemize}
 \item GV similar to CP (types, terms, well-typed relation, $\ldots$)
 \item Representation choices (Kindedness, Sessions)
 \end{itemize}
+\begin{coqp}
+Inductive wf_typ : typ -> kind -> Prop :=
+  | $\ldots$
+  | wf_labs : forall kt ku T U
+                     (WFT: wf_typ T kt)
+                     (WFU: wf_typ U ku),
+                wf_typ (T $\lolli$ U) lin
+  | $\ldots$
+\end{coqp}
 \note{
 
 Typing rules again? Very similar to CP.\\~\\
@@ -561,18 +570,33 @@ value of type T along a channel N of type !T.S.
 
 \subsection{Translation}
 
-\begin{frame}
-\ftitle{Translation from GV to CP}{3}
-something about a translation
-
+\begin{frame}[fragile]
+\ftitle{Translation from GV to CP : Work in Progress}{1}
+\begin{theorem}[Translation]
+If a GV term is well-typed then its translation is well-typed in CP.
+\end{theorem}
+Issues
+\begin{itemize}
+\item type inference, positive cases and duplication
+\end{itemize}
+\begin{coqp}
+trans_case:
+  forall L $S_1$ $S_2$ M NL NR P QL QR G H z
+         (INFM: inferTy M G ($S_1$ $\with$ $S_2$))
+         (TR: transTm M G 0 P)
+         (TRNL: forall x (NIN: x $\notin$ L),
+                  transTm (open NL x) (x $\sim$ $S_1$ ++ H) z QL)
+         (TRNR: forall x (NIN: x $\notin$ L),
+                  transTm (open NR x) (x $\sim$ $S_2$ ++ H) z QR),
+  transTm (tm_case M NL NR) (G++H) z
+          ($\nu \sem{S_1 \with S_2}$t.(P $\mid$ 0 CASE QL OR QR))
+\end{coqp}
 \note{
 
-the translation to CP is
-presented. blah blah something about the session types being a little odd or
-overlook this probably
+continuation-passing style.
 
-the translation seems to require a duplication of the specifications for cp
-and gv typing rules not done
+A well-typed term in GV is parameterised by a name representing the channel
+which communicates the result of its translation
 
 }
 \end{frame}
