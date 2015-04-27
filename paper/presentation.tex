@@ -9,6 +9,7 @@
 \usepackage{amsmath}
 \usepackage{comment}
 \usepackage{etoolbox}
+\usepackage[cal=cm,calscaled=.80]{mathalfa}
 \usepackage{tikz}
 \usetikzlibrary{arrows,positioning}
 \usepackage[style=alphabetic,natbib=true]{biblatex}
@@ -29,7 +30,18 @@
 \setbeameroption{show notes}
 \setbeamertemplate{note page}[plain]
 
-% GV/CP example listing details
+\newcommand\CPFSize{\fontsize{7}{8.4}\selectfont}
+% CP/GV example listing details
+\lstdefinelanguage{CP}{
+    mathescape=true,
+    morekeywords=[1]{case, inl, inr},
+    sensitive=false,
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]",
+    basicstyle=\CPFSize,
+    keywordstyle=[1]{\color{red}},
+}
 \lstdefinelanguage{GV}{
     mathescape=true,
     morekeywords=[1]{case, connect, in, let, of, receive, select, send,
@@ -42,6 +54,7 @@
     keywordstyle=[1]{\color{magenta}},
 }
 
+\lstnewenvironment{cp}{\lstset{language=CP}}{}
 \lstnewenvironment{gv}{\lstset{language=GV}}{}
 
 \title[Project Presentation]{Propositions as Sessions, Mechanically}
@@ -73,14 +86,15 @@ communicating agents to be well-defined and correctly implemented.
   \begin{array}{cccc}
     S & \bnf  & \inpt{T}{S} & \mbox{receive value of type T, continue as S}\\
       & \altt & \outpt{T}{S} & \mbox{send value of type T, continue as S}\\
-      & \altt & \Branch{l_i}{S_i}{i\in I} &
+      & \altt & \Branch{\mathcal{L}_i}{S_i}{i\in I} &
                            \mbox{offer between $|I|$ alternatives}\\
-      & \altt & \Choice{l_i}{S_i}{i\in I} &
+      & \altt & \Choice{\mathcal{L}_i}{S_i}{i\in I} &
                            \mbox{choose between $|I|$ alternatives}\\
       & \altt & \mbox{\lstinline{end}} & \mbox{terminate session}\\
  \dual{S} & \bnf & \mbox{dual of S}\\
  \dual{(\inpt{T}{S})} & \bnf & \outpt{T}{\dual{S}}\\
- \dual{\Branch{l_i}{S_i}{i\in I}} & \bnf & \Choice{l_i}{\dual{S_i}}{i\in I}\\
+ \dual{\Branch{\mathcal{L}_i}{S_i}{i\in I}} & \bnf &
+       \Choice{\mathcal{L}_i}{\dual{S_i}}{i\in I}\\
             \vdots                & \cdots & \vdots
  \end{array}
 \end{math}
@@ -118,6 +132,58 @@ as session types.
 \end{frame}
 
 \begin{frame}[fragile]
+\ftitle{CP Example}{0.5}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} cc}
+Process A ($A_x$) & Process B ($B_x$)\\
+$\colored\tp{Int \parr (String \otimes \1)}$
+  ($\colored\tp{\dualbt{S}}$) &
+$\colored\tp{Int \otimes (String \parr \bot)}$ ($\colored\tp{S}$)\\
+\begin{cp}
+$\colored\tm{x(y).x[w].(\mbox{put-thanks}_w \mid x[\,].0)}$
+\end{cp} &
+\begin{cp}
+$\colored\tm{x[y].(\mbox{put-gift}_y \mid x(w).x().\mbox{get-response}_w)}$
+\end{cp}
+\end{tabular*}
+\[\colored
+\inference{
+  \tm{B_x} \tpvdash \tp{\Gamma \comma \tmof{x}S}
+  &
+  \tm{A_x} \tpvdash \tp{\Delta \comma \tmof{x}\dualbt{S}}
+}{Cut}{
+  \tm{\nu x \of{S}.(B_x \mid A_x)} \tpvdash \tp{\Gamma \comma \Delta}
+}
+\]
+\CPFSize
+\colored
+\begin{align*}
+  \tm{\nu x.(B_x \mid A_x)} & =
+    \tm{\nu x.(x[y].(\mbox{put-gift}_y \mid x(w).x().\mbox{get-response}_w)
+          \mid x(y).x[w].(\mbox{put-thanks}_w \mid x[\,].0))}
+    \\
+                            & \becomes
+    \tm{\nu y.(\mbox{put-gift}_y \mid
+               \nu x.(x(w).x().\mbox{get-response}_w) \mid
+                      x[w].(\mbox{put-thanks}_w \mid x[\,].0))}
+    \\
+                            & \becomes
+    \tm{\nu y.(\mbox{put-gift}_y \mid
+               \nu w.(\mbox{put-thanks}_w \mid
+                      \nu x.(x().\mbox{get-response}_w \mid x[\,].0)))}
+    \\
+                            & \becomes
+    \tm{\nu y.(\mbox{put-gift}_y \mid
+               \nu w.(\mbox{put-thanks}_w \mid \mbox{get-response}_w))}
+\end{align*}
+\note{
+Here are some exmaples of linear logic connectives with session type
+interpretations. The operator times corresponds to output and the operator par
+corresponds to input. Since it is based on the classical variant of linear
+logic we have that negation is an involution.
+}
+\end{frame}
+
+\begin{frame}[fragile]
 \ftitle{GV Example}{2}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} cc}
 Process A ($A_x$) & Process B ($B_x$)\\
@@ -148,6 +214,9 @@ terminate $x_2$
 \begin{frame}
 \frametitle{Motivation}
 Informal proofs $=$ Error-prone $+$ Difficult to update
+\begin{itemize}
+\item Subject Reduction: If $m : T$ and $m \rightarrow m'$ then $m' : T$
+\end{itemize}
 \note{
 there has been a lot of activity in this area producing a variety of different
 session-based type systems. many systems build on top of previous work adding
@@ -157,28 +226,6 @@ not always clear which parts of a system's metatheory is affected by a
 change. a formalised system would reduce likelihood of errors in the proofs
 and aid extension since the theorem prover would highlight changes to the
 metatheory
-}
-\end{frame}
-
-\begin{frame}
-\frametitle{CP Propositions}
-\begin{math}
-\begin{array}{rclc}
-    \tp{A,B,C} & \bnf
-          & \tp{A \otimes B} & \key{times: output A then behave as B}\\
-          & \altt & \tp{A \parr B} & \key{par: input A then behave as B}\\
-          & \altt & \cdots
-\end{array}
-\end{math}
-
-For all propositions $A$, $\dualbt{(\dualbt{A})} = A$ (negation is an
-involution)
-
-\note{
-Here are some exmaples of linear logic connectives with session type
-interpretations. The operator times corresponds to output and the operator par
-corresponds to input. Since it is based on the classical variant of linear
-logic we have that negation is an involution.
 }
 \end{frame}
 
