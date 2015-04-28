@@ -573,7 +573,9 @@ value of type T along a channel N of type !T.S.
 \begin{frame}[fragile]
 \ftitle{Translation from GV to CP : Work in Progress}{1}
 \begin{theorem}[Translation]
-If a GV term is well-typed then its translation is well-typed in CP.
+If a GV term is well-typed then its translation is well-typed in CP:
+If $\Phi \tpgv~M\of{T}$ then
+$\sem{M}x \tpcp~\dualbt{\sem{\Phi}},x\of{\sem{T}}$
 \end{theorem}
 Issues
 \begin{itemize}
@@ -593,10 +595,19 @@ trans_case:
 \end{coqp}
 \note{
 
-continuation-passing style.
-
 A well-typed term in GV is parameterised by a name representing the channel
-which communicates the result of its translation
+which communicates the result of its translation\\~\\
+
+due to locally nameless translation requires type inference procedure to
+obtain binders for corresponding CP process. environment may not have variable
+(impossible, only well-typed terms are translated) \\~\\
+
+solution: instead of defining functionally, use inductive type to specify only
+positive cases
+
+problem: requires much of the details from the CP/GV definitions such as
+linear environment splitting and cofinite quantification (for both CP and GV!)
+even if GV term with no binders e.g. function application.
 
 }
 \end{frame}
@@ -606,27 +617,66 @@ which communicates the result of its translation
 \begin{frame}
 \frametitle{Issues and Guidelines}
 \begin{itemize}
-\item representation
-\item modularisation
-\item automation
-\item reuse
+\item Representation
+\item Modularisation
+\item Automation
+\item Reuse
 \end{itemize}
 \note{
-  representation, modularisation(?), automation, reuse
+
+  representation is a central issue when formalising languages and choices
+  impact future definitions and properties dependent on them. Considerations
+  range from how much expressive power provided by the theorem prover to
+  exploit to the choice of which encoding to use for the properties of
+  interest. Some decisions may impact upon the correspondence between the
+  formal and informal systems.
+
+  Modularising the development was essential to reduce the interactive load
+  time and mitigate crashes.
+
+  Automation advise use of non-trivial tactics favour proof search over
+  in-place macros for oft-repeated sequences. It is worth considering
+  situations where automation would simplify proofs. Automation is already an
+  important consideration in the interactive theorem proving
+  community. Examples of automation from the current development have been
+  highlighted, but particular emphasis should be placed on tactics involving
+  non-trivial proof search of the context because these tend to be more widely
+  applicable.
+
+  Reuse libraries wherever possible: programming language assistance but also
+  helpful tactics not present in standard Coq (added some to solve permutation
+  goals)
+
 }
 \end{frame}
 
 \section{Future Work}
 
 \begin{frame}
-\oldframetitle{Future Work}
+\ftitle{Future Work}{3}
 \begin{itemize}
-\item difficulties in formalisation
-\item implications
-\item future work
+\item Further investigate top-level cut elimination
+\item Make progress on translation
+\item Support polymorphism and $n$-ary branch and choice
+\item Alternate forms of alias control (adoption and focus)
 \end{itemize}
 \note{
 
+  resolve issues with proving top-level cut elimination either by constructing
+  explicit derivations or by defining a suitable induction on the current
+  definition. however, for the latter approach it is unclear how to obtain the
+  desired relationship between subprocesses of cut
+
+  Further progress on the current inductive definition of the translation can
+  be made and then limiting the extent of duplication would be another aim
+
+  the development currently does not support polymorphism and has only binary
+  branch and choice. extending the system to support these features would
+  bring it in line with extensions of the original cp/gv system.
+
+  lastly, investigating alternate forms of alias control such as the adoption
+  and focus system which allows controlled aliasing of linear objects may be
+  worth formal study in the context of session types.
 
 }
 \end{frame}
